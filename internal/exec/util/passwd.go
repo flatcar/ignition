@@ -181,7 +181,7 @@ func (u Util) AuthorizeSSHKeys(c types.PasswdUser) error {
 			ks = ks + "\n"
 		}
 
-		if err := akd.Add("coreos-ignition", []byte(ks), true, true); err != nil {
+		if err := akd.Add("flatcar-ignition", []byte(ks), true, true); err != nil {
 			return err
 		}
 
