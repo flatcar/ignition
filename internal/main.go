@@ -79,15 +79,27 @@ func main() {
 	}
 
 	oemConfig := oem.MustGet(flags.oem.String())
+	fetcher, err := oemConfig.NewFetcherFunc()(&logger)
+	if err != nil {
+		logger.Crit("failed to generate fetcher: %s", err)
+		os.Exit(3)
+	}
 	engine := exec.Engine{
 		Root:         flags.root,
 		FetchTimeout: flags.fetchTimeout,
 		Logger:       &logger,
 		ConfigCache:  flags.configCache,
 		OEMConfig:    oemConfig,
+		Fetcher:      &fetcher,
 	}
 
-	if !engine.Run(flags.stage.String()) {
+	err = engine.Run(flags.stage.String())
+	if statusErr := engine.OEMConfig.Status(flags.stage.String(), *engine.Fetcher, err); statusErr != nil {
+		logger.Err("POST Status error: %v", statusErr.Error())
+	}
+	if err != nil {
+		logger.Crit("Ignition failed: %v", err.Error())
 		os.Exit(1)
 	}
+	logger.Info("Ignition finished successfully")
 }

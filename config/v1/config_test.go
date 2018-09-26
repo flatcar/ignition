@@ -19,7 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/coreos/ignition/config/errors"
+	"github.com/coreos/ignition/config/shared/errors"
 	"github.com/coreos/ignition/config/v1/types"
 	"github.com/coreos/ignition/config/validate/report"
 )
@@ -48,7 +48,7 @@ func TestParse(t *testing.T) {
 				report: report.Report{
 					Entries: []report.Entry{
 						{
-							Message:   types.ErrPathRelative.Error(),
+							Message:   errors.ErrPathRelative.Error(),
 							Kind:      report.EntryError,
 							Line:      1,
 							Column:    87,
@@ -61,7 +61,7 @@ func TestParse(t *testing.T) {
 		},
 		{
 			in:  in{config: []byte(`{}`)},
-			out: out{err: errors.ErrInvalid},
+			out: out{err: errors.ErrUnknownVersion},
 		},
 		{
 			in:  in{config: []byte{}},

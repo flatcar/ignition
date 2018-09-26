@@ -201,12 +201,16 @@ func Translate(old from.Config) types.Config {
 		var res []types.Partition
 		for _, x := range old {
 			res = append(res, types.Partition{
-				GUID:     x.GUID,
-				Label:    x.Label,
-				Number:   x.Number,
-				Size:     x.Size,
-				Start:    x.Start,
-				TypeGUID: x.TypeGUID,
+				GUID:               x.GUID,
+				Label:              x.Label,
+				Number:             x.Number,
+				Size:               x.Size,
+				SizeMb:             x.SizeMb,
+				Start:              x.Start,
+				StartMb:            x.StartMb,
+				TypeGUID:           x.TypeGUID,
+				ShouldExist:        x.ShouldExist,
+				WipePartitionEntry: x.WipePartitionEntry,
 			})
 		}
 		return res

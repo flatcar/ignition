@@ -175,12 +175,10 @@ func (u Util) PerformFetch(f *FetchOp) error {
 		return err
 	}
 
-	defer func() {
-		tmp.Close()
-		if err != nil {
-			os.Remove(tmp.Name())
-		}
-	}()
+	defer tmp.Close()
+	// sometimes the following line will fail (the file might be renamed),
+	// but that's ok (we wanted to keep the file in that case).
+	defer os.Remove(tmp.Name())
 
 	err = u.Fetcher.Fetch(f.Url, tmp, f.FetchOptions)
 	if err != nil {
@@ -267,6 +265,20 @@ func (u Util) PerformFetch(f *FetchOp) error {
 // MkdirForFile helper creates the directory components of path.
 func MkdirForFile(path string) error {
 	return os.MkdirAll(filepath.Dir(path), DefaultDirectoryPermissions)
+}
+
+// PathExists returns true if a node exists within DestDir, false otherwise. Any
+// error other than ENOENT is treated as fatal.
+func (u Util) PathExists(path string) (bool, error) {
+	_, err := os.Stat(u.JoinPath(path))
+	switch {
+	case os.IsNotExist(err):
+		return false, nil
+	case err != nil:
+		return false, err
+	default:
+		return true, nil
+	}
 }
 
 // getFileOwner will return the uid and gid for the file at a given path. If the

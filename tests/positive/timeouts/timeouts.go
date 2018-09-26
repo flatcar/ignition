@@ -36,15 +36,16 @@ var (
 		w.WriteHeader(http.StatusOK)
 	}))
 
-	lastResponse           time.Time
+	lastResponses          = map[string]time.Time{}
 	respondThrottledServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if (lastResponse != time.Time{}) && time.Since(lastResponse) > time.Second*4 {
+		lastResponse, ok := lastResponses[r.RequestURI]
+		if ok && time.Since(lastResponse) > time.Second*4 {
 			// Only respond successfully if it's been more than 4 seconds since
 			// the last attempt
 			w.WriteHeader(http.StatusOK)
 			return
 		}
-		lastResponse = time.Now()
+		lastResponses[r.RequestURI] = time.Now()
 		w.WriteHeader(http.StatusInternalServerError)
 	}))
 )
@@ -55,7 +56,7 @@ func IncreaseHTTPResponseHeadersTimeout() types.Test {
 	out := types.GetBaseDisk()
 	config := fmt.Sprintf(`{
 		"ignition": {
-			"version": "2.1.0",
+			"version": "$version",
 			"timeouts": {
 				"httpResponseHeaders": 12
 			}
@@ -72,6 +73,7 @@ func IncreaseHTTPResponseHeadersTimeout() types.Test {
 			]
 		}
 	}`, respondDelayServer.URL)
+	configMinVersion := "2.1.0"
 	out[0].Partitions.AddFiles("ROOT", []types.File{
 		{
 			Node: types.Node{
@@ -83,10 +85,11 @@ func IncreaseHTTPResponseHeadersTimeout() types.Test {
 	})
 
 	return types.Test{
-		Name:   name,
-		In:     in,
-		Out:    out,
-		Config: config,
+		Name:             name,
+		In:               in,
+		Out:              out,
+		Config:           config,
+		ConfigMinVersion: configMinVersion,
 	}
 }
 
@@ -96,7 +99,7 @@ func ConfirmHTTPBackoffWorks() types.Test {
 	out := types.GetBaseDisk()
 	config := fmt.Sprintf(`{
 		"ignition": {
-			"version": "2.1.0"
+			"version": "$version"
 		},
 		"storage": {
 		    "files": [
@@ -104,12 +107,13 @@ func ConfirmHTTPBackoffWorks() types.Test {
 					"filesystem": "root",
 					"path": "/foo/bar",
 					"contents": {
-						"source": %q
+						"source": "%s/$version"
 					}
 				}
 			]
 		}
 	}`, respondThrottledServer.URL)
+	configMinVersion := "2.0.0"
 	out[0].Partitions.AddFiles("ROOT", []types.File{
 		{
 			Node: types.Node{
@@ -121,9 +125,10 @@ func ConfirmHTTPBackoffWorks() types.Test {
 	})
 
 	return types.Test{
-		Name:   name,
-		In:     in,
-		Out:    out,
-		Config: config,
+		Name:             name,
+		In:               in,
+		Out:              out,
+		Config:           config,
+		ConfigMinVersion: configMinVersion,
 	}
 }

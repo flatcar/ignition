@@ -27,7 +27,6 @@ import (
 	"github.com/coreos/ignition/internal/providers/gce"
 	"github.com/coreos/ignition/internal/providers/noop"
 	"github.com/coreos/ignition/internal/providers/openstack"
-	"github.com/coreos/ignition/internal/providers/oracleoci"
 	"github.com/coreos/ignition/internal/providers/packet"
 	"github.com/coreos/ignition/internal/providers/qemu"
 	"github.com/coreos/ignition/internal/providers/virtualbox"
@@ -41,6 +40,7 @@ type Config struct {
 	name       string
 	fetch      providers.FuncFetchConfig
 	newFetcher providers.FuncNewFetcher
+	status     providers.FuncPostStatus
 }
 
 func (c Config) Name() string {
@@ -60,6 +60,14 @@ func (c Config) NewFetcherFunc() providers.FuncNewFetcher {
 			Logger: l,
 		}, nil
 	}
+}
+
+// Status takes a Fetcher and the error from Run (from engine)
+func (c Config) Status(stageName string, f resource.Fetcher, statusErr error) error {
+	if c.status != nil {
+		return c.status(stageName, f, statusErr)
+	}
+	return nil
 }
 
 var configs = registry.Create("oem configs")
@@ -111,8 +119,9 @@ func init() {
 		fetch: noop.FetchConfig,
 	})
 	configs.Register(Config{
-		name:  "packet",
-		fetch: packet.FetchConfig,
+		name:   "packet",
+		fetch:  packet.FetchConfig,
+		status: packet.PostStatus,
 	})
 	configs.Register(Config{
 		name:  "pxe",
@@ -153,10 +162,6 @@ func init() {
 	configs.Register(Config{
 		name:  "file",
 		fetch: file.FetchConfig,
-	})
-	configs.Register(Config{
-		name:  "oracle-oci",
-		fetch: oracleoci.FetchConfig,
 	})
 }
 
