@@ -1,5 +1,5 @@
-hash: 6cec3b8e033abff84f106f33e57a381886d30d53c863cc1621d4405c4725efeb
-updated: 2018-02-15T18:15:43.70808531Z
+hash: 45ef0dd196a7294a2c1926416e22a2d031531d12302e680dc55999706ded86a7
+updated: 2018-09-17T14:38:31.888054059-07:00
 imports:
 - name: github.com/ajeddeloh/go-json
   version: 73d058cf8437a1989030afe571eeab9f90eebbbd
@@ -38,18 +38,20 @@ imports:
   subpackages:
   - semver
 - name: github.com/coreos/go-systemd
-  version: 40e2722dffead74698ca12a750f64ef313ddce05
+  version: 39ca1b05acc7ad1220e09f133283b8859a8b71ab
   subpackages:
   - dbus
   - unit
 - name: github.com/go-ini/ini
-  version: c787282c39ac1fc618827141a1f762240def08a3
+  version: 20b96f641a5ea98f2f8619ff4f3e061cff4833bd
 - name: github.com/godbus/dbus
   version: a389bdde4dd695d414e47b755e95e72b7826432c
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jmespath/go-jmespath
-  version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
+  version: c01cf91b011868172fdcd9f41838e80c9d716264
+- name: github.com/pborman/uuid
+  version: e790cca94e6cc75c7064b1332e63811d4aae1a53
 - name: github.com/pin/tftp
   version: 9ea92f6b1029bc1bf3072bba195c84bb9b0370e3
   subpackages:

@@ -31,10 +31,14 @@ The Ignition configuration is a JSON document conforming to the following specif
     * **_partitions_** (list of objects): the list of partitions and their configuration for this particular disk.
       * **_label_** (string): the PARTLABEL for the partition.
       * **_number_** (integer): the partition number, which dictates it's position in the partition table (one-indexed). If zero, use the next available partition slot.
-      * **_size_** (integer): the size of the partition (in device logical sectors, 512 or 4096 bytes). If zero, the partition will be made as large as possible.
-      * **_start_** (integer): the start of the partition (in device logical sectors). If zero, the partition will be positioned at the start of the largest block available.
+      * **_sizeMB_** (integer): the size of the partition (in megabytes). If zero, the partition will be made as large as possible.
+      * **_startMB_** (integer): the start of the partition (in megabytes). If zero, the partition will be positioned at the start of the largest block available.
+      * **_size_** (integer, DEPRECATED): the size of the partition (in device logical sectors, 512 or 4096 bytes). If zero, the partition will be made as large as possible. This object has been marked for deprecation, please use **_sizeMB_** field instead.
+      * **_start_** (integer, DEPRECATED): the start of the partition (in device logical sectors). If zero, the partition will be positioned at the start of the largest block available. This object has been marked for deprecation, please use **_startMB_** field instead.
       * **_typeGuid_** (string): the GPT [partition type GUID][part-types]. If omitted, the default will be 0FC63DAF-8483-4772-8E79-3D69D8477DE4 (Linux filesystem data).
       * **_guid_** (string): the GPT unique partition GUID.
+      * **_wipePartitionEntry_** (boolean) if true, Ignition will clobber an existing partition if it does not match the config. If false (default), Ignition will fail instead.
+      * **_shouldExist_** (boolean) whether or not the partition with the specified `number` should exist. If omitted, it defaults to true. If false Ignition will either delete the specified partition or fail, depending on `wipePartitionEntry`. If false `number` must be specified and non-zero and `label`, `start`, `size`, `guid`, and `typeGuid` must all be omitted.
   * **_raid_** (list of objects): the list of RAID arrays to be configured.
     * **name** (string): the name to use for the resulting md device.
     * **level** (string): the redundancy level of the array (e.g. linear, raid1, raid5, etc.).
@@ -125,7 +129,7 @@ The Ignition configuration is a JSON document conforming to the following specif
     * **_noUserGroup_** (boolean): whether or not to create a group with the same name as the user. This only has an effect if the account doesn't exist yet.
     * **_noLogInit_** (boolean): whether or not to add the user to the lastlog and faillog databases. This only has an effect if the account doesn't exist yet.
     * **_shell_** (string): the login shell of the new account.
-    * **_system_** (bool): whether or not to make the account a system account. This only has an effect if the account doesn't exist yet.
+    * **_system_** (bool): whether or not this account should be a system account. This only has an effect if the account doesn't exist yet.
     * **_create_** (object, DEPRECATED): contains the set of options to be used when creating the user. A non-null entry indicates that the user account shall be created. This object has been marked for deprecation, please use the **_users_** level fields instead.
       * **_uid_** (integer): the user ID of the new account.
       * **_gecos_** (string): the GECOS field of the new account.
@@ -136,10 +140,12 @@ The Ignition configuration is a JSON document conforming to the following specif
       * **_noUserGroup_** (boolean): whether or not to create a group with the same name as the user.
       * **_noLogInit_** (boolean): whether or not to add the user to the lastlog and faillog databases.
       * **_shell_** (string): the login shell of the new account.
+      * **_system_** (bool): whether or not to make the user a system user.
   * **_groups_** (list of objects): the list of groups to be added.
     * **name** (string): the name of the group.
     * **_gid_** (integer): the group ID of the new group.
     * **_passwordHash_** (string): the encrypted password of the new group.
+    * **_system_** (bool): whether or not the group should be a system group. This only has an effect if the group doesn't exist yet.
 
 [part-types]: http://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs
 [rfc2397]: https://tools.ietf.org/html/rfc2397

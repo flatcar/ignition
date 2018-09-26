@@ -15,7 +15,7 @@
 package blackbox
 
 import (
-	"bufio"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -31,7 +31,7 @@ import (
 	"github.com/coreos/ignition/tests/types"
 )
 
-func regexpSearch(t *testing.T, itemName, pattern string, data []byte) (string, error) {
+func regexpSearch(itemName, pattern string, data []byte) (string, error) {
 	re := regexp.MustCompile(pattern)
 	match := re.FindSubmatch(data)
 	if len(match) < 2 {
@@ -40,34 +40,68 @@ func regexpSearch(t *testing.T, itemName, pattern string, data []byte) (string, 
 	return string(match[1]), nil
 }
 
-func validateDisk(t *testing.T, d types.Disk, imageFile string) error {
-	for _, e := range d.Partitions {
-		if e.TypeCode == "blank" || e.FilesystemType == "swap" {
+func getPartitionSet(device string) (map[int]struct{}, error) {
+	sgdiskOverview, err := exec.Command("sgdisk", "-p", device).CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("sgdisk -p %s failed: %v", device, err)
+	}
+
+	//What this regex means:       num      start    end    size,code,name
+	re := regexp.MustCompile("\n\\W+(\\d+)\\W+\\d+\\W+\\d+\\W+\\d+.*")
+	ret := map[int]struct{}{}
+	for _, match := range re.FindAllStringSubmatch(string(sgdiskOverview), -1) {
+		if len(match) == 0 {
 			continue
 		}
+		if len(match) != 2 {
+			return nil, fmt.Errorf("Invalid regex result from parsing sgdisk")
+		}
+		num, err := strconv.Atoi(match[1])
+		if err != nil {
+			return nil, err
+		}
+		ret[num] = struct{}{}
+	}
+	return ret, nil
+}
+
+func validateDisk(t *testing.T, d types.Disk) error {
+	partitionSet, err := getPartitionSet(d.Device)
+	if err != nil {
+		return err
+	}
+
+	for _, e := range d.Partitions {
+		if e.TypeCode == "blank" {
+			continue
+		}
+
+		if _, ok := partitionSet[e.Number]; !ok {
+			t.Errorf("Partition %d is missing", e.Number)
+		}
+		delete(partitionSet, e.Number)
+
 		sgdiskInfo, err := exec.Command(
 			"sgdisk", "-i", strconv.Itoa(e.Number),
-			imageFile).CombinedOutput()
+			d.Device).CombinedOutput()
 		if err != nil {
-			fmt.Printf("sgdisk -i %d %s died\n", e.Number, imageFile)
-			bufio.NewReader(os.Stdin).ReadBytes('\n')
 			t.Error("sgdisk -i", strconv.Itoa(e.Number), err)
 			return nil
 		}
 
-		actualGUID, err := regexpSearch(t, "GUID", "Partition unique GUID: (?P<partition_guid>[\\d\\w-]+)", sgdiskInfo)
+		actualGUID, err := regexpSearch("GUID", "Partition unique GUID: (?P<partition_guid>[\\d\\w-]+)", sgdiskInfo)
 		if err != nil {
 			return err
 		}
-		actualTypeGUID, err := regexpSearch(t, "type GUID", "Partition GUID code: (?P<partition_code>[\\d\\w-]+)", sgdiskInfo)
+		actualTypeGUID, err := regexpSearch("type GUID", "Partition GUID code: (?P<partition_code>[\\d\\w-]+)", sgdiskInfo)
 		if err != nil {
 			return err
 		}
-		actualSectors, err := regexpSearch(t, "partition size", "Partition size: (?P<sectors>\\d+) sectors", sgdiskInfo)
+		actualSectors, err := regexpSearch("partition size", "Partition size: (?P<sectors>\\d+) sectors", sgdiskInfo)
 		if err != nil {
 			return err
 		}
-		actualLabel, err := regexpSearch(t, "partition name", "Partition name: '(?P<name>[\\d\\w-_]+)'", sgdiskInfo)
+		actualLabel, err := regexpSearch("partition name", "Partition name: '(?P<name>[\\d\\w-_]+)'", sgdiskInfo)
 		if err != nil {
 			return err
 		}
@@ -75,7 +109,7 @@ func validateDisk(t *testing.T, d types.Disk, imageFile string) error {
 		// have to align the size to the nearest sector alignment boundary first
 		expectedSectors := types.Align(e.Length, d.Alignment)
 
-		if e.TypeGUID != "" && e.TypeGUID != actualTypeGUID {
+		if e.TypeGUID != "" && formatUUID(e.TypeGUID) != formatUUID(actualTypeGUID) {
 			t.Error("TypeGUID does not match!", e.TypeGUID, actualTypeGUID)
 		}
 		if e.GUID != "" && formatUUID(e.GUID) != formatUUID(actualGUID) {
@@ -89,6 +123,15 @@ func validateDisk(t *testing.T, d types.Disk, imageFile string) error {
 				"Sectors does not match!", expectedSectors, actualSectors)
 		}
 	}
+
+	if len(partitionSet) != 0 {
+		t.Error("Disk had extra partitions", partitionSet)
+	}
+
+	// TODO: inspect the disk without triggering partition rescans so we don't need to settle here
+	if _, err := runWithoutContext("udevadm", "settle"); err != nil {
+		t.Log(err)
+	}
 	return nil
 }
 
@@ -96,7 +139,7 @@ func formatUUID(s string) string {
 	return strings.ToUpper(strings.Replace(s, "-", "", -1))
 }
 
-func validateFilesystems(t *testing.T, expected []*types.Partition, imageFile string) error {
+func validateFilesystems(t *testing.T, expected []*types.Partition) error {
 	for _, e := range expected {
 		if e.FilesystemType != "" {
 			filesystemType, err := util.FilesystemType(e.Device)
@@ -132,23 +175,39 @@ func validateFilesystems(t *testing.T, expected []*types.Partition, imageFile st
 	return nil
 }
 
-func validateFilesDirectoriesAndLinks(t *testing.T, expected []*types.Partition) {
+func validatePartitionNodes(t *testing.T, ctx context.Context, partition *types.Partition) {
+	if err := mountPartition(ctx, partition); err != nil {
+		t.Errorf("failed to mount %s: %v", partition.Device, err)
+	}
+	defer func() {
+		if err := umountPartition(partition); err != nil {
+			// failing to unmount is not a validation failure
+			t.Logf("Failed to unmount %s: %v", partition.MountPath, err)
+		}
+	}()
+	for _, file := range partition.Files {
+		validateFile(t, partition, file)
+	}
+	for _, dir := range partition.Directories {
+		validateDirectory(t, partition, dir)
+	}
+	for _, link := range partition.Links {
+		validateLink(t, partition, link)
+	}
+	for _, node := range partition.RemovedNodes {
+		path := filepath.Join(partition.MountPath, node.Directory, node.Name)
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
+			t.Error("Node was expected to be removed and is present!", path)
+		}
+	}
+}
+
+func validateFilesDirectoriesAndLinks(t *testing.T, ctx context.Context, expected []*types.Partition) {
 	for _, partition := range expected {
-		for _, file := range partition.Files {
-			validateFile(t, partition, file)
+		if partition.TypeCode == "blank" || partition.Length == 0 || partition.FilesystemType == "" || partition.FilesystemType == "swap" {
+			continue
 		}
-		for _, dir := range partition.Directories {
-			validateDirectory(t, partition, dir)
-		}
-		for _, link := range partition.Links {
-			validateLink(t, partition, link)
-		}
-		for _, node := range partition.RemovedNodes {
-			path := filepath.Join(partition.MountPath, node.Directory, node.Name)
-			if _, err := os.Stat(path); !os.IsNotExist(err) {
-				t.Error("Node was expected to be removed and is present!", path)
-			}
-		}
+		validatePartitionNodes(t, ctx, partition)
 	}
 }
 

@@ -18,12 +18,18 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/coreos/ignition/config/shared/errors"
 	"github.com/coreos/ignition/config/validate/report"
 )
 
+// redefined here to avoid import cycles
+func strToPtrStrict(s string) *string {
+	return &s
+}
+
 func TestValidateLabel(t *testing.T) {
 	type in struct {
-		label string
+		label *string
 	}
 	type out struct {
 		report report.Report
@@ -33,24 +39,28 @@ func TestValidateLabel(t *testing.T) {
 		out out
 	}{
 		{
-			in{"root"},
+			in{strToPtrStrict("root")},
 			out{report.Report{}},
 		},
 		{
-			in{""},
+			in{strToPtrStrict("")},
 			out{report.Report{}},
 		},
 		{
-			in{"111111111111111111111111111111111111"},
+			in{nil},
 			out{report.Report{}},
 		},
 		{
-			in{"1111111111111111111111111111111111111"},
-			out{report.ReportFromError(ErrLabelTooLong, report.EntryError)},
+			in{strToPtrStrict("111111111111111111111111111111111111")},
+			out{report.Report{}},
 		},
 		{
-			in{"test:"},
-			out{report.ReportFromError(ErrLabelContainsColon, report.EntryWarning)},
+			in{strToPtrStrict("1111111111111111111111111111111111111")},
+			out{report.ReportFromError(errors.ErrLabelTooLong, report.EntryError)},
+		},
+		{
+			in{strToPtrStrict("test:")},
+			out{report.ReportFromError(errors.ErrLabelContainsColon, report.EntryWarning)},
 		},
 	}
 	for i, test := range tests {
@@ -82,7 +92,7 @@ func TestValidateTypeGUID(t *testing.T) {
 		},
 		{
 			in{"not-a-valid-typeguid"},
-			out{report.ReportFromError(ErrDoesntMatchGUIDRegex, report.EntryError)},
+			out{report.ReportFromError(errors.ErrDoesntMatchGUIDRegex, report.EntryError)},
 		},
 	}
 	for i, test := range tests {
@@ -114,11 +124,75 @@ func TestValidateGUID(t *testing.T) {
 		},
 		{
 			in{"not-a-valid-typeguid"},
-			out{report.ReportFromError(ErrDoesntMatchGUIDRegex, report.EntryError)},
+			out{report.ReportFromError(errors.ErrDoesntMatchGUIDRegex, report.EntryError)},
 		},
 	}
 	for i, test := range tests {
 		r := Partition{GUID: test.in.guid}.ValidateGUID()
+		if !reflect.DeepEqual(r, test.out.report) {
+			t.Errorf("#%d: wanted %v, got %v", i, test.out.report, r)
+		}
+	}
+}
+
+func TestValidateSize(t *testing.T) {
+	type in struct {
+		size *int
+	}
+	type out struct {
+		report report.Report
+	}
+	tests := []struct {
+		in  in
+		out out
+	}{
+		{
+			in{},
+			out{report.Report{}},
+		},
+		{
+			in{intToPtr(0)},
+			out{report.ReportFromError(errors.ErrSizeDeprecated, report.EntryDeprecated)},
+		},
+		{
+			in{intToPtr(1)},
+			out{report.ReportFromError(errors.ErrSizeDeprecated, report.EntryDeprecated)},
+		},
+	}
+	for i, test := range tests {
+		r := Partition{Size: test.in.size}.ValidateSize()
+		if !reflect.DeepEqual(r, test.out.report) {
+			t.Errorf("#%d: wanted %v, got %v", i, test.out.report, r)
+		}
+	}
+}
+
+func TestValidateStart(t *testing.T) {
+	type in struct {
+		start *int
+	}
+	type out struct {
+		report report.Report
+	}
+	tests := []struct {
+		in  in
+		out out
+	}{
+		{
+			in{},
+			out{report.Report{}},
+		},
+		{
+			in{intToPtr(0)},
+			out{report.ReportFromError(errors.ErrStartDeprecated, report.EntryDeprecated)},
+		},
+		{
+			in{intToPtr(1)},
+			out{report.ReportFromError(errors.ErrStartDeprecated, report.EntryDeprecated)},
+		},
+	}
+	for i, test := range tests {
+		r := Partition{Start: test.in.start}.ValidateStart()
 		if !reflect.DeepEqual(r, test.out.report) {
 			t.Errorf("#%d: wanted %v, got %v", i, test.out.report, r)
 		}

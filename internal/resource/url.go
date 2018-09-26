@@ -31,7 +31,7 @@ import (
 	"strings"
 	"syscall"
 
-	configErrors "github.com/coreos/ignition/config/errors"
+	configErrors "github.com/coreos/ignition/config/shared/errors"
 	"github.com/coreos/ignition/internal/distro"
 	"github.com/coreos/ignition/internal/log"
 	"github.com/coreos/ignition/internal/systemd"
@@ -60,10 +60,6 @@ var (
 		"Accept-Encoding": []string{"identity"},
 		"Accept":          []string{"application/vnd.coreos.ignition+json; version=2.2.0, application/vnd.coreos.ignition+json; version=1; q=0.5, */*; q=0.1"},
 	}
-)
-
-const (
-	oemMountPath = "/mnt/oem" // Mountpoint where oem partition is mounted when present.
 )
 
 // Fetcher holds settings for fetching resources from URLs
@@ -134,6 +130,11 @@ func (f *Fetcher) FetchToBuffer(u url.URL, opts FetchOptions) ([]byte, error) {
 // and written into dest. If opts.Hash is set the data stream will also be
 // hashed and compared against opts.ExpectedSum, and any match failures will
 // result in an error being returned.
+//
+// Fetch expects dest to be an empty file and for the cursor in the file to be
+// at the beginning. Since some url schemes (ex: s3) use chunked downloads and
+// fetch chunks out of order, Fetch's behavior when dest is not an empty file is
+// undefined.
 func (f *Fetcher) Fetch(u url.URL, dest *os.File, opts FetchOptions) error {
 	switch u.Scheme {
 	case "http", "https":
@@ -218,11 +219,20 @@ func (f *Fetcher) FetchFromTFTP(u url.URL, dest *os.File, opts FetchOptions) err
 // FetchFromHTTP fetches a resource from u via HTTP(S) into dest, returning an
 // error if one is encountered.
 func (f *Fetcher) FetchFromHTTP(u url.URL, dest *os.File, opts FetchOptions) error {
-	ctx := context.Background()
+	// for the case when "config is not valid"
+	// this if necessary if not spawned through kola (e.g. Packet Dashboard)
 	if f.client == nil {
+		logger := log.New(true)
+		f.Logger = &logger
 		f.newHttpClient()
 	}
-	dataReader, status, err := f.client.getReaderWithHeader(ctx, u.String(), opts.Headers)
+
+	dataReader, status, ctxCancel, err := f.client.getReaderWithHeader(u.String(), opts.Headers)
+	if ctxCancel != nil {
+		// whatever context getReaderWithHeader created for the request should
+		// be cancelled once we're done reading the response
+		defer ctxCancel()
+	}
 	if err != nil {
 		return err
 	}
@@ -274,15 +284,21 @@ func (f *Fetcher) FetchFromOEM(u url.URL, dest *os.File, opts FetchOptions) erro
 		return ErrFailed
 	}
 
-	f.Logger.Info("oem config not found in %q, trying %q",
-		distro.OEMLookasideDir(), oemMountPath)
+	f.Logger.Info("oem config not found in %q, looking on oem partition",
+		distro.OEMLookasideDir())
 
+	oemMountPath, err := ioutil.TempDir("/mnt", "oem")
+	if err != nil {
+		f.Logger.Err("failed to create mount path for oem partition: %v", err)
+		return ErrFailed
+	}
 	// try oemMountPath, requires mounting it.
-	if err := f.mountOEM(); err != nil {
+	if err := f.mountOEM(oemMountPath); err != nil {
 		f.Logger.Err("failed to mount oem partition: %v", err)
 		return ErrFailed
 	}
-	defer f.umountOEM()
+	defer os.Remove(oemMountPath)
+	defer f.umountOEM(oemMountPath)
 
 	absPath = filepath.Join(oemMountPath, path)
 	fi, err := os.Open(absPath)
@@ -426,8 +442,8 @@ func (f *Fetcher) decompressCopyHashAndVerify(dest io.Writer, src io.Reader, opt
 }
 
 // mountOEM waits for the presence of and mounts the oem partition at
-// oemMountPath.
-func (f *Fetcher) mountOEM() error {
+// oemMountPath. oemMountPath will be created if it does not exist.
+func (f *Fetcher) mountOEM(oemMountPath string) error {
 	dev := []string{distro.OEMDevicePath()}
 	if err := systemd.WaitOnDevices(dev, "oem-cmdline"); err != nil {
 		f.Logger.Err("failed to wait for oem device: %v", err)
@@ -453,7 +469,7 @@ func (f *Fetcher) mountOEM() error {
 }
 
 // umountOEM unmounts the oem partition at oemMountPath.
-func (f *Fetcher) umountOEM() {
+func (f *Fetcher) umountOEM(oemMountPath string) {
 	f.Logger.LogOp(
 		func() error { return syscall.Unmount(oemMountPath, 0) },
 		"unmounting %q", oemMountPath,

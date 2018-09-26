@@ -1,5 +1,7 @@
 # Configuration Specification v2.1.0 #
 
+*NOTE*: The [configuration specification 2.2.0][v2_2] is currently the latest stable version of the spec, and it's advised to use that over version 2.1.0.
+
 The Ignition configuration is a JSON document conforming to the following specification, with **_italicized_** entries being optional:
 
 * **ignition** (object): metadata about the configuration itself.
@@ -109,7 +111,7 @@ The Ignition configuration is a JSON document conforming to the following specif
     * **_noUserGroup_** (boolean): whether or not to create a group with the same name as the user. This only has an effect if the account doesn't exist yet.
     * **_noLogInit_** (boolean): whether or not to add the user to the lastlog and faillog databases. This only has an effect if the account doesn't exist yet.
     * **_shell_** (string): the login shell of the new account.
-    * **_system_** (bool): whether or not to make the account a system account. This only has an effect if the account doesn't exist yet.
+    * **_system_** (bool): whether or not this account should be a system account. This only has an effect if the account doesn't exist yet.
     * **_create_** (object, DEPRECATED): contains the set of options to be used when creating the user. A non-null entry indicates that the user account shall be created. This object has been marked for deprecation, please use the **_users_** level fields instead.
       * **_uid_** (integer): the user ID of the new account.
       * **_gecos_** (string): the GECOS field of the new account.
@@ -120,10 +122,13 @@ The Ignition configuration is a JSON document conforming to the following specif
       * **_noUserGroup_** (boolean): whether or not to create a group with the same name as the user.
       * **_noLogInit_** (boolean): whether or not to add the user to the lastlog and faillog databases.
       * **_shell_** (string): the login shell of the new account.
+      * **_system_** (bool): whether or not to make the user a system user.
   * **_groups_** (list of objects): the list of groups to be added.
     * **name** (string): the name of the group.
     * **_gid_** (integer): the group ID of the new group.
     * **_passwordHash_** (string): the encrypted password of the new group.
+    * **_system_** (bool): whether or not the group should be a system group. This only has an effect if the group doesn't exist yet.
 
+[v2_2]: configuration-v2_2.md
 [part-types]: http://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs
 [rfc2397]: https://tools.ietf.org/html/rfc2397
