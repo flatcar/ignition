@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// The noop provider does nothing, for use by unimplemented oems.
+// The noop provider does nothing, for use by unimplemented platforms.
 
 package noop
 
 import (
 	"github.com/coreos/ignition/config/shared/errors"
+	"github.com/coreos/ignition/config/v3_0/types"
 	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
 	"github.com/coreos/ignition/internal/resource"
 )
 

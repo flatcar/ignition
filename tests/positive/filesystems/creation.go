@@ -15,17 +15,19 @@
 package filesystems
 
 import (
+	"fmt"
+
 	"github.com/coreos/ignition/tests/register"
 	"github.com/coreos/ignition/tests/types"
 )
 
 func init() {
-	register.Register(register.PositiveTest, ForceNewFilesystemOfSameType())
 	register.Register(register.PositiveTest, WipeFilesystemWithSameType())
+	register.Register(register.PositiveTest, FilesystemCreationOnMultipleDisks())
 }
 
-func ForceNewFilesystemOfSameType() types.Test {
-	name := "Force new Filesystem Creation of same type"
+func WipeFilesystemWithSameType() types.Test {
+	name := "Wipe Filesystem with Filesystem of same type"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	mntDevices := []types.MntDevice{
@@ -35,19 +37,17 @@ func ForceNewFilesystemOfSameType() types.Test {
 		},
 	}
 	config := `{
-		"ignition": {"version": "$version"},
+		"ignition": { "version": "$version" },
 		"storage": {
 			"filesystems": [{
-				"mount": {
-					"device": "$DEVICE",
-					"format": "ext4",
-					"create": {
-						"force": true
-					}}
-				 }]
-			}
+				"device": "$DEVICE",
+				"format": "ext4",
+				"path": "/boot",
+				"wipeFilesystem": true
+			}]
+		}
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	in[0].Partitions.GetPartition("EFI-SYSTEM").FilesystemType = "ext4"
 	out[0].Partitions.GetPartition("EFI-SYSTEM").FilesystemType = "ext4"
@@ -78,47 +78,77 @@ func ForceNewFilesystemOfSameType() types.Test {
 	}
 }
 
-func WipeFilesystemWithSameType() types.Test {
-	name := "Wipe Filesystem with Filesystem of same type"
+func FilesystemCreationOnMultipleDisks() types.Test {
+	name := "Filesystem creation on multiple disks"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
-	mntDevices := []types.MntDevice{
-		{
-			Label:        "EFI-SYSTEM",
-			Substitution: "$DEVICE",
-		},
-	}
-	config := `{
-		"ignition": { "version": "$version" },
-		"storage": {
-			"filesystems": [{
-				"mount": {
-					"device": "$DEVICE",
-					"format": "ext4",
-					"wipeFilesystem": true
-				}}]
-			}
-	}`
-	configMinVersion := "2.1.0"
 
-	in[0].Partitions.GetPartition("EFI-SYSTEM").FilesystemType = "ext4"
-	out[0].Partitions.GetPartition("EFI-SYSTEM").FilesystemType = "ext4"
-	out[0].Partitions.GetPartition("EFI-SYSTEM").Files = []types.File{}
-	out[0].Partitions.AddRemovedNodes("EFI-SYSTEM", []types.Node{
-		{
-			Name:      "multiLine",
-			Directory: "path/example",
-		}, {
-			Name:      "singleLine",
-			Directory: "another/path/example",
-		}, {
-			Name:      "emptyFile",
-			Directory: "empty",
-		}, {
-			Name:      "noPath",
-			Directory: "",
-		},
-	})
+	mntDevices := []types.MntDevice{}
+
+	for i := 0; i < 4; i++ {
+		label := fmt.Sprintf("data-%d", i)
+		in = append(in, types.Disk{
+			Alignment: types.IgnitionAlignment,
+			Partitions: types.Partitions{
+				{
+					Label:          label,
+					Number:         1,
+					Length:         65536,
+					FilesystemType: "blank",
+				},
+			},
+		})
+
+		out = append(out, types.Disk{
+			Alignment: types.IgnitionAlignment,
+			Partitions: types.Partitions{
+				{
+					Label:          label,
+					Number:         1,
+					Length:         65536,
+					FilesystemType: "xfs",
+				},
+			},
+		})
+
+		mntDevices = append(mntDevices, types.MntDevice{
+			Label:        label,
+			Substitution: fmt.Sprintf("$dev%d", i),
+		})
+	}
+
+	config := `{
+		"ignition": {"version": "$version"},
+		"storage": {
+			"filesystems": [
+				{
+					"path": "/tmp-0",
+					"device": "$dev0",
+					"format": "xfs",
+					"label": "data-0"
+				},
+				{
+					"path": "/tmp-1",
+					"device": "$dev1",
+					"format": "xfs",
+					"label": "data-1"
+				},
+				{
+					"path": "/tmp-2",
+					"device": "$dev2",
+					"format": "xfs",
+					"label": "data-2"
+				},
+				{
+					"path": "/tmp-3",
+					"device": "$dev3",
+					"format": "xfs",
+					"label": "data-3"
+				}
+			]
+		}
+	}`
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

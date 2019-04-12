@@ -92,14 +92,15 @@ type MntDevice struct {
 
 type Test struct {
 	Name              string
-	In                []Disk
-	Out               []Disk
+	In                []Disk // Disk state before running Ignition
+	Out               []Disk // Expected disk state after running Ignition
 	MntDevices        []MntDevice
-	OEMLookasideFiles []File
 	SystemDirFiles    []File
+	Env               []string // Environment variables for Ignition
 	Config            string
 	ConfigMinVersion  string
-	ConfigShouldBeBad bool
+	ConfigVersion     string
+	ConfigShouldBeBad bool // Set to true to skip config validation step
 }
 
 func (ps Partitions) GetPartition(label string) *Partition {
@@ -244,7 +245,7 @@ func GetBaseDisk() []Disk {
 	}
 }
 
-// Replace all UUID variables (format $uuid<num>) in configs and partitions with an UUID
+// ReplaceAllUUIDVars replaces all UUID variables (format $uuid<num>) in configs and partitions with an UUID
 func (test *Test) ReplaceAllUUIDVars() error {
 	var err error
 	UUIDmap := make(map[string]string)
@@ -311,7 +312,7 @@ func getUUID(key string, UUIDmap map[string]string) string {
 	return UUIDmap[key]
 }
 
-// Replace Version variable (format $version) in configs with ConfigMinVersion
+// ReplaceAllVersionVars replaces Version variable (format $version) in configs with ConfigMinVersion
 // Updates the old config version (oldVersion) with a new one (newVersion)
 func (t *Test) ReplaceAllVersionVars(version string) {
 	pattern := regexp.MustCompile("\\$version")
@@ -319,7 +320,7 @@ func (t *Test) ReplaceAllVersionVars(version string) {
 	t.Name += " " + version
 }
 
-// Deep copy Test struct fields In, Out, MntDevices, OEMLookasideFiles, SystemDirFiles
+// Deep copy Test struct fields In, Out, MntDevices, SystemDirFiles
 // so each BB test with identical Test structs have their own independent Test copies
 func DeepCopy(t Test) Test {
 	In_diskArr := make([]Disk, len(t.In))
@@ -333,10 +334,6 @@ func DeepCopy(t Test) Test {
 	mntdevice := make([]MntDevice, len(t.MntDevices))
 	copy(mntdevice, t.MntDevices)
 	t.MntDevices = mntdevice
-
-	OEMLookasideFiles := make([]File, len(t.OEMLookasideFiles))
-	copy(OEMLookasideFiles, t.OEMLookasideFiles)
-	t.OEMLookasideFiles = OEMLookasideFiles
 
 	SystemDirFiles := make([]File, len(t.SystemDirFiles))
 	copy(SystemDirFiles, t.SystemDirFiles)

@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/coreos/ignition/internal/config/types"
+	"github.com/coreos/ignition/config/v3_0/types"
 	"github.com/coreos/ignition/internal/distro"
 	"github.com/coreos/ignition/internal/exec/stages"
 	"github.com/coreos/ignition/internal/exec/util"
@@ -68,12 +68,10 @@ func (stage) Name() string {
 func (s stage) Run(config types.Config) error {
 	// Interacting with disks/partitions/raids/filesystems in general can cause
 	// udev races. If we do not need to  do anything, we also do not need to
-	// do the udevadm settle and can just return here. There is always an implicit
-	// root filesystem defined in the base config, so the lowest number of
-	// filesystems is 1.
+	// do the udevadm settle and can just return here.
 	if len(config.Storage.Disks) == 0 &&
 		len(config.Storage.Raid) == 0 &&
-		len(config.Storage.Filesystems) == 1 {
+		len(config.Storage.Filesystems) == 0 {
 		return nil
 	}
 

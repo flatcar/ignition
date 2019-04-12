@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"time"
 
 	"github.com/coreos/ignition/tests/register"
@@ -37,16 +38,21 @@ var (
 	}))
 
 	lastResponses          = map[string]time.Time{}
+	lastResponsesLock      = sync.Mutex{}
 	respondThrottledServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var status int
+		lastResponsesLock.Lock()
 		lastResponse, ok := lastResponses[r.RequestURI]
 		if ok && time.Since(lastResponse) > time.Second*4 {
 			// Only respond successfully if it's been more than 4 seconds since
 			// the last attempt
-			w.WriteHeader(http.StatusOK)
-			return
+			status = http.StatusOK
+		} else {
+			status = http.StatusInternalServerError
+			lastResponses[r.RequestURI] = time.Now()
 		}
-		lastResponses[r.RequestURI] = time.Now()
-		w.WriteHeader(http.StatusInternalServerError)
+		lastResponsesLock.Unlock()
+		w.WriteHeader(status)
 	}))
 )
 
@@ -64,7 +70,6 @@ func IncreaseHTTPResponseHeadersTimeout() types.Test {
 		"storage": {
 		    "files": [
 			    {
-					"filesystem": "root",
 					"path": "/foo/bar",
 					"contents": {
 						"source": %q
@@ -73,7 +78,7 @@ func IncreaseHTTPResponseHeadersTimeout() types.Test {
 			]
 		}
 	}`, respondDelayServer.URL)
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 	out[0].Partitions.AddFiles("ROOT", []types.File{
 		{
 			Node: types.Node{
@@ -104,7 +109,6 @@ func ConfirmHTTPBackoffWorks() types.Test {
 		"storage": {
 		    "files": [
 			    {
-					"filesystem": "root",
 					"path": "/foo/bar",
 					"contents": {
 						"source": "%s/$version"
@@ -113,7 +117,7 @@ func ConfirmHTTPBackoffWorks() types.Test {
 			]
 		}
 	}`, respondThrottledServer.URL)
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 	out[0].Partitions.AddFiles("ROOT", []types.File{
 		{
 			Node: types.Node{

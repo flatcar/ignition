@@ -56,11 +56,21 @@ sudo -E PATH=$PWD/bin/amd64:$PATH ./tests.test
 
 ## Runnning Blackbox Tests on platforms other than Container Linux
 
-Build Ignition and the test binaries with HELPERS=HOST to use the paths of the binaries from your host system instead of those found in Container linux. Then run blackbox tests. The subshell ensures the root PATH is used instead of your user's.
-
 ```sh
-HELPERS=HOST ./build_blackbox_tests
+./build_blackbox_tests
 sudo sh -c 'PATH=$PWD/bin/amd64:$PATH ./tests.test'
+```
+
+To run a subset of the blackbox tests, pass a regular expression into `-test.run`. As an example:
+
+```
+sudo sh -c 'PATH=$PWD/bin/amd64:$PATH ./tests.test -test.run TestIgnitionBlackBox/Preemption.*'
+```
+
+You can get a list of available tests to run by passing the `-list` option, like so:
+
+```
+sudo sh -c 'PATH=$PWD/bin/amd64:$PATH ./tests.test -list'
 ```
 
 ## Test Host System Dependencies
@@ -88,8 +98,6 @@ Out: `[]Disk` object, which describes the Disks that should be present after Ign
 
 MntDevices: `MntDevice` object, which describes any disk related variable replacements that need to be done to the Ignition config before Ignition is run. This is done so that disks which are created during the test run can be referenced inside of an Ignition config.
 
-OEMLookasideFiles: `[]File` object which describes the Files that should be written into the OEM lookaside directory before Ignition is run.
-
 SystemDirFiles: `[]File` object which describes the Files that should be written into Ignition's system config directory before Ignition is run.
 
 Config: `string` type where the specific config version should be replaced by `$version` and will be updated before Ignition is run.
@@ -102,7 +110,7 @@ UUIDs may be required in the following fields of a Test object: In, Out, and Con
 
 ## Releasing Ignition
 
-Create a new [release checklist](https://github.com/coreos/ignition/issues/new?template=release-checklist.md) and follow the steps there.
+Create a new [release checklist](https://github.com/coreos/ignition/issues/new?labels=kind/release&template=release-checklist.md) and follow the steps there.
 
 ## Marking an experimental spec as stable
 

@@ -32,12 +32,12 @@ func CreateSystemdService() types.Test {
 		"systemd": {
 			"units": [{
 				"name": "example.service",
-				"enable": true,
+				"enabled": true,
 				"contents": "[Service]\nType=oneshot\nExecStart=/usr/bin/echo Hello World\n\n[Install]\nWantedBy=multi-user.target"
 			}]
 		}
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 	out[0].Partitions.AddFiles("ROOT", []types.File{
 		{
 			Node: types.Node{

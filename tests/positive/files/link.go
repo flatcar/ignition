@@ -24,6 +24,8 @@ func init() {
 	register.Register(register.PositiveTest, CreateSymlinkOnRoot())
 	register.Register(register.PositiveTest, ForceLinkCreation())
 	register.Register(register.PositiveTest, ForceHardLinkCreation())
+	register.Register(register.PositiveTest, WriteOverSymlink())
+	register.Register(register.PositiveTest, WriteOverBrokenSymlink())
 }
 
 func CreateHardLinkOnRoot() types.Test {
@@ -34,14 +36,12 @@ func CreateHardLinkOnRoot() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/target",
 	      "contents": {
 	        "source": "http://127.0.0.1:8080/contents"
 	      }
 	    }],
 	    "links": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 		  "target": "/foo/target",
 		  "hard": true
@@ -67,7 +67,7 @@ func CreateHardLinkOnRoot() types.Test {
 			Hard:   true,
 		},
 	})
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -86,7 +86,6 @@ func CreateSymlinkOnRoot() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "links": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "target": "/foo/target",
 	      "hard": false
@@ -111,7 +110,7 @@ func CreateSymlinkOnRoot() types.Test {
 			Hard:   false,
 		},
 	})
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -130,14 +129,12 @@ func ForceLinkCreation() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/target",
 	      "contents": {
 	        "source": "http://127.0.0.1:8080/contents"
 	      }
 	    }],
 	    "links": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "target": "/foo/target",
 	      "overwrite": true
@@ -171,7 +168,7 @@ func ForceLinkCreation() types.Test {
 			Target: "/foo/target",
 		},
 	})
-	configMinVersion := "2.2.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -190,14 +187,12 @@ func ForceHardLinkCreation() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/target",
 	      "contents": {
 	        "source": "http://127.0.0.1:8080/contents"
 	      }
 	    }],
 	    "links": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "target": "/foo/target",
 		  "hard": true,
@@ -233,7 +228,115 @@ func ForceHardLinkCreation() types.Test {
 			Hard:   true,
 		},
 	})
-	configMinVersion := "2.2.0"
+	configMinVersion := "3.0.0"
+
+	return types.Test{
+		Name:             name,
+		In:               in,
+		Out:              out,
+		Config:           config,
+		ConfigMinVersion: configMinVersion,
+	}
+}
+
+func WriteOverSymlink() types.Test {
+	name := "Write Over Symlink at end of path"
+	in := types.GetBaseDisk()
+	out := types.GetBaseDisk()
+	config := `{
+	  "ignition": { "version": "$version" },
+	  "storage": {
+	    "files": [{
+	      "path": "/etc/file",
+	      "mode": 420,
+	      "overwrite": true,
+	      "contents": { "source": "" }
+	    }]
+	  }
+	}`
+	in[0].Partitions.AddLinks("ROOT", []types.Link{
+		{
+			Node: types.Node{
+				Name:      "file",
+				Directory: "etc",
+			},
+			Target: "/usr/rofile",
+		},
+	})
+	in[0].Partitions.AddFiles("ROOT", []types.File{
+		{
+			Node: types.Node{
+				Name:      "rofile",
+				Directory: "usr",
+			},
+			Contents: "",
+			Mode:     420,
+		},
+	})
+	out[0].Partitions.AddFiles("ROOT", []types.File{
+		{
+			Node: types.Node{
+				Name:      "rofile",
+				Directory: "usr",
+			},
+			Contents: "",
+			Mode:     420,
+		},
+		{
+			Node: types.Node{
+				Name:      "file",
+				Directory: "etc",
+			},
+			Contents: "",
+			Mode:     420,
+		},
+	})
+	configMinVersion := "3.0.0"
+
+	return types.Test{
+		Name:             name,
+		In:               in,
+		Out:              out,
+		Config:           config,
+		ConfigMinVersion: configMinVersion,
+	}
+}
+
+func WriteOverBrokenSymlink() types.Test {
+	name := "Write Over Broken Symlink at end of path"
+	in := types.GetBaseDisk()
+	out := types.GetBaseDisk()
+	config := `{
+	  "ignition": { "version": "$version" },
+	  "storage": {
+	    "files": [{
+	      "path": "/etc/file",
+	      "mode": 420,
+	      "overwrite": true,
+	      "contents": { "source": "" }
+	    }]
+	  }
+	}`
+	in[0].Partitions.AddLinks("ROOT", []types.Link{
+		{
+			Node: types.Node{
+				Name:      "file",
+				Directory: "etc",
+			},
+			Target: "/usr/rofile",
+		},
+	})
+	out[0].Partitions.AddFiles("ROOT", []types.File{
+		{
+			Node: types.Node{
+				Name:      "file",
+				Directory: "etc",
+			},
+			Contents: "",
+			Mode:     420,
+		},
+	})
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

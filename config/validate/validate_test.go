@@ -15,7 +15,6 @@
 package validate
 
 import (
-	"bytes"
 	"fmt"
 	"reflect"
 	"testing"
@@ -29,7 +28,7 @@ import (
 	"github.com/coreos/ignition/config/validate/astjson"
 	"github.com/coreos/ignition/config/validate/report"
 	// Import into the same namespace to keep config definitions clean
-	. "github.com/coreos/ignition/config/v2_3_experimental/types"
+	. "github.com/coreos/ignition/config/v3_0/types"
 )
 
 func TestValidate(t *testing.T) {
@@ -47,7 +46,7 @@ func TestValidate(t *testing.T) {
 	}{
 		{
 			in:  in{cfg: Config{Ignition: Ignition{Version: semver.Version{Major: 2}.String()}}},
-			out: out{},
+			out: out{err: errors.ErrUnknownVersion},
 		},
 		{
 			in:  in{cfg: Config{}},
@@ -58,23 +57,23 @@ func TestValidate(t *testing.T) {
 			out: out{err: errors.ErrInvalidVersion},
 		},
 		{
-			in:  in{cfg: Config{Ignition: Ignition{Version: "2.3.0"}}},
-			out: out{err: errors.ErrNewVersion},
+			in:  in{cfg: Config{Ignition: Ignition{Version: "3.1.0"}}},
+			out: out{err: errors.ErrUnknownVersion},
 		},
 		{
-			in:  in{cfg: Config{Ignition: Ignition{Version: "3.0.0"}}},
-			out: out{err: errors.ErrNewVersion},
+			in:  in{cfg: Config{Ignition: Ignition{Version: "2.0.0"}}},
+			out: out{err: errors.ErrUnknownVersion},
 		},
 		{
 			in:  in{cfg: Config{Ignition: Ignition{Version: "1.0.0"}}},
-			out: out{err: errors.ErrOldVersion},
+			out: out{err: errors.ErrUnknownVersion},
 		},
 		{
 			in: in{cfg: Config{
 				Ignition: Ignition{
-					Version: semver.Version{Major: 2}.String(),
+					Version: "3.0.0",
 					Config: IgnitionConfig{
-						Replace: &ConfigReference{
+						Replace: ConfigReference{
 							Verification: Verification{
 								Hash: func(s string) *string { return &s }("foobar-"),
 							},
@@ -86,14 +85,86 @@ func TestValidate(t *testing.T) {
 		},
 		{
 			in: in{cfg: Config{
-				Ignition: Ignition{Version: semver.Version{Major: 2}.String()},
+				Ignition: Ignition{Version: "3.0.0"},
 				Storage: Storage{
 					Filesystems: []Filesystem{
 						{
-							Name: "filesystem1",
-							Mount: &Mount{
-								Device: "/dev/disk/by-partlabel/ROOT",
-								Format: "btrfs",
+							Path:   util.StrToPtr("/"),
+							Device: "/dev/disk/by-partlabel/ROOT",
+							Format: util.StrToPtr("btrfs"),
+						},
+					},
+				},
+			}},
+			out: out{},
+		},
+		{
+			in: in{cfg: Config{
+				Ignition: Ignition{Version: "3.0.0"},
+				Storage: Storage{
+					Filesystems: []Filesystem{
+						{
+							Path:   util.StrToPtr("/"),
+							Device: "/dev/disk/by-partlabel/ROOT",
+							Format: util.StrToPtr("btrfs"),
+						},
+						{
+							Path:   util.StrToPtr("/"),
+							Device: "/dev/disk/by-partlabel/ROOT",
+							Format: util.StrToPtr("xfs"),
+						},
+					},
+				},
+			}},
+			out: out{err: fmt.Errorf("Entry defined by %q is already defined in this config", "/dev/disk/by-partlabel/ROOT")},
+		},
+		{
+			in: in{cfg: Config{
+				Ignition: Ignition{Version: "3.0.0"},
+				Storage: Storage{
+					Files: []File{
+						{
+							Node: Node{
+								Path: "/",
+							},
+							FileEmbedded1: FileEmbedded1{
+								Mode: util.IntToPtr(421),
+							},
+						},
+					},
+					Directories: []Directory{
+						{
+							Node: Node{
+								Path: "/",
+							},
+							DirectoryEmbedded1: DirectoryEmbedded1{
+								Mode: util.IntToPtr(420),
+							},
+						},
+					},
+				},
+			}},
+			out: out{err: fmt.Errorf("Entry defined by %q is already defined in this config", "/")},
+		},
+		{
+			in: in{cfg: Config{
+				Ignition: Ignition{Version: "3.0.0"},
+				Storage: Storage{
+					Files: []File{
+						{
+							Node: Node{
+								Path: "/",
+							},
+							FileEmbedded1: FileEmbedded1{
+								Mode: util.IntToPtr(421),
+								Append: []FileContents{
+									{
+										Source: util.StrToPtr("http://example.com"),
+									},
+									{
+										Source: util.StrToPtr("http://example.com"),
+									},
+								},
 							},
 						},
 					},
@@ -103,29 +174,15 @@ func TestValidate(t *testing.T) {
 		},
 		{
 			in: in{cfg: Config{
-				Ignition: Ignition{Version: semver.Version{Major: 2}.String()},
-				Storage: Storage{
-					Filesystems: []Filesystem{
-						{
-							Name: "filesystem1",
-							Path: func(p string) *string { return &p }("/sysroot"),
-						},
-					},
-				},
-			}},
-			out: out{},
-		},
-		{
-			in: in{cfg: Config{
-				Ignition: Ignition{Version: semver.Version{Major: 2}.String()},
-				Systemd:  Systemd{Units: []Unit{{Name: "foo.bar", Contents: "[Foo]\nfoo=qux"}}},
+				Ignition: Ignition{Version: "3.0.0"},
+				Systemd:  Systemd{Units: []Unit{{Name: "foo.bar", Contents: util.StrToPtr("[Foo]\nfoo=qux")}}},
 			}},
 			out: out{err: fmt.Errorf("invalid systemd unit extension")},
 		},
 		{
 			in: in{cfg: Config{
-				Ignition: Ignition{Version: semver.Version{Major: 2}.String()},
-				Systemd:  Systemd{Units: []Unit{{Name: "enable-but-no-install.service", Enabled: util.BoolToPtr(true), Contents: "[Foo]\nlemon=lime"}}},
+				Ignition: Ignition{Version: "3.0.0"},
+				Systemd:  Systemd{Units: []Unit{{Name: "enable-but-no-install.service", Enabled: util.BoolToPtr(true), Contents: util.StrToPtr("[Foo]\nlemon=lime")}}},
 			}},
 			out: out{warning: errors.NewNoInstallSectionError("enable-but-no-install.service")},
 		},
@@ -259,9 +316,7 @@ func TestValidateLineCol(t *testing.T) {
 			t.Errorf("#%d: Failed to unmarshal into ast. This is most likely an error with the test: %v", i, err)
 		}
 
-		reader := bytes.NewReader([]byte(test.in.cfg))
-
-		r := Validate(v, astjson.FromJsonRoot(ast), reader, false)
+		r := Validate(v, astjson.FromJsonRoot(ast), []byte(test.in.cfg), false)
 		// highlight strings are hard to generate by hand, so ignore them for now
 		// TODO(ajeddeloh) test highlight strings
 		for i := range r.Entries {

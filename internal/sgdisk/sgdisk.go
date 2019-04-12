@@ -19,7 +19,7 @@ import (
 	"io/ioutil"
 	"os/exec"
 
-	"github.com/coreos/ignition/internal/config/types"
+	"github.com/coreos/ignition/config/v3_0/types"
 	"github.com/coreos/ignition/internal/distro"
 	"github.com/coreos/ignition/internal/log"
 )
@@ -129,11 +129,11 @@ func (op Operation) buildOptions() []string {
 		if p.Label != nil {
 			opts = append(opts, fmt.Sprintf("--change-name=%d:%s", p.Number, *p.Label))
 		}
-		if p.TypeGUID != "" {
-			opts = append(opts, fmt.Sprintf("--typecode=%d:%s", p.Number, p.TypeGUID))
+		if p.TypeGUID != nil && *p.TypeGUID != "" {
+			opts = append(opts, fmt.Sprintf("--typecode=%d:%s", p.Number, *p.TypeGUID))
 		}
-		if p.GUID != "" {
-			opts = append(opts, fmt.Sprintf("--partition-guid=%d:%s", p.Number, p.GUID))
+		if p.GUID != nil && *p.GUID != "" {
+			opts = append(opts, fmt.Sprintf("--partition-guid=%d:%s", p.Number, *p.GUID))
 		}
 	}
 
@@ -150,21 +150,15 @@ func (op Operation) buildOptions() []string {
 }
 
 func partitionGetStart(p types.Partition) string {
-	if p.Start != nil {
-		return fmt.Sprintf("%d", *p.Start)
-	}
-	if p.StartMb != nil {
-		return fmt.Sprintf("%dM", *p.StartMb)
+	if p.StartMiB != nil {
+		return fmt.Sprintf("%d", *p.StartMiB)
 	}
 	return "0"
 }
 
 func partitionGetSize(p types.Partition) string {
-	if p.Size != nil {
-		return fmt.Sprintf("%d", *p.Size)
-	}
-	if p.SizeMb != nil {
-		return fmt.Sprintf("%dM", *p.SizeMb)
+	if p.SizeMiB != nil {
+		return fmt.Sprintf("%d", *p.SizeMiB)
 	}
 	return "0"
 }

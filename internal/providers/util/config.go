@@ -15,14 +15,18 @@
 package util
 
 import (
+	"crypto/sha512"
+	"encoding/hex"
+
+	config "github.com/coreos/ignition/config/v3_0"
+	"github.com/coreos/ignition/config/v3_0/types"
 	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config"
-	"github.com/coreos/ignition/internal/config/types"
 	"github.com/coreos/ignition/internal/log"
 )
 
 func ParseConfig(logger *log.Logger, rawConfig []byte) (types.Config, report.Report, error) {
-	logger.Debug("parsing config: %s", string(rawConfig))
+	hash := sha512.Sum512(rawConfig)
+	logger.Debug("parsing config with SHA512: %s", hex.EncodeToString(hash[:]))
 
 	return config.Parse(rawConfig)
 }

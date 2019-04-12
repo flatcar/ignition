@@ -53,7 +53,7 @@ func CreatePartition() types.Test {
 				"partitions": [
 				{
 					"number": 1,
-					"size": 65536,
+					"sizeMiB": 32,
 					"label": "create-partition",
 					"typeGuid": "$uuid0",
 					"guid": "$uuid1"
@@ -63,7 +63,7 @@ func CreatePartition() types.Test {
 			]
 		}
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -91,14 +91,14 @@ func WipeAndCreateNewPartitions() types.Test {
 				{
 					"label": "important-data",
 					"number": 1,
-					"size": 65536,
+					"sizeMiB": 32,
 					"typeGuid": "$uuid0",
 					"guid": "$uuid1"
 				},
 				{
 					"label": "ephemeral-data",
 					"number": 2,
-					"size": 131072,
+					"sizeMiB": 64,
 					"typeGuid": "$uuid2",
 					"guid": "$uuid3"
 				}
@@ -107,7 +107,7 @@ func WipeAndCreateNewPartitions() types.Test {
 			]
 		}
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 	// Create dummy partitions. The UUIDs in the input partitions
 	// are intentionally different so if Ignition doesn't do the right thing the
 	// validation will fail.
@@ -174,21 +174,21 @@ func AppendPartitions() types.Test {
 				"partitions": [{
 					"label": "additional-partition",
 					"number": 3,
-					"size": 65536,
+					"sizeMiB": 32,
 					"typeGuid": "$uuid0",
 					"guid": "$uuid1"
 				},
 				{
 					"label": "additional-partition2",
 					"number": 4,
-					"size": 65536,
+					"sizeMiB": 32,
 					"typeGuid": "$uuid0",
 					"guid": "$uuid2"
 				}]
 			}]
 		}
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	in = append(in, types.Disk{
 		Alignment: types.IgnitionAlignment,
@@ -267,7 +267,7 @@ func ResizeRoot() types.Test {
 				"partitions": [{
 					"label": "ROOT",
 					"number": 9,
-					"size": 13008896,
+					"sizeMiB": 6352,
 					"typeGuid": "3884DD41-8582-4404-B9A8-E9B84F2DF50E",
 					"guid": "$uuid0",
 					"wipePartitionEntry": true
@@ -276,7 +276,7 @@ func ResizeRoot() types.Test {
 			}]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

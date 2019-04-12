@@ -20,7 +20,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/coreos/ignition/internal/config/types"
+	"github.com/coreos/ignition/config/v3_0/types"
 	"github.com/coreos/ignition/internal/distro"
 	"github.com/coreos/ignition/internal/exec/stages"
 	"github.com/coreos/ignition/internal/exec/util"
@@ -98,12 +98,16 @@ func (s *stage) checkRelabeling() error {
 		return nil
 	}
 
-	exists, err := s.PathExists(distro.RestoreconCmd())
+	path, err := s.JoinPath(distro.RestoreconCmd())
 	if err != nil {
-		return err
-	} else if !exists {
-		s.Logger.Debug("targeting root without %s, skipping relabel", distro.RestoreconCmd())
-		return nil
+		return fmt.Errorf("error resolving path for %s: %v", distro.RestoreconCmd(), err)
+	}
+
+	_, err = os.Lstat(path)
+	if err != nil && os.IsNotExist(err) {
+		return fmt.Errorf("targeting root without %s, cannot relabel", distro.RestoreconCmd())
+	} else if err != nil {
+		return fmt.Errorf("error checking for %s in root: %v", distro.RestoreconCmd(), err)
 	}
 
 	// initialize to non-nil (whereas a nil slice means not to append, even
@@ -130,15 +134,11 @@ func (s *stage) addRelabelUnit(config types.Config) error {
 	if s.toRelabel == nil || len(s.toRelabel) == 0 {
 		return nil
 	}
-
-	// create the unit file itself
-	unit := types.Unit{
-		Name: "ignition-relabel.service",
-		Contents: `[Unit]
+	contents := `[Unit]
 Description=Relabel files created by Ignition
 DefaultDependencies=no
 After=local-fs.target
-Before=sysinit.target
+Before=sysinit.target systemd-sysctl.service
 ConditionSecurity=selinux
 ConditionPathExists=/etc/selinux/ignition.relabel
 OnFailure=emergency.target
@@ -148,7 +148,12 @@ OnFailureJobMode=replace-irreversibly
 Type=oneshot
 ExecStart=` + distro.RestoreconCmd() + ` -0vRif /etc/selinux/ignition.relabel
 ExecStart=/usr/bin/rm /etc/selinux/ignition.relabel
-RemainAfterExit=yes`,
+RemainAfterExit=yes`
+
+	// create the unit file itself
+	unit := types.Unit{
+		Name:     "ignition-relabel.service",
+		Contents: &contents,
 	}
 
 	if err := s.writeSystemdUnit(unit, true); err != nil {
@@ -160,7 +165,11 @@ RemainAfterExit=yes`,
 	}
 
 	// and now create the list of files to relabel
-	f, err := os.Create(s.JoinPath("etc/selinux/ignition.relabel"))
+	etcRelabelPath, err := s.JoinPath("etc/selinux/ignition.relabel")
+	if err != nil {
+		return err
+	}
+	f, err := os.Create(etcRelabelPath)
 	if err != nil {
 		return err
 	}

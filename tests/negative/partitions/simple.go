@@ -47,7 +47,7 @@ func ShouldNotExistNoWipeEntry() types.Test {
 			]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -71,14 +71,14 @@ func DoesNotMatchNoWipeEntry() types.Test {
 				"partitions": [
 				{
 					"number": 9,
-					"size": 4096
+					"sizeMiB": 2
 				}
 				]
 			}
 			]
 		}
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -105,14 +105,14 @@ func ValidAndDoesNotMatchNoWipeEntry() types.Test {
 				},
 				{
 					"number": 9,
-					"size": 4096
+					"sizeMiB": 2
 				}
 				]
 			}
 			]
 		}
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -140,14 +140,14 @@ func NotThereAndDoesNotMatchNoWipeEntry() types.Test {
 				},
 				{
 					"number": 9,
-					"size": 4096
+					"sizeMiB": 2
 				}
 				]
 			}
 			]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

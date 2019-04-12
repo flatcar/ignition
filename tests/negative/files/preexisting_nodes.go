@@ -21,6 +21,7 @@ import (
 
 func init() {
 	register.Register(register.NegativeTest, ForceFileCreation())
+	register.Register(register.NegativeTest, ForceFileCreationNoOverwrite())
 	register.Register(register.NegativeTest, ForceDirCreation())
 	register.Register(register.NegativeTest, ForceLinkCreation())
 	register.Register(register.NegativeTest, ForceHardLinkCreation())
@@ -36,7 +37,6 @@ func ForceFileCreation() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "contents": {
 	        "source": "http://127.0.0.1:8080/contents"
@@ -45,7 +45,7 @@ func ForceFileCreation() types.Test {
 	    }]
 	  }
 	}`
-	configMinVersion := "2.2.0"
+	configMinVersion := "3.0.0"
 	in[0].Partitions.AddFiles("ROOT", []types.File{
 		{
 			Node: types.Node{
@@ -64,6 +64,41 @@ func ForceFileCreation() types.Test {
 	}
 }
 
+func ForceFileCreationNoOverwrite() types.Test {
+	name := "Force File Creation No Overwrite"
+	in := types.GetBaseDisk()
+	out := types.GetBaseDisk()
+	config := `{
+	  "ignition": { "version": "$version" },
+	  "storage": {
+	    "files": [{
+	      "path": "/foo/bar",
+	      "contents": {
+	        "source": "http://127.0.0.1:8080/contents"
+	      }
+	    }]
+	  }
+	}`
+	in[0].Partitions.AddFiles("ROOT", []types.File{
+		{
+			Node: types.Node{
+				Directory: "foo",
+				Name:      "bar",
+			},
+			Contents: "hello, world",
+		},
+	})
+	configMinVersion := "3.0.0"
+
+	return types.Test{
+		Name:             name,
+		In:               in,
+		Out:              out,
+		Config:           config,
+		ConfigMinVersion: configMinVersion,
+	}
+}
+
 func ForceDirCreation() types.Test {
 	name := "Force Directory Creation"
 	in := types.GetBaseDisk()
@@ -72,12 +107,11 @@ func ForceDirCreation() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "directories": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar"
 	    }]
 	  }
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 	in[0].Partitions.AddFiles("ROOT", []types.File{
 		{
 			Node: types.Node{
@@ -105,20 +139,18 @@ func ForceLinkCreation() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/target",
 	      "contents": {
 	        "source": "http://127.0.0.1:8080/contents"
 	      }
 	    }],
 	    "links": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "target": "/foo/target"
 	    }]
 	  }
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 	in[0].Partitions.AddFiles("ROOT", []types.File{
 		{
 			Node: types.Node{
@@ -146,21 +178,19 @@ func ForceHardLinkCreation() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/target",
 	      "contents": {
 	        "source": "http://127.0.0.1:8080/contents"
 	      }
 	    }],
 	    "links": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "target": "/foo/target",
 		  "hard": true
 	    }]
 	  }
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 	in[0].Partitions.AddFiles("ROOT", []types.File{
 		{
 			Node: types.Node{
@@ -188,7 +218,6 @@ func ForceFileCreationOverNonemptyDir() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "contents": {
 	        "source": "http://127.0.0.1:8080/contents"
@@ -197,7 +226,7 @@ func ForceFileCreationOverNonemptyDir() types.Test {
 	    }]
 	  }
 	}`
-	configMinVersion := "2.2.0"
+	configMinVersion := "3.0.0"
 	in[0].Partitions.AddFiles("ROOT", []types.File{
 		{
 			Node: types.Node{
@@ -225,20 +254,18 @@ func ForceLinkCreationOverNonemptyDir() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/target",
 	      "contents": {
 	        "source": "http://127.0.0.1:8080/contents"
 	      }
 	    }],
 	    "links": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "target": "/foo/target"
 	    }]
 	  }
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 	in[0].Partitions.AddFiles("ROOT", []types.File{
 		{
 			Node: types.Node{

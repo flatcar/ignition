@@ -15,21 +15,24 @@
 package exec
 
 import (
+	"crypto/sha512"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/url"
 	"os"
+	"reflect"
 	"time"
 
 	"github.com/coreos/ignition/config/shared/errors"
-	configUtil "github.com/coreos/ignition/config/util"
+	config "github.com/coreos/ignition/config/v3_0"
+	"github.com/coreos/ignition/config/v3_0/types"
+	"github.com/coreos/ignition/config/validate"
 	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config"
-	"github.com/coreos/ignition/internal/config/types"
 	"github.com/coreos/ignition/internal/exec/stages"
 	"github.com/coreos/ignition/internal/log"
-	"github.com/coreos/ignition/internal/oem"
+	"github.com/coreos/ignition/internal/platform"
 	"github.com/coreos/ignition/internal/providers"
 	"github.com/coreos/ignition/internal/providers/cmdline"
 	"github.com/coreos/ignition/internal/providers/system"
@@ -38,17 +41,17 @@ import (
 )
 
 const (
-	DefaultFetchTimeout = time.Minute
+	DefaultFetchTimeout = 2 * time.Minute
 )
 
 // Engine represents the entity that fetches and executes a configuration.
 type Engine struct {
-	ConfigCache  string
-	FetchTimeout time.Duration
-	Logger       *log.Logger
-	Root         string
-	OEMConfig    oem.Config
-	Fetcher      *resource.Fetcher
+	ConfigCache    string
+	FetchTimeout   time.Duration
+	Logger         *log.Logger
+	Root           string
+	PlatformConfig platform.Config
+	Fetcher        *resource.Fetcher
 }
 
 // Run executes the stage of the given name. It returns true if the stage
@@ -60,12 +63,6 @@ func (e Engine) Run(stageName string) error {
 	}
 	baseConfig := types.Config{
 		Ignition: types.Ignition{Version: types.MaxVersion.String()},
-		Storage: types.Storage{
-			Filesystems: []types.Filesystem{{
-				Name: "root",
-				Path: configUtil.StrToPtr(e.Root),
-			}},
-		},
 	}
 
 	systemBaseConfig, r, err := system.FetchBaseConfig(e.Logger)
@@ -76,17 +73,9 @@ func (e Engine) Run(stageName string) error {
 	}
 
 	cfg, err := e.acquireConfig()
-	switch err {
-	case nil:
-	case errors.ErrCloudConfig, errors.ErrScript, errors.ErrEmpty:
+	if err == errors.ErrEmpty {
 		e.Logger.Info("%v: ignoring user-provided config", err)
-		cfg, r, err = system.FetchDefaultConfig(e.Logger)
-		e.logReport(r)
-		if err != nil && err != providers.ErrNoProvider {
-			e.Logger.Crit("failed to acquire default config: %v", err)
-			return err
-		}
-	default:
+	} else if err != nil {
 		e.Logger.Crit("failed to acquire config: %v", err)
 		return err
 	}
@@ -94,9 +83,17 @@ func (e Engine) Run(stageName string) error {
 	e.Logger.PushPrefix(stageName)
 	defer e.Logger.PopPrefix()
 
-	if err = stages.Get(stageName).Create(e.Logger, e.Root, *e.Fetcher).Run(config.Append(baseConfig, config.Append(systemBaseConfig, cfg))); err != nil {
+	fullConfig := config.Merge(baseConfig, config.Merge(systemBaseConfig, cfg))
+	if err = stages.Get(stageName).Create(e.Logger, e.Root, *e.Fetcher).Run(fullConfig); err != nil {
 		// e.Logger could be nil
 		fmt.Fprintf(os.Stderr, "%s failed", stageName)
+		tmp, jsonerr := json.MarshalIndent(fullConfig, "", "  ")
+		if jsonerr != nil {
+			// Nothing else to do with this error
+			fmt.Fprintf(os.Stderr, "Could not marshal full config: %v", err)
+		} else {
+			fmt.Fprintf(os.Stderr, "Full config:\n%s", string(tmp))
+		}
 		return err
 	}
 	e.Logger.Info("%s passed", stageName)
@@ -153,6 +150,14 @@ func (e *Engine) acquireConfig() (cfg types.Config, err error) {
 		return
 	}
 
+	rpt := validate.ValidateWithoutSource(reflect.ValueOf(cfg))
+	e.logReport(rpt)
+	if rpt.IsFatal() {
+		err = errors.ErrInvalid
+		e.Logger.Crit("merging configs resulted in an invalid config")
+		return
+	}
+
 	// Populate the config cache.
 	b, err = json.Marshal(cfg)
 	if err != nil {
@@ -178,7 +183,7 @@ func (e *Engine) fetchProviderConfig() (types.Config, error) {
 	fetchers := []providers.FuncFetchConfig{
 		cmdline.FetchConfig,
 		system.FetchConfig,
-		e.OEMConfig.FetchFunc(),
+		e.PlatformConfig.FetchFunc(),
 	}
 
 	var cfg types.Config
@@ -215,8 +220,8 @@ func (e *Engine) fetchProviderConfig() (types.Config, error) {
 // provided config will be returned unmodified. An updated fetcher will be
 // returned with any new timeouts set.
 func (e *Engine) renderConfig(cfg types.Config) (types.Config, error) {
-	if cfgRef := cfg.Ignition.Config.Replace; cfgRef != nil {
-		newCfg, err := e.fetchReferencedConfig(*cfgRef)
+	if cfgRef := cfg.Ignition.Config.Replace; cfgRef.Source != nil {
+		newCfg, err := e.fetchReferencedConfig(cfgRef)
 		if err != nil {
 			return types.Config{}, err
 		}
@@ -232,16 +237,16 @@ func (e *Engine) renderConfig(cfg types.Config) (types.Config, error) {
 	}
 
 	appendedCfg := cfg
-	for _, cfgRef := range cfg.Ignition.Config.Append {
+	for _, cfgRef := range cfg.Ignition.Config.Merge {
 		newCfg, err := e.fetchReferencedConfig(cfgRef)
 		if err != nil {
 			return types.Config{}, err
 		}
 
-		// Append the old config with the new config before the new config has
+		// Merge the old config with the new config before the new config has
 		// been rendered, so we can use the new config's timeouts and CAs when
 		// fetching more configs.
-		cfgForFetcherSettings := config.Append(appendedCfg, newCfg)
+		cfgForFetcherSettings := config.Merge(appendedCfg, newCfg)
 		err = e.Fetcher.UpdateHttpTimeoutsAndCAs(cfgForFetcherSettings.Ignition.Timeouts, cfgForFetcherSettings.Ignition.Security.TLS.CertificateAuthorities)
 		if err != nil {
 			return types.Config{}, err
@@ -252,14 +257,15 @@ func (e *Engine) renderConfig(cfg types.Config) (types.Config, error) {
 			return types.Config{}, err
 		}
 
-		appendedCfg = config.Append(appendedCfg, newCfg)
+		appendedCfg = config.Merge(appendedCfg, newCfg)
 	}
 	return appendedCfg, nil
 }
 
 // fetchReferencedConfig fetches and parses the requested config.
+// cfgRef.Source must not ve nil
 func (e *Engine) fetchReferencedConfig(cfgRef types.ConfigReference) (types.Config, error) {
-	u, err := url.Parse(cfgRef.Source)
+	u, err := url.Parse(*cfgRef.Source)
 	if err != nil {
 		return types.Config{}, err
 	}
@@ -269,7 +275,14 @@ func (e *Engine) fetchReferencedConfig(cfgRef types.ConfigReference) (types.Conf
 	if err != nil {
 		return types.Config{}, err
 	}
-	e.Logger.Debug("fetched referenced config: %s", string(rawCfg))
+
+	hash := sha512.Sum512(rawCfg)
+	if u.Scheme != "data" {
+		e.Logger.Debug("fetched referenced config at %s with SHA512: %s", *cfgRef.Source, hex.EncodeToString(hash[:]))
+	} else {
+		// data url's might contain secrets
+		e.Logger.Debug("fetched referenced config from data url with SHA512: %s", hex.EncodeToString(hash[:]))
+	}
 
 	if err := util.AssertValid(cfgRef.Verification, rawCfg); err != nil {
 		return types.Config{}, err
@@ -286,6 +299,7 @@ func (e *Engine) fetchReferencedConfig(cfgRef types.ConfigReference) (types.Conf
 
 func (e Engine) logReport(r report.Report) {
 	for _, entry := range r.Entries {
+		entry.Highlight = "" // might contain secrets, don't log when Ignition runs
 		switch entry.Kind {
 		case report.EntryError:
 			e.Logger.Crit("%v", entry)

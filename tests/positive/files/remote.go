@@ -22,7 +22,6 @@ import (
 func init() {
 	register.Register(register.PositiveTest, CreateFileFromRemoteContentsHTTP())
 	register.Register(register.PositiveTest, CreateFileFromRemoteContentsTFTP())
-	register.Register(register.PositiveTest, CreateFileFromRemoteContentsOEM())
 }
 
 func CreateFileFromRemoteContentsHTTP() types.Test {
@@ -33,7 +32,6 @@ func CreateFileFromRemoteContentsHTTP() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "contents": {
 	        "source": "http://127.0.0.1:8080/contents"
@@ -50,7 +48,7 @@ func CreateFileFromRemoteContentsHTTP() types.Test {
 			Contents: "asdf\nfdsa",
 		},
 	})
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -69,7 +67,6 @@ func CreateFileFromRemoteContentsTFTP() types.Test {
           "ignition": { "version": "$version" },
           "storage": {
             "files": [{
-              "filesystem": "root",
               "path": "/foo/bar",
               "contents": {
                 "source": "tftp://127.0.0.1:69/contents"
@@ -86,51 +83,7 @@ func CreateFileFromRemoteContentsTFTP() types.Test {
 			Contents: "asdf\nfdsa",
 		},
 	})
-	configMinVersion := "2.1.0"
-
-	return types.Test{
-		Name:             name,
-		In:               in,
-		Out:              out,
-		Config:           config,
-		ConfigMinVersion: configMinVersion,
-	}
-}
-
-func CreateFileFromRemoteContentsOEM() types.Test {
-	name := "Create Files from Remote Contents - OEM"
-	in := types.GetBaseDisk()
-	out := types.GetBaseDisk()
-	config := `{
-	  "ignition": { "version": "$version" },
-	  "storage": {
-	    "files": [{
-	      "filesystem": "root",
-	      "path": "/foo/bar",
-	      "contents": {
-	        "source": "oem:///source"
-	      }
-	    }]
-	  }
-	}`
-	in[0].Partitions.AddFiles("OEM", []types.File{
-		{
-			Node: types.Node{
-				Name: "source",
-			},
-			Contents: "asdf\nfdsa",
-		},
-	})
-	out[0].Partitions.AddFiles("ROOT", []types.File{
-		{
-			Node: types.Node{
-				Name:      "bar",
-				Directory: "foo",
-			},
-			Contents: "asdf\nfdsa",
-		},
-	})
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

@@ -19,8 +19,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/coreos/ignition/config/v3_0/types"
 	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
 	"github.com/coreos/ignition/internal/distro"
 	"github.com/coreos/ignition/internal/log"
 	"github.com/coreos/ignition/internal/providers"
@@ -29,17 +29,12 @@ import (
 )
 
 const (
-	baseFilename    = "base.ign"
-	defaultFilename = "default.ign"
-	userFilename    = "user.ign"
+	baseFilename = "base.ign"
+	userFilename = "user.ign"
 )
 
 func FetchBaseConfig(logger *log.Logger) (types.Config, report.Report, error) {
 	return fetchConfig(logger, baseFilename)
-}
-
-func FetchDefaultConfig(logger *log.Logger) (types.Config, report.Report, error) {
-	return fetchConfig(logger, defaultFilename)
 }
 
 func FetchConfig(f resource.Fetcher) (types.Config, report.Report, error) {

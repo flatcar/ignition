@@ -21,8 +21,6 @@ import (
 
 func init() {
 	register.Register(register.NegativeTest, NoFilesystemType())
-	register.Register(register.NegativeTest, NoFilesystemTypeWithForce())
-	register.Register(register.NegativeTest, NoFilesystemTypeWithWipeFilesystem())
 }
 
 func NoFilesystemType() types.Test {
@@ -39,86 +37,12 @@ func NoFilesystemType() types.Test {
 		"ignition": {"version": "$version"},
 		"storage": {
 			"filesystems": [{
-				"mount": {
-					"device": "$DEVICE"
-				},
-				"name": "foobar"
+				"device": "$DEVICE",
+				"path": "/foobar"
 			}]
 		}
 	}`
-	configMinVersion := "2.0.0"
-
-	return types.Test{
-		Name:              name,
-		In:                in,
-		Out:               out,
-		MntDevices:        mntDevices,
-		Config:            config,
-		ConfigShouldBeBad: true,
-		ConfigMinVersion:  configMinVersion,
-	}
-}
-
-func NoFilesystemTypeWithForce() types.Test {
-	name := "No Filesystem Type w/ Force"
-	in := types.GetBaseDisk()
-	out := in
-	mntDevices := []types.MntDevice{
-		{
-			Label:        "EFI-SYSTEM",
-			Substitution: "$DEVICE",
-		},
-	}
-	config := `{
-		"ignition": {"version": "$version"},
-		"storage": {
-			"filesystems": [{
-				"mount": {
-					"device": "$DEVICE",
-					"create": {
-						"force": true
-					}
-				},
-				"name": "foobar"
-			}]
-		}
-	}`
-	configMinVersion := "2.0.0"
-
-	return types.Test{
-		Name:              name,
-		In:                in,
-		Out:               out,
-		MntDevices:        mntDevices,
-		Config:            config,
-		ConfigShouldBeBad: true,
-		ConfigMinVersion:  configMinVersion,
-	}
-}
-
-func NoFilesystemTypeWithWipeFilesystem() types.Test {
-	name := "No Filesystem Type w/ wipeFilesystem"
-	in := types.GetBaseDisk()
-	out := in
-	mntDevices := []types.MntDevice{
-		{
-			Label:        "EFI-SYSTEM",
-			Substitution: "$DEVICE",
-		},
-	}
-	config := `{
-		"ignition": {"version": "$version"},
-		"storage": {
-			"filesystems": [{
-				"mount": {
-					"device": "$DEVICE",
-					"wipeFilesystem": true
-				},
-				"name": "foobar"
-			}]
-		}
-	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:              name,

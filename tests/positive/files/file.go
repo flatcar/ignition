@@ -23,9 +23,10 @@ func init() {
 	register.Register(register.PositiveTest, CreateFileOnRoot())
 	register.Register(register.PositiveTest, UserGroupByID())
 	register.Register(register.PositiveTest, ForceFileCreation())
-	register.Register(register.PositiveTest, ForceFileCreationNoOverwrite())
 	register.Register(register.PositiveTest, AppendToAFile())
+	register.Register(register.PositiveTest, AppendToExistingFile())
 	register.Register(register.PositiveTest, AppendToNonexistentFile())
+	register.Register(register.PositiveTest, ApplyDefaultFilePermissions())
 	// TODO: Investigate why ignition's C code hates our environment
 	// register.Register(register.PositiveTest, UserGroupByName())
 }
@@ -38,7 +39,6 @@ func CreateFileOnRoot() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "contents": { "source": "data:,example%20file%0A" }
 	    }]
@@ -53,7 +53,7 @@ func CreateFileOnRoot() types.Test {
 			Contents: "example file\n",
 		},
 	})
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -72,7 +72,6 @@ func UserGroupByID() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "contents": { "source": "data:,example%20file%0A" },
 		  "user": {"id": 500},
@@ -91,7 +90,7 @@ func UserGroupByID() types.Test {
 			Contents: "example file\n",
 		},
 	})
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -110,7 +109,6 @@ func UserGroupByName() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "contents": { "source": "data:,example%20file%0A" },
 		  "user": {"name": "core"},
@@ -129,7 +127,7 @@ func UserGroupByName() types.Test {
 			Contents: "example file\n",
 		},
 	})
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -148,7 +146,6 @@ func ForceFileCreation() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "contents": {
 	        "source": "http://127.0.0.1:8080/contents"
@@ -175,52 +172,7 @@ func ForceFileCreation() types.Test {
 			Contents: "asdf\nfdsa",
 		},
 	})
-	configMinVersion := "2.2.0"
-
-	return types.Test{
-		Name:             name,
-		In:               in,
-		Out:              out,
-		Config:           config,
-		ConfigMinVersion: configMinVersion,
-	}
-}
-
-func ForceFileCreationNoOverwrite() types.Test {
-	name := "Force File Creation No Overwrite"
-	in := types.GetBaseDisk()
-	out := types.GetBaseDisk()
-	config := `{
-	  "ignition": { "version": "$version" },
-	  "storage": {
-	    "files": [{
-	      "filesystem": "root",
-	      "path": "/foo/bar",
-	      "contents": {
-	        "source": "http://127.0.0.1:8080/contents"
-	      }
-	    }]
-	  }
-	}`
-	in[0].Partitions.AddFiles("ROOT", []types.File{
-		{
-			Node: types.Node{
-				Directory: "foo",
-				Name:      "bar",
-			},
-			Contents: "hello, world",
-		},
-	})
-	out[0].Partitions.AddFiles("ROOT", []types.File{
-		{
-			Node: types.Node{
-				Directory: "foo",
-				Name:      "bar",
-			},
-			Contents: "asdf\nfdsa",
-		},
-	})
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -239,17 +191,11 @@ func AppendToAFile() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "contents": { "source": "data:,example%20file%0A" },
 	      "user": {"id": 500},
-	      "group": {"id": 500}
-	    },{
-	      "filesystem": "root",
-	      "path": "/foo/bar",
-	      "contents": { "source": "data:,hello%20world%0A" },
-	      "group": {"id": 0},
-	      "append": true
+	      "group": {"id": 500},
+	      "append": [{ "source": "data:,hello%20world%0A" }]
 	    }]
 	  }
 	}`
@@ -259,12 +205,58 @@ func AppendToAFile() types.Test {
 				Name:      "bar",
 				Directory: "foo",
 				User:      500,
-				Group:     0,
+				Group:     500,
 			},
 			Contents: "example file\nhello world\n",
 		},
 	})
-	configMinVersion := "2.2.0"
+	configMinVersion := "3.0.0"
+
+	return types.Test{
+		Name:             name,
+		In:               in,
+		Out:              out,
+		Config:           config,
+		ConfigMinVersion: configMinVersion,
+	}
+}
+
+func AppendToExistingFile() types.Test {
+	name := "Append to existing file"
+	in := types.GetBaseDisk()
+	out := types.GetBaseDisk()
+	config := `{
+	  "ignition": { "version": "$version" },
+	  "storage": {
+	    "files": [{
+	      "path": "/foo/bar",
+	      "append": [{ "source": "data:,hello%20world%0A" }]
+	    }]
+	  }
+	}`
+	in[0].Partitions.AddFiles("ROOT", []types.File{
+		{
+			Node: types.Node{
+				Name:      "bar",
+				Directory: "foo",
+				User:      500,
+				Group:     500,
+			},
+			Contents: "example file\n",
+		},
+	})
+	out[0].Partitions.AddFiles("ROOT", []types.File{
+		{
+			Node: types.Node{
+				Name:      "bar",
+				Directory: "foo",
+				User:      500,
+				Group:     500,
+			},
+			Contents: "example file\nhello world\n",
+		},
+	})
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -283,11 +275,9 @@ func AppendToNonexistentFile() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
-	      "contents": { "source": "data:,hello%20world%0A" },
-	      "group": {"id": 500},
-	      "append": true
+	      "append": [{ "source": "data:,hello%20world%0A" }],
+	      "group": {"id": 500}
 	    }]
 	  }
 	}`
@@ -301,7 +291,42 @@ func AppendToNonexistentFile() types.Test {
 			Contents: "hello world\n",
 		},
 	})
-	configMinVersion := "2.2.0"
+	configMinVersion := "3.0.0"
+
+	return types.Test{
+		Name:             name,
+		In:               in,
+		Out:              out,
+		Config:           config,
+		ConfigMinVersion: configMinVersion,
+	}
+}
+
+func ApplyDefaultFilePermissions() types.Test {
+	name := "Apply Default File Permissions"
+	in := types.GetBaseDisk()
+	out := types.GetBaseDisk()
+	config := `{
+	  "ignition": { "version": "$version" },
+	  "storage": {
+	    "files": [{
+	      "filesystem": "root",
+	      "path": "/foo/bar",
+	      "contents": { "source": "data:,hello%20world%0A" }
+	    }]
+	  }
+	}`
+	out[0].Partitions.AddFiles("ROOT", []types.File{
+		{
+			Node: types.Node{
+				Directory: "foo",
+				Name:      "bar",
+			},
+			Contents: "hello world\n",
+			Mode:     0644,
+		},
+	})
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

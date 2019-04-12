@@ -10,9 +10,9 @@ Any HTTP response code less than 500 results in the request being completed, and
 
 Ignition will initially wait 100 milliseconds between failed attempts, and the amount of time to wait doubles for each failed attempt until it reaches 5 seconds.
 
-## EC2 and IAM roles
+## AWS and IAM roles
 
-Ignition has support for fetching files over the S3 protocol. When Ignition is running in EC2, it supports using the IAM role given to the EC2 instance to fetch protected assets from S3. If IAM credentials are not successfully fetched, Ignition will attempt to fetch the file with no credentials.
+Ignition has support for fetching files over the S3 protocol. When Ignition is running in Amazon EC2, it supports using the IAM role given to the EC2 instance to fetch protected assets from S3. If IAM credentials are not successfully fetched, Ignition will attempt to fetch the file with no credentials.
 
 
 ## Filesystem-Reuse Semantics
@@ -30,6 +30,10 @@ In the second two cases, where there is a preexisting filesystem, Ignition's beh
 If `wipeFilesystem` is set to true, Ignition will always wipe any preexisting filesystem and create the desired filesystem. Note this will result in any data on the old filesystem being lost.
 
 If `wipeFilesystem` is set to false, Ignition will then attempt to reuse the existing filesystem. If the filesystem is of the correct type, has a matching label, and has a matching UUID, then Ignition will reuse the filesystem. If the label or UUID is not set in the Ignition config, they don't need to match for Ignition to reuse the filesystem. Any preexisting data will be left on the device and will be available to the installation. If the preexisting filesystem is *not* of the correct type, then Ignition will fail, and the machine will fail to boot.
+
+## Path Traversal and Following Symlinks
+
+When resolving paths, Ignition follows symlinks on all but the last element of a path. This ensures existing symlinks on a filesystem can be overwritten while still following symlinks as expected. When writing files, links, or directories, Ignition does not allow following symlinks outside the specified filesystem. When writing files, links, or directories on the `root` filesystem, Ignition follows symlinks as if it were executing in that root; a symlink to `/etc` is followed to `/etc` on the `root` filesystem. When writing files, links, or directories to any other filesystem, Ignition fails if it tries to follow a symlink outside that filesystem.
 
 ## SELinux
 

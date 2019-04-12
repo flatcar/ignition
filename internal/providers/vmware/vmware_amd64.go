@@ -18,8 +18,8 @@
 package vmware
 
 import (
+	"github.com/coreos/ignition/config/v3_0/types"
 	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
 	"github.com/coreos/ignition/internal/providers"
 	"github.com/coreos/ignition/internal/providers/util"
 	"github.com/coreos/ignition/internal/resource"
@@ -65,17 +65,17 @@ func fetchRawConfig(f resource.Fetcher) (config, error) {
 			f.Logger.Warning("failed to parse OVF environment: %v. Continuing...", err)
 		}
 
-		ovfData = env.Properties["guestinfo.coreos.config.data"]
-		ovfEncoding = env.Properties["guestinfo.coreos.config.data.encoding"]
+		ovfData = env.Properties["guestinfo.ignition.config.data"]
+		ovfEncoding = env.Properties["guestinfo.ignition.config.data.encoding"]
 	}
 
-	data, err := info.String("coreos.config.data", ovfData)
+	data, err := info.String("ignition.config.data", ovfData)
 	if err != nil {
 		f.Logger.Debug("failed to fetch config: %v", err)
 		return config{}, err
 	}
 
-	encoding, err := info.String("coreos.config.data.encoding", ovfEncoding)
+	encoding, err := info.String("ignition.config.data.encoding", ovfEncoding)
 	if err != nil {
 		f.Logger.Debug("failed to fetch config encoding: %v", err)
 		return config{}, err

@@ -26,47 +26,50 @@ var (
 	diskByIDDir       = "/dev/disk/by-id"
 	diskByLabelDir    = "/dev/disk/by-label"
 	diskByPartUUIDDir = "/dev/disk/by-partuuid"
-	oemDevicePath     = "/dev/disk/by-label/OEM"
 
 	// File paths
 	kernelCmdlinePath = "/proc/cmdline"
 	// initramfs directory containing distro-provided base config
 	systemConfigDir = "/usr/lib/ignition"
-	// initramfs directory to check before retrieving file from OEM partition
-	oemLookasideDir = "/usr/share/oem"
 
 	// Helper programs
-	chrootCmd     = "/usr/bin/chroot"
-	groupaddCmd   = "/usr/sbin/groupadd"
-	idCmd         = "/usr/bin/id"
-	mdadmCmd      = "/usr/sbin/mdadm"
-	mountCmd      = "/usr/bin/mount"
-	sgdiskCmd     = "/usr/sbin/sgdisk"
-	udevadmCmd    = "/usr/bin/udevadm"
-	usermodCmd    = "/usr/sbin/usermod"
-	useraddCmd    = "/usr/sbin/useradd"
+	chrootCmd   = "chroot"
+	groupaddCmd = "groupadd"
+	idCmd       = "id"
+	mdadmCmd    = "mdadm"
+	mountCmd    = "mount"
+	sgdiskCmd   = "sgdisk"
+	udevadmCmd  = "udevadm"
+	usermodCmd  = "usermod"
+	useraddCmd  = "useradd"
+
+	// The restorecon tool is embedded inside of a systemd unit
+	// and as such requires the absolute path
 	restoreconCmd = "/usr/sbin/restorecon"
 
 	// Filesystem tools
-	btrfsMkfsCmd = "/usr/sbin/mkfs.btrfs"
-	ext4MkfsCmd  = "/usr/sbin/mkfs.ext4"
-	swapMkfsCmd  = "/usr/sbin/mkswap"
-	vfatMkfsCmd  = "/usr/sbin/mkfs.vfat"
-	xfsMkfsCmd   = "/usr/sbin/mkfs.xfs"
+	btrfsMkfsCmd = "mkfs.btrfs"
+	ext4MkfsCmd  = "mkfs.ext4"
+	swapMkfsCmd  = "mkswap"
+	vfatMkfsCmd  = "mkfs.vfat"
+	xfsMkfsCmd   = "mkfs.xfs"
 
 	// Flags
 	selinuxRelabel  = "false"
 	blackboxTesting = "false"
+	// writeAuthorizedKeysFragment indicates whether to write SSH keys
+	// specified in the Ignition config as a fragment to
+	// ".ssh/authorized_keys.d/ignition" ("true"), or to
+	// ".ssh/authorized_keys" ("false").
+	writeAuthorizedKeysFragment = "true"
 )
 
 func DiskByIDDir() string       { return diskByIDDir }
 func DiskByLabelDir() string    { return diskByLabelDir }
 func DiskByPartUUIDDir() string { return diskByPartUUIDDir }
-func OEMDevicePath() string     { return fromEnv("OEM_DEVICE", oemDevicePath) }
 
 func KernelCmdlinePath() string { return kernelCmdlinePath }
 func SystemConfigDir() string   { return fromEnv("SYSTEM_CONFIG_DIR", systemConfigDir) }
-func OEMLookasideDir() string   { return fromEnv("OEM_LOOKASIDE_DIR", oemLookasideDir) }
 
 func ChrootCmd() string     { return chrootCmd }
 func GroupaddCmd() string   { return groupaddCmd }
@@ -87,6 +90,9 @@ func XfsMkfsCmd() string   { return xfsMkfsCmd }
 
 func SelinuxRelabel() bool  { return bakedStringToBool(selinuxRelabel) }
 func BlackboxTesting() bool { return bakedStringToBool(blackboxTesting) }
+func WriteAuthorizedKeysFragment() bool {
+	return bakedStringToBool(fromEnv("WRITE_AUTHORIZED_KEYS_FRAGMENT", writeAuthorizedKeysFragment))
+}
 
 func fromEnv(nameSuffix, defaultValue string) string {
 	value := os.Getenv("IGNITION_" + nameSuffix)

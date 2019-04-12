@@ -16,35 +16,28 @@ package files
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
-	"syscall"
+	"strings"
 
-	configUtil "github.com/coreos/ignition/config/util"
-	"github.com/coreos/ignition/internal/config/types"
+	"github.com/coreos/ignition/config/v3_0/types"
 	"github.com/coreos/ignition/internal/exec/util"
 	"github.com/coreos/ignition/internal/log"
 )
 
 // createFilesystemsEntries creates the files described in config.Storage.{Files,Directories}.
 func (s *stage) createFilesystemsEntries(config types.Config) error {
-	if len(config.Storage.Filesystems) == 0 {
-		return nil
-	}
 	s.Logger.PushPrefix("createFilesystemsFiles")
 	defer s.Logger.PopPrefix()
 
-	entryMap, err := s.mapEntriesToFilesystems(config)
+	entries, err := s.getOrderedCreationList(config)
 	if err != nil {
 		return err
 	}
 
-	for fs, f := range entryMap {
-		if err := s.createEntries(fs, f); err != nil {
-			return fmt.Errorf("failed to create files: %v", err)
-		}
+	if err := s.createEntries(entries); err != nil {
+		return fmt.Errorf("failed to create files: %v", err)
 	}
 
 	return nil
@@ -53,111 +46,96 @@ func (s *stage) createFilesystemsEntries(config types.Config) error {
 // filesystemEntry represent a thing that knows how to create itself.
 type filesystemEntry interface {
 	create(l *log.Logger, u util.Util) error
-	getPath() string
+	node() types.Node
 }
 
 type fileEntry types.File
 
-func (tmp fileEntry) getPath() string {
-	return types.File(tmp).Path
+func (tmp fileEntry) node() types.Node {
+	return types.File(tmp).Node
 }
 
 func (tmp fileEntry) create(l *log.Logger, u util.Util) error {
 	f := types.File(tmp)
 
-	fetchOp := u.PrepareFetch(l, f)
-	if fetchOp == nil {
-		return fmt.Errorf("failed to resolve file %q", f.Path)
+	empty := "" // golang--
+
+	st, err := os.Lstat(f.Path)
+	regular := (st == nil) || st.Mode().IsRegular()
+	switch {
+	case os.IsNotExist(err) && f.Contents.Source == nil:
+		// set f.Contents so we create an empty file
+		f.Contents.Source = &empty
+	case os.IsNotExist(err):
+		break
+	case err != nil:
+		return err
+	// Cases where there is file there
+	case !regular:
+		return fmt.Errorf("error creating file %q: A non regular file exists there already and overwrite is false", f.Path)
+	case f.Contents.Source != nil:
+		return fmt.Errorf("error creating file %q: A file exists there already and overwrite is false", f.Path)
+	case regular && f.Contents.Source == nil:
+		break
+	default:
+		return fmt.Errorf("Ignition encountered an internal error processing %q and must die now. Please file a bug", f.Path)
 	}
 
-	msg := "writing file %q"
-	if f.Append {
-		msg = "appending to file %q"
+	fetchOps, err := u.PrepareFetches(l, f)
+	if err != nil {
+		return fmt.Errorf("failed to resolve file %q: %v", f.Path, err)
 	}
 
-	if err := l.LogOp(
-		func() error {
-			err := u.DeletePathOnOverwrite(f.Node)
-			if err != nil {
-				return err
-			}
-
-			return u.PerformFetch(fetchOp)
-		}, msg, string(f.Path),
-	); err != nil {
-		return fmt.Errorf("failed to create file %q: %v", fetchOp.Path, err)
+	for _, op := range fetchOps {
+		msg := "writing file %q"
+		if op.Append {
+			msg = "appending to file %q"
+		}
+		if err := l.LogOp(
+			func() error {
+				return u.PerformFetch(op)
+			}, msg, f.Path,
+		); err != nil {
+			return fmt.Errorf("failed to create file %q: %v", op.Node.Path, err)
+		}
 	}
-
+	if err := u.SetPermissions(f.Mode, f.Node); err != nil {
+		return fmt.Errorf("error setting file permissions for %s: %v", f.Path, err)
+	}
 	return nil
 }
 
 type dirEntry types.Directory
 
-func (tmp dirEntry) getPath() string {
-	return types.Directory(tmp).Path
+func (tmp dirEntry) node() types.Node {
+	return types.Directory(tmp).Node
 }
 
 func (tmp dirEntry) create(l *log.Logger, u util.Util) error {
 	d := types.Directory(tmp)
-
-	err := l.LogOp(func() error {
-		path := filepath.Clean(u.JoinPath(string(d.Path)))
-
-		err := u.DeletePathOnOverwrite(d.Node)
-		if err != nil {
-			return err
+	st, err := os.Lstat(d.Path)
+	switch {
+	case os.IsNotExist(err):
+		// use default perms, we'll fix it later
+		if err := os.MkdirAll(d.Path, util.DefaultDirectoryPermissions); err != nil {
+			return fmt.Errorf("Failed to create directory %s: %v", d.Path, err)
 		}
-
-		uid, gid, err := u.ResolveNodeUidAndGid(d.Node, 0, 0)
-		if err != nil {
-			return err
-		}
-
-		// Build a list of paths to create. Since os.MkdirAll only sets the mode for new directories and not the
-		// ownership, we need to determine which directories will be created so we don't chown something that already
-		// exists.
-		newPaths := []string{path}
-		for p := filepath.Dir(path); p != "/"; p = filepath.Dir(p) {
-			_, err := os.Stat(p)
-			if err == nil {
-				break
-			}
-			if !os.IsNotExist(err) {
-				return err
-			}
-			newPaths = append(newPaths, p)
-		}
-
-		if d.Mode == nil {
-			d.Mode = configUtil.IntToPtr(0)
-		}
-
-		if err := os.MkdirAll(path, os.FileMode(*d.Mode)); err != nil {
-			return err
-		}
-
-		for _, newPath := range newPaths {
-			if err := os.Chmod(newPath, os.FileMode(*d.Mode)); err != nil {
-				return err
-			}
-			if err := os.Chown(newPath, uid, gid); err != nil {
-				return err
-			}
-		}
-
-		return nil
-	}, "creating directory %q", string(d.Path))
-	if err != nil {
-		return fmt.Errorf("failed to create directory %q: %v", d.Path, err)
+	case err != nil:
+		return fmt.Errorf("stat() failed on %s: %v", d.Path, err)
+	case !st.Mode().IsDir():
+		return fmt.Errorf("error creating directory %s: A non-directory already exists and overwrite is false", d.Path)
 	}
 
+	if err := u.SetPermissions(d.Mode, d.Node); err != nil {
+		return fmt.Errorf("error setting directory permissions for %s: %v", d.Path, err)
+	}
 	return nil
 }
 
 type linkEntry types.Link
 
-func (tmp linkEntry) getPath() string {
-	return types.Link(tmp).Path
+func (tmp linkEntry) node() types.Node {
+	return types.Link(tmp).Node
 }
 
 func (tmp linkEntry) create(l *log.Logger, u util.Util) error {
@@ -165,11 +143,6 @@ func (tmp linkEntry) create(l *log.Logger, u util.Util) error {
 
 	if err := l.LogOp(
 		func() error {
-			err := u.DeletePathOnOverwrite(s.Node)
-			if err != nil {
-				return err
-			}
-
 			return u.WriteLink(s)
 		}, "writing link %q -> %q", s.Path, s.Target,
 	); err != nil {
@@ -179,137 +152,117 @@ func (tmp linkEntry) create(l *log.Logger, u util.Util) error {
 	return nil
 }
 
-// ByDirectorySegments is used to sort directories so /foo gets created before /foo/bar if they are both specified.
-type ByDirectorySegments []types.Directory
-
-func (lst ByDirectorySegments) Len() int { return len(lst) }
-
-func (lst ByDirectorySegments) Swap(i, j int) {
-	lst[i], lst[j] = lst[j], lst[i]
-}
-
-func (lst ByDirectorySegments) Less(i, j int) bool {
-	return depth(lst[i].Node) < depth(lst[j].Node)
-}
-
-func depth(n types.Node) uint {
-	var count uint = 0
-	for p := filepath.Clean(string(n.Path)); p != "/"; count++ {
-		p = filepath.Dir(p)
-	}
-	return count
-}
-
-// mapEntriesToFilesystems builds a map of filesystems to files. If multiple
-// definitions of the same filesystem are present, only the final definition is
-// used. The directories are sorted to ensure /foo gets created before /foo/bar.
-func (s stage) mapEntriesToFilesystems(config types.Config) (map[types.Filesystem][]filesystemEntry, error) {
-	filesystems := map[string]types.Filesystem{}
-	for _, fs := range config.Storage.Filesystems {
-		filesystems[fs.Name] = fs
-	}
-
-	entryMap := map[types.Filesystem][]filesystemEntry{}
-
-	// Sort directories to ensure /a gets created before /a/b.
-	sortedDirs := config.Storage.Directories
-	sort.Stable(ByDirectorySegments(sortedDirs))
-
-	// Add directories first to ensure they are created before files.
-	for _, d := range sortedDirs {
-		if fs, ok := filesystems[d.Filesystem]; ok {
-			entryMap[fs] = append(entryMap[fs], dirEntry(d))
-		} else {
-			s.Logger.Crit("the filesystem (%q), was not defined", d.Filesystem)
-			return nil, ErrFilesystemUndefined
+// getOrderedCreationList resolves all symlinks in the node paths and sets the path to be
+// prepended by the sysroot. It orders the list from shallowest (e.g. /a) to deepeset
+// (e.g. /a/b/c/d/e).
+func (s stage) getOrderedCreationList(config types.Config) ([]filesystemEntry, error) {
+	entries := []filesystemEntry{}
+	// Map from paths in the config to where they resolve for duplicate checking
+	paths := map[string]string{}
+	for _, d := range config.Storage.Directories {
+		path, err := s.JoinPath(d.Path)
+		if err != nil {
+			return nil, err
 		}
+		if existing, ok := paths[path]; ok {
+			return nil, fmt.Errorf("Directory at %s resolved to %s after symlink chasing, but another entry with path %s also resolves there",
+				d.Path, path, existing)
+		}
+		paths[path] = d.Path
+		d.Path = path
+		entries = append(entries, dirEntry(d))
 	}
 
 	for _, f := range config.Storage.Files {
-		if fs, ok := filesystems[f.Filesystem]; ok {
-			entryMap[fs] = append(entryMap[fs], fileEntry(f))
-		} else {
-			s.Logger.Crit("the filesystem (%q), was not defined", f.Filesystem)
-			return nil, ErrFilesystemUndefined
+		path, err := s.JoinPath(f.Path)
+		if err != nil {
+			return nil, err
 		}
+		if existing, ok := paths[path]; ok {
+			return nil, fmt.Errorf("File at %s resolved to %s after symlink chasing, but another entry with path %s also resolves there",
+				f.Path, path, existing)
+		}
+		paths[path] = f.Path
+		f.Path = path
+		entries = append(entries, fileEntry(f))
 	}
 
-	for _, sy := range config.Storage.Links {
-		if fs, ok := filesystems[sy.Filesystem]; ok {
-			entryMap[fs] = append(entryMap[fs], linkEntry(sy))
-		} else {
-			s.Logger.Crit("the filesystem (%q), was not defined", sy.Filesystem)
-			return nil, ErrFilesystemUndefined
+	for _, l := range config.Storage.Links {
+		path, err := s.JoinPath(l.Path)
+		if err != nil {
+			return nil, err
 		}
+		if existing, ok := paths[path]; ok {
+			return nil, fmt.Errorf("Link at %s resolved to %s after symlink chasing, but another entry with path %s also resolves there",
+				l.Path, path, existing)
+		}
+		paths[path] = l.Path
+		l.Path = path
+		entries = append(entries, linkEntry(l))
 	}
+	sort.Slice(entries, func(i, j int) bool { return util.Depth(entries[i].node().Path) < util.Depth(entries[j].node().Path) })
 
-	return entryMap, nil
+	return entries, nil
+}
+
+func (s *stage) removePathOnOverwrite(e filesystemEntry) error {
+	if e.node().Overwrite != nil && *e.node().Overwrite {
+		return os.RemoveAll(e.node().Path)
+	}
+	return nil
+}
+
+func (s *stage) relabelDirsForFile(path string) error {
+	if !s.relabeling() {
+		return nil
+	}
+	// relabel from the first parent dir that we'll have to create --
+	// alternatively, we could make `MkdirForFile` fancier instead of
+	// using `os.MkdirAll`, though that's quite a lot of levels to plumb
+	// through
+	relabelFrom := path
+	dir := filepath.Dir(path)
+	for {
+		exists := true
+		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
+			exists = false
+		} else if err != nil {
+			return err
+		}
+
+		// we're done on the first hit -- also sanity check we didn't
+		// somehow get all the way up to /sysroot
+		if exists || dir == s.DestDir {
+			break
+		}
+		relabelFrom = dir
+		dir = filepath.Dir(dir)
+	}
+	// trim off prefix since this needs to be relative to the sysroot
+	s.relabel(relabelFrom[len(s.DestDir):])
+
+	return nil
 }
 
 // createEntries creates any files or directories listed for the filesystem in Storage.{Files,Directories}.
-func (s *stage) createEntries(fs types.Filesystem, files []filesystemEntry) error {
+func (s *stage) createEntries(entries []filesystemEntry) error {
 	s.Logger.PushPrefix("createFiles")
 	defer s.Logger.PopPrefix()
 
-	var mnt string
-	if fs.Path == nil {
-		var err error
-		mnt, err = ioutil.TempDir("", "ignition-files")
-		if err != nil {
-			return fmt.Errorf("failed to create temp directory: %v", err)
+	for _, e := range entries {
+		path := e.node().Path
+		if !strings.HasPrefix(path, s.DestDir) {
+			panic(fmt.Sprintf("Entry path %s isn't under prefix %s", path, s.DestDir))
 		}
-		defer os.Remove(mnt)
 
-		dev := string(fs.Mount.Device)
-		format := string(fs.Mount.Format)
-
-		if err := s.Logger.LogOp(
-			func() error { return syscall.Mount(dev, mnt, format, 0, "") },
-			"mounting %q at %q", dev, mnt,
-		); err != nil {
-			return fmt.Errorf("failed to mount device %q at %q: %v", dev, mnt, err)
+		if err := s.relabelDirsForFile(path); err != nil {
+			return fmt.Errorf("error relabeling paths for %s: %v", path, err)
 		}
-		defer s.Logger.LogOp(
-			func() error { return syscall.Unmount(mnt, 0) },
-			"unmounting %q at %q", dev, mnt,
-		)
-	} else {
-		mnt = *fs.Path
-	}
-
-	u := util.Util{
-		DestDir: mnt,
-		Fetcher: s.Util.Fetcher,
-		Logger:  s.Logger,
-	}
-
-	for _, e := range files {
-		path := e.getPath()
-		// only relabel things on the root filesystem
-		if fs.Name == "root" && s.relabeling() {
-			// relabel from the first parent dir that we'll have to create --
-			// alternatively, we could make `MkdirForFile` fancier instead of
-			// using `os.MkdirAll`, though that's quite a lot of levels to plumb
-			// through
-			relabelFrom := path
-			dir := filepath.Dir(path)
-			for {
-				exists, err := u.PathExists(dir)
-				if err != nil {
-					return err
-				}
-				// we're done on the first hit -- also sanity check we didn't
-				// somehow get all the way up to /
-				if exists || dir == "/" {
-					break
-				}
-				relabelFrom = dir
-				dir = filepath.Dir(dir)
-			}
-			s.relabel(relabelFrom)
+		if err := s.removePathOnOverwrite(e); err != nil {
+			return fmt.Errorf("error removing existing file %s: %v", path, err)
 		}
-		if err := e.create(s.Logger, u); err != nil {
-			return err
+		if err := e.create(s.Logger, s.Util); err != nil {
+			return fmt.Errorf("error creating %s: %v", path, err)
 		}
 	}
 	return nil

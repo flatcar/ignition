@@ -16,6 +16,10 @@
 
 package util
 
+// We want at least this warning, since the default C behavior of
+// assuming int foo(int) is totally broken.
+
+// #cgo CFLAGS: -Werror=implicit-function-declaration
 // #cgo LDFLAGS: -lblkid
 // #include <stdlib.h>
 // #include "blkid.h"
@@ -28,7 +32,6 @@ import (
 	"unsafe"
 
 	"github.com/coreos/ignition/config/util"
-	"github.com/coreos/ignition/internal/config/types"
 )
 
 const (
@@ -36,6 +39,29 @@ const (
 	field_name_uuid  = "UUID"
 	field_name_label = "LABEL"
 )
+
+type DiskInfo struct {
+	LogicalSectorSize int // 4k or 512
+	Partitions        []PartitionInfo
+}
+
+func (d DiskInfo) GetPartition(n int) (PartitionInfo, bool) {
+	for _, part := range d.Partitions {
+		if part.Number == n {
+			return part, true
+		}
+	}
+	return PartitionInfo{}, false
+}
+
+type PartitionInfo struct {
+	Label         string
+	GUID          string
+	TypeGUID      string
+	StartSector   int
+	SizeInSectors int
+	Number        int
+}
 
 func FilesystemType(device string) (string, error) {
 	return filesystemLookup(device, field_name_type)
@@ -91,13 +117,13 @@ func CBufToGoStr(s [C.PART_INFO_BUF_SIZE]C.char) string {
 }
 
 func CBufToGoPtr(s [C.PART_INFO_BUF_SIZE]C.char) *string {
-	return util.StrToPtrStrict(CBufToGoStr(s))
+	return util.StrToPtr(CBufToGoStr(s))
 }
 
 // DumpPartitionTable returns a list of all partitions on device (e.g. /dev/vda). The list
 // of partitions returned is unordered.
-func DumpPartitionTable(device string) ([]types.Partition, error) {
-	output := []types.Partition{}
+func DumpDisk(device string) (DiskInfo, error) {
+	output := DiskInfo{}
 
 	var cInfo C.struct_partition_info
 	cInfoRef := (*C.struct_partition_info)(unsafe.Pointer(&cInfo))
@@ -105,26 +131,32 @@ func DumpPartitionTable(device string) ([]types.Partition, error) {
 	cDevice := C.CString(device)
 	defer C.free(unsafe.Pointer(cDevice))
 
+	cSectorSizeRef := (*C.int)(unsafe.Pointer(&output.LogicalSectorSize))
+	if err := cResultToErr(C.blkid_get_logical_sector_size(cDevice, cSectorSizeRef), device); err != nil {
+		return DiskInfo{}, err
+	}
+
 	numParts := 0
 	cNumPartsRef := (*C.int)(unsafe.Pointer(&numParts))
 	if err := cResultToErr(C.blkid_get_num_partitions(cDevice, cNumPartsRef), device); err != nil {
-		return []types.Partition{}, err
+		return DiskInfo{}, err
 	}
 
 	for i := 0; i < numParts; i++ {
 		if err := cResultToErr(C.blkid_get_partition(cDevice, C.int(i), cInfoRef), device); err != nil {
-			return []types.Partition{}, err
-		}
-		current := types.Partition{
-			Label:    CBufToGoPtr(cInfo.label),
-			GUID:     strings.ToUpper(CBufToGoStr(cInfo.uuid)),
-			TypeGUID: strings.ToUpper(CBufToGoStr(cInfo.type_guid)),
-			Number:   int(cInfo.number),
-			Start:    util.IntToPtr(int(cInfo.start)),
-			Size:     util.IntToPtr(int(cInfo.size)),
+			return DiskInfo{}, err
 		}
 
-		output = append(output, current)
+		current := PartitionInfo{
+			Label:         CBufToGoStr(cInfo.label),
+			GUID:          strings.ToUpper(CBufToGoStr(cInfo.uuid)),
+			TypeGUID:      strings.ToUpper(CBufToGoStr(cInfo.type_guid)),
+			Number:        int(cInfo.number),
+			StartSector:   int(cInfo.start),
+			SizeInSectors: int(cInfo.size),
+		}
+
+		output.Partitions = append(output.Partitions, current)
 	}
 	return output, nil
 }

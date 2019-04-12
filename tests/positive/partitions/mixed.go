@@ -86,14 +86,14 @@ func Match1Recreate1Delete1Create1() types.Test {
 				{
 					"label": "important-data",
 					"number": 1,
-					"start": 2048,
-					"size": 65536
+					"startMiB": 1,
+					"sizeMiB": 32
 				},
 				{
 					"label": "ephemeral-data",
 					"number": 2,
-					"start": 67584,
-					"size": 131072,
+					"startMiB": 33,
+					"sizeMiB": 64,
 					"wipePartitionEntry": true
 				},
 				{
@@ -104,15 +104,15 @@ func Match1Recreate1Delete1Create1() types.Test {
 				{
 					"label": "even-more-data",
 					"number": 4,
-					"start": 198656,
-					"size": 65536
+					"startMiB": 97,
+					"sizeMiB": 32
 				}
 				]
 			}
 			]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -184,24 +184,24 @@ func NothingMatches() types.Test {
 				{
 					"label": "important-data",
 					"number": 1,
-					"start": 2048,
-					"size": 65536,
+					"startMiB": 1,
+					"sizeMiB": 32,
 					"wipePartitionEntry": true,
 					"typeGuid": "$uuid1"
 				},
 				{
 					"label": "ephemeral-data",
 					"number": 2,
-					"start": 67584,
-					"size": 65536,
+					"startMiB": 33,
+					"sizeMiB": 32,
 					"wipePartitionEntry": true,
 					"guid": "$uuid1"
 				},
 				{
 					"label": "even-more-data",
 					"number": 3,
-					"start": 133120,
-					"size": 65536,
+					"startMiB": 65,
+					"sizeMiB": 32,
 					"wipePartitionEntry": true
 				}
 				]
@@ -209,7 +209,7 @@ func NothingMatches() types.Test {
 			]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

@@ -25,8 +25,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/coreos/ignition/config/v3_0/types"
 	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
 	"github.com/coreos/ignition/internal/providers/util"
 	"github.com/coreos/ignition/internal/resource"
 )
@@ -112,7 +112,7 @@ func postMessage(stageName string, e error, url string) error {
 		}
 	} else {
 		m = mStruct{
-			State:   "succeeded",
+			State:   "running",
 			Message: stageName + " Ignition status: finished successfully",
 		}
 	}

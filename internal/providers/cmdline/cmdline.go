@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // The cmdline provider fetches a remote configuration from the URL specified
-// in the kernel boot option "flatcar.config.url".
+// in the kernel boot option "ignition.config.url".
 
 package cmdline
 
@@ -22,8 +22,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/coreos/ignition/config/v3_0/types"
 	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
 	"github.com/coreos/ignition/internal/distro"
 	"github.com/coreos/ignition/internal/log"
 	"github.com/coreos/ignition/internal/providers"
@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	cmdlineUrlFlag = "flatcar.config.url"
+	cmdlineUrlFlag = "ignition.config.url"
 )
 
 func FetchConfig(f resource.Fetcher) (types.Config, report.Report, error) {

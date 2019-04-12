@@ -15,29 +15,21 @@
 package files
 
 import (
+	"fmt"
 	"path/filepath"
+	"strings"
 
-	"github.com/coreos/ignition/internal/config/types"
+	"github.com/coreos/ignition/config/v3_0/types"
 	"github.com/coreos/ignition/internal/distro"
 	"github.com/coreos/ignition/internal/exec/util"
 )
 
-// createUnits creates the units listed under systemd.units and networkd.units.
+// createUnits creates the units listed under systemd.units.
 func (s *stage) createUnits(config types.Config) error {
 	enabledOneUnit := false
 	for _, unit := range config.Systemd.Units {
 		if err := s.writeSystemdUnit(unit, false); err != nil {
 			return err
-		}
-		if unit.Enable {
-			s.Logger.Warning("the enable field has been deprecated in favor of enabled")
-			if err := s.Logger.LogOp(
-				func() error { return s.EnableUnit(unit) },
-				"enabling unit %q", unit.Name,
-			); err != nil {
-				return err
-			}
-			enabledOneUnit = true
 		}
 		if unit.Enabled != nil {
 			if *unit.Enabled {
@@ -57,7 +49,7 @@ func (s *stage) createUnits(config types.Config) error {
 			}
 			enabledOneUnit = true
 		}
-		if unit.Mask {
+		if unit.Mask != nil && *unit.Mask {
 			if err := s.Logger.LogOp(
 				func() error { return s.MaskUnit(unit) },
 				"masking unit %q", unit.Name,
@@ -69,11 +61,6 @@ func (s *stage) createUnits(config types.Config) error {
 	// and relabel the preset file itself if we enabled/disabled something
 	if enabledOneUnit {
 		s.relabel(util.PresetPath)
-	}
-	for _, unit := range config.Networkd.Units {
-		if err := s.writeNetworkdUnit(unit); err != nil {
-			return err
-		}
 	}
 	return nil
 }
@@ -92,86 +79,58 @@ func (s *stage) writeSystemdUnit(unit types.Unit, runtime bool) error {
 	return s.Logger.LogOp(func() error {
 		relabeledDropinDir := false
 		for _, dropin := range unit.Dropins {
-			if dropin.Contents == "" {
+			if dropin.Contents == nil || *dropin.Contents == "" {
 				continue
 			}
-			f, err := util.FileFromSystemdUnitDropin(unit, dropin, runtime)
+			f, err := u.FileFromSystemdUnitDropin(unit, dropin, runtime)
 			if err != nil {
 				s.Logger.Crit("error converting systemd dropin: %v", err)
 				return err
 			}
+			relabelPath := f.Node.Path
+			if !runtime {
+				// trim off prefix since this needs to be relative to the sysroot
+				if !strings.HasPrefix(f.Node.Path, s.DestDir) {
+					panic(fmt.Sprintf("Dropin path %s isn't under prefix %s", f.Node.Path, s.DestDir))
+				}
+				relabelPath = f.Node.Path[len(s.DestDir):]
+			}
 			if err := s.Logger.LogOp(
 				func() error { return u.PerformFetch(f) },
-				"writing systemd drop-in %q at %q", dropin.Name, f.Path,
+				"writing systemd drop-in %q at %q", dropin.Name, f.Node.Path,
 			); err != nil {
 				return err
 			}
 			if !relabeledDropinDir {
-				s.relabel(filepath.Dir("/" + f.Path))
+				s.relabel(filepath.Dir(relabelPath))
 				relabeledDropinDir = true
 			}
 		}
 
-		if unit.Contents == "" {
+		if unit.Contents == nil || *unit.Contents == "" {
 			return nil
 		}
 
-		f, err := util.FileFromSystemdUnit(unit, runtime)
+		f, err := u.FileFromSystemdUnit(unit, runtime)
 		if err != nil {
 			s.Logger.Crit("error converting unit: %v", err)
 			return err
+		}
+		relabelPath := f.Node.Path
+		if !runtime {
+			// trim off prefix since this needs to be relative to the sysroot
+			if !strings.HasPrefix(f.Node.Path, s.DestDir) {
+				panic(fmt.Sprintf("Unit path %s isn't under prefix %s", f.Node.Path, s.DestDir))
+			}
+			relabelPath = f.Node.Path[len(s.DestDir):]
 		}
 		if err := s.Logger.LogOp(
 			func() error { return u.PerformFetch(f) },
-			"writing unit %q at %q", unit.Name, f.Path,
+			"writing unit %q at %q", unit.Name, f.Node.Path,
 		); err != nil {
 			return err
 		}
-		s.relabel("/" + f.Path)
-
-		return nil
-	}, "processing unit %q", unit.Name)
-}
-
-// writeNetworkdUnit creates the specified unit and any dropins for that unit.
-// If the contents of the unit or are empty, the unit is not created. The same
-// applies to the unit's dropins.
-func (s *stage) writeNetworkdUnit(unit types.Networkdunit) error {
-	return s.Logger.LogOp(func() error {
-		for _, dropin := range unit.Dropins {
-			if dropin.Contents == "" {
-				continue
-			}
-
-			f, err := util.FileFromNetworkdUnitDropin(unit, dropin)
-			if err != nil {
-				s.Logger.Crit("error converting networkd dropin: %v", err)
-				return err
-			}
-			if err := s.Logger.LogOp(
-				func() error { return s.PerformFetch(f) },
-				"writing networkd drop-in %q at %q", dropin.Name, f.Path,
-			); err != nil {
-				return err
-			}
-			s.relabel("/" + f.Path)
-		}
-		if unit.Contents == "" {
-			return nil
-		}
-
-		f, err := util.FileFromNetworkdUnit(unit)
-		if err != nil {
-			s.Logger.Crit("error converting unit: %v", err)
-			return err
-		}
-		if err := s.Logger.LogOp(
-			func() error { return s.PerformFetch(f) },
-			"writing unit %q at %q", unit.Name, f.Path,
-		); err != nil {
-			return err
-		}
-		s.relabel("/" + f.Path)
+		s.relabel(relabelPath)
 
 		return nil
 	}, "processing unit %q", unit.Name)
