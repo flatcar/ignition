@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	cmdlineUrlFlagLegacy = "coreos.config.url"
+	cmdlineUrlFlagLegacy = "flatcar.config.url"
 	cmdlineUrlFlag       = "ignition.config.url"
 )
 
