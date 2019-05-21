@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // The cmdline provider fetches a remote configuration from the URL specified
-// in the kernel boot option "coreos.config.url".
+// in the kernel boot option "flatcar.config.url".
 
 package cmdline
 
@@ -32,8 +32,7 @@ import (
 )
 
 const (
-	cmdlineUrlFlagLegacy = "coreos.config.url"
-	cmdlineUrlFlag       = "ignition.config.url"
+	cmdlineUrlFlag = "flatcar.config.url"
 )
 
 func FetchConfig(f resource.Fetcher) (types.Config, report.Report, error) {
@@ -84,10 +83,12 @@ func parseCmdline(cmdline []byte) (url string) {
 		parts := strings.SplitN(strings.TrimSpace(arg), "=", 2)
 		key := parts[0]
 
-		if key == cmdlineUrlFlagLegacy || key == cmdlineUrlFlag {
-			if len(parts) == 2 {
-				url = parts[1]
-			}
+		if key != cmdlineUrlFlag {
+			continue
+		}
+
+		if len(parts) == 2 {
+			url = parts[1]
 		}
 	}
 
