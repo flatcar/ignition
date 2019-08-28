@@ -46,7 +46,6 @@ func (creator) Create(logger *log.Logger, root string, f resource.Fetcher) stage
 	return &stage{
 		Util: util.Util{
 			DestDir: root,
-			Root:    root,
 			Logger:  logger,
 			Fetcher: f,
 		},
@@ -139,7 +138,7 @@ func (s *stage) addRelabelUnit(config types.Config) error {
 Description=Relabel files created by Ignition
 DefaultDependencies=no
 After=local-fs.target
-Before=sysinit.target systemd-sysctl.service
+Before=sysinit.target
 ConditionSecurity=selinux
 ConditionPathExists=/etc/selinux/ignition.relabel
 OnFailure=emergency.target
@@ -161,11 +160,7 @@ RemainAfterExit=yes`,
 	}
 
 	// and now create the list of files to relabel
-	etcRelabelPath, err := s.JoinPath("etc/selinux/ignition.relabel")
-	if err != nil {
-		return err
-	}
-	f, err := os.Create(etcRelabelPath)
+	f, err := os.Create(s.JoinPath("etc/selinux/ignition.relabel"))
 	if err != nil {
 		return err
 	}

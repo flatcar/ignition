@@ -16,9 +16,6 @@
 
 package util
 
-// See blkid.go for compiler warning comment.
-
-// #cgo CFLAGS: -Werror=implicit-function-declaration
 // #include "user_group_lookup.h"
 import "C"
 
@@ -27,11 +24,11 @@ import (
 	"os/user"
 )
 
-// userLookup looks up the user in u.Root.
+// userLookup looks up the user in u.DestDir.
 func (u Util) userLookup(name string) (*user.User, error) {
 	res := &C.lookup_res_t{}
 
-	if ret, err := C.user_lookup(C.CString(u.Root),
+	if ret, err := C.user_lookup(C.CString(u.DestDir),
 		C.CString(name), res); ret < 0 {
 		return nil, fmt.Errorf("lookup failed: %v", err)
 	}
@@ -40,16 +37,11 @@ func (u Util) userLookup(name string) (*user.User, error) {
 		return nil, fmt.Errorf("user %q not found", name)
 	}
 
-	homedir, err := u.JoinPath(C.GoString(res.home))
-	if err != nil {
-		return nil, err
-	}
-
 	usr := &user.User{
 		Name:    C.GoString(res.name),
 		Uid:     fmt.Sprintf("%d", int(res.uid)),
 		Gid:     fmt.Sprintf("%d", int(res.gid)),
-		HomeDir: homedir,
+		HomeDir: u.JoinPath(C.GoString(res.home)),
 	}
 
 	C.user_lookup_res_free(res)
@@ -57,11 +49,11 @@ func (u Util) userLookup(name string) (*user.User, error) {
 	return usr, nil
 }
 
-// groupLookup looks up the group in u.Root.
+// groupLookup looks up the group in u.DestDir.
 func (u Util) groupLookup(name string) (*user.Group, error) {
 	res := &C.lookup_res_t{}
 
-	if ret, err := C.group_lookup(C.CString(u.Root),
+	if ret, err := C.group_lookup(C.CString(u.DestDir),
 		C.CString(name), res); ret < 0 {
 		return nil, fmt.Errorf("lookup failed: %v", err)
 	}

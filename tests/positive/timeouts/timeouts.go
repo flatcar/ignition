@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"sync"
 	"time"
 
 	"github.com/coreos/ignition/tests/register"
@@ -38,21 +37,16 @@ var (
 	}))
 
 	lastResponses          = map[string]time.Time{}
-	lastResponsesLock      = sync.Mutex{}
 	respondThrottledServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var status int
-		lastResponsesLock.Lock()
 		lastResponse, ok := lastResponses[r.RequestURI]
 		if ok && time.Since(lastResponse) > time.Second*4 {
 			// Only respond successfully if it's been more than 4 seconds since
 			// the last attempt
-			status = http.StatusOK
-		} else {
-			status = http.StatusInternalServerError
-			lastResponses[r.RequestURI] = time.Now()
+			w.WriteHeader(http.StatusOK)
+			return
 		}
-		lastResponsesLock.Unlock()
-		w.WriteHeader(status)
+		lastResponses[r.RequestURI] = time.Now()
+		w.WriteHeader(http.StatusInternalServerError)
 	}))
 )
 
