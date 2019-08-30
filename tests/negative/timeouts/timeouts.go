@@ -20,8 +20,8 @@ import (
 	"net/http/httptest"
 	"time"
 
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
@@ -42,13 +42,13 @@ var (
 	configDelayServer    = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Hold the connection open for 2 seconds, then return
 		time.Sleep(time.Second * 2)
-		// Give a config that appends ourselves and sets the timeouts to 1
+		// Give a config that merges ourselves and sets the timeouts to 1
 		// second (less than we wait!)
 		w.Write([]byte(fmt.Sprintf(`{
 			"ignition": {
 				"version": "$version",
 				"config": {
-					"append": [{
+					"merge": [{
 						"source": %q
 					}]
 				},
@@ -62,7 +62,7 @@ var (
 )
 
 func DecreaseHTTPResponseHeadersTimeout() types.Test {
-	name := "Decrease HTTP Response Headers Timeout"
+	name := "timeouts.file.create.http.timesout"
 	in := types.GetBaseDisk()
 	out := in
 	config := fmt.Sprintf(`{
@@ -76,7 +76,6 @@ func DecreaseHTTPResponseHeadersTimeout() types.Test {
 		"storage": {
 		    "files": [
 			    {
-					"filesystem": "root",
 					"path": "/foo/bar",
 					"contents": {
 						"source": %q
@@ -85,7 +84,7 @@ func DecreaseHTTPResponseHeadersTimeout() types.Test {
 			]
 		}
 	}`, respondDelayServer.URL)
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -97,14 +96,14 @@ func DecreaseHTTPResponseHeadersTimeout() types.Test {
 }
 
 func AppendWithHTTPTimeouts() types.Test {
-	name := "AppendWithHTTPTimeouts"
+	name := "timeouts.config.merge.timesout"
 	in := types.GetBaseDisk()
 	out := in
 	config := fmt.Sprintf(`{
 		"ignition": {
 			"version": "$version",
 			"config": {
-				"append": [{
+				"merge": [{
 					"source": %q
 				}]
 			},
@@ -115,7 +114,7 @@ func AppendWithHTTPTimeouts() types.Test {
 		}
 	}`, configDelayServer.URL)
 	configDelayServerURL = configDelayServer.URL
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -127,21 +126,21 @@ func AppendWithHTTPTimeouts() types.Test {
 }
 
 func AppendLowerHTTPTimeouts() types.Test {
-	name := "AppendLowerHTTPTimeouts"
+	name := "timeouts.config.mergeslowertimeout"
 	in := types.GetBaseDisk()
 	out := in
 	config := fmt.Sprintf(`{
 		"ignition": {
 			"version": "$version",
 			"config": {
-				"append": [{
+				"merge": [{
 					"source": %q
 				}]
 			}
 		}
 	}`, configDelayServer.URL)
 	configDelayServerURL = configDelayServer.URL
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -153,14 +152,14 @@ func AppendLowerHTTPTimeouts() types.Test {
 }
 
 func AppendNoneThenLowerHTTPTimeouts() types.Test {
-	// If an initial config specifies timeouts, and then appends a config with
+	// If an initial config specifies timeouts, and then merges a config with
 	// no timeouts, the initial timeouts should still apply
 
 	var (
 		emptyConfigDelayServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Hold the connection open for 2 seconds, then return
 			time.Sleep(time.Second * 2)
-			// Give a config that appends ourselves and sets the timeouts to 1
+			// Give a config that merges ourselves and sets the timeouts to 1
 			// second (less than we wait!)
 			w.Write([]byte(`{
 				"ignition": {
@@ -170,13 +169,13 @@ func AppendNoneThenLowerHTTPTimeouts() types.Test {
 		}))
 
 		configNoDelayServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Give a config that appends ourselves and sets the timeouts to 1
+			// Give a config that merges ourselves and sets the timeouts to 1
 			// second (less than we wait!)
 			w.Write([]byte(fmt.Sprintf(`{
 			"ignition": 
 				"version": "$version",
 				"config": {
-					"append": [{
+					"merge": [{
 						"source": %q
 					}]
 				}
@@ -185,14 +184,14 @@ func AppendNoneThenLowerHTTPTimeouts() types.Test {
 		}))
 	)
 
-	name := "AppendNoneThenLowerHTTPTimeouts"
+	name := "timeouts.config.merge.nonethenlower"
 	in := types.GetBaseDisk()
 	out := in
 	config := fmt.Sprintf(`{
 		"ignition": {
 			"version": "$version",
 			"config": {
-				"append": [{
+				"merge": [{
 					"source": %q
 				}]
 			},
@@ -202,7 +201,7 @@ func AppendNoneThenLowerHTTPTimeouts() types.Test {
 			}
 		}
 	}`, configNoDelayServer.URL)
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

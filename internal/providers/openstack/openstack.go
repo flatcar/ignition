@@ -30,12 +30,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/distro"
-	"github.com/coreos/ignition/internal/log"
-	"github.com/coreos/ignition/internal/resource"
+	"github.com/coreos/ignition/v2/config/v3_1_experimental/types"
+	"github.com/coreos/ignition/v2/internal/distro"
+	"github.com/coreos/ignition/v2/internal/log"
+	"github.com/coreos/ignition/v2/internal/providers/util"
+	"github.com/coreos/ignition/v2/internal/resource"
+
+	"github.com/coreos/vcontext/report"
 )
 
 const (
@@ -50,7 +51,7 @@ var (
 	}
 )
 
-func FetchConfig(f resource.Fetcher) (types.Config, report.Report, error) {
+func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 	var data []byte
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 
@@ -88,7 +89,7 @@ func FetchConfig(f resource.Fetcher) (types.Config, report.Report, error) {
 		f.Logger.Info("neither config drive nor metadata service were available in time. Continuing without a config...")
 	}
 
-	return config.Parse(data)
+	return util.ParseConfig(f.Logger, data)
 }
 
 func fileExists(path string) bool {
@@ -129,7 +130,7 @@ func fetchConfigFromDevice(logger *log.Logger, ctx context.Context, path string)
 	return ioutil.ReadFile(filepath.Join(mnt, configDriveUserdataPath))
 }
 
-func fetchConfigFromMetadataService(f resource.Fetcher) ([]byte, error) {
+func fetchConfigFromMetadataService(f *resource.Fetcher) ([]byte, error) {
 	res, err := f.FetchToBuffer(metadataServiceUrl, resource.FetchOptions{
 		Headers: resource.ConfigHeaders,
 	})

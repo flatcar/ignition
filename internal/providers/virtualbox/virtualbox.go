@@ -23,19 +23,20 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/coreos/ignition/config/shared/errors"
-	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/distro"
-	"github.com/coreos/ignition/internal/providers/util"
-	"github.com/coreos/ignition/internal/resource"
+	"github.com/coreos/ignition/v2/config/shared/errors"
+	"github.com/coreos/ignition/v2/config/v3_1_experimental/types"
+	"github.com/coreos/ignition/v2/internal/distro"
+	"github.com/coreos/ignition/v2/internal/providers/util"
+	"github.com/coreos/ignition/v2/internal/resource"
+
+	"github.com/coreos/vcontext/report"
 )
 
 const (
 	partUUID = "99570a8a-f826-4eb0-ba4e-9dd72d55ea13"
 )
 
-func FetchConfig(f resource.Fetcher) (types.Config, report.Report, error) {
+func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 	f.Logger.Debug("Attempting to read config drive")
 	rawConfig, err := ioutil.ReadFile(filepath.Join(distro.DiskByPartUUIDDir(), partUUID))
 	if os.IsNotExist(err) {

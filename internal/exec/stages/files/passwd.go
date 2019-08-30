@@ -17,7 +17,7 @@ package files
 import (
 	"fmt"
 
-	"github.com/coreos/ignition/internal/config/types"
+	"github.com/coreos/ignition/v2/config/v3_1_experimental/types"
 )
 
 // createPasswd creates the users and groups as described in config.Passwd.
@@ -38,6 +38,8 @@ func (s *stage) createPasswd(config types.Config) error {
 			"/etc/group*",
 			"/etc/shadow*",
 			"/etc/gshadow*",
+			"/etc/subuid*",
+			"/etc/subgid*",
 			"/etc/.pwd.lock",
 			"/home",
 			"/root",

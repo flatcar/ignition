@@ -15,8 +15,8 @@
 package partitions
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
@@ -28,7 +28,7 @@ func init() {
 }
 
 func ShouldNotExistNoWipeEntry() types.Test {
-	name := "Partition should not exist but wipePartitionEntry is false"
+	name := "partition.delete.nowipe"
 	in := types.GetBaseDisk()
 	out := in
 	config := `{
@@ -47,7 +47,7 @@ func ShouldNotExistNoWipeEntry() types.Test {
 			]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -59,7 +59,7 @@ func ShouldNotExistNoWipeEntry() types.Test {
 }
 
 func DoesNotMatchNoWipeEntry() types.Test {
-	name := "Partition does not match and wipePartitionEntry is false"
+	name := "partition.match.fail"
 	in := types.GetBaseDisk()
 	out := in
 	config := `{
@@ -71,14 +71,14 @@ func DoesNotMatchNoWipeEntry() types.Test {
 				"partitions": [
 				{
 					"number": 9,
-					"size": 4096
+					"sizeMiB": 2
 				}
 				]
 			}
 			]
 		}
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -90,7 +90,7 @@ func DoesNotMatchNoWipeEntry() types.Test {
 }
 
 func ValidAndDoesNotMatchNoWipeEntry() types.Test {
-	name := "Partition does not match and wipePartitionEntry is false but the first partition matches"
+	name := "partition.partialmatch.fail"
 	in := types.GetBaseDisk()
 	out := in
 	config := `{
@@ -105,14 +105,14 @@ func ValidAndDoesNotMatchNoWipeEntry() types.Test {
 				},
 				{
 					"number": 9,
-					"size": 4096
+					"sizeMiB": 2
 				}
 				]
 			}
 			]
 		}
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -124,7 +124,7 @@ func ValidAndDoesNotMatchNoWipeEntry() types.Test {
 }
 
 func NotThereAndDoesNotMatchNoWipeEntry() types.Test {
-	name := "Partition does not match and wipePartitionEntry is false but a partition matches not existing"
+	name := "partition.partialmatch.fail.nonexistent"
 	in := types.GetBaseDisk()
 	out := in
 	config := `{
@@ -140,14 +140,14 @@ func NotThereAndDoesNotMatchNoWipeEntry() types.Test {
 				},
 				{
 					"number": 9,
-					"size": 4096
+					"sizeMiB": 2
 				}
 				]
 			}
 			]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

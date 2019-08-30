@@ -19,30 +19,26 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/distro"
-	"github.com/coreos/ignition/internal/log"
-	"github.com/coreos/ignition/internal/providers"
-	"github.com/coreos/ignition/internal/providers/util"
-	"github.com/coreos/ignition/internal/resource"
+	"github.com/coreos/ignition/v2/config/v3_1_experimental/types"
+	"github.com/coreos/ignition/v2/internal/distro"
+	"github.com/coreos/ignition/v2/internal/log"
+	"github.com/coreos/ignition/v2/internal/providers"
+	"github.com/coreos/ignition/v2/internal/providers/util"
+	"github.com/coreos/ignition/v2/internal/resource"
+
+	"github.com/coreos/vcontext/report"
 )
 
 const (
-	baseFilename    = "base.ign"
-	defaultFilename = "default.ign"
-	userFilename    = "user.ign"
+	baseFilename = "base.ign"
+	userFilename = "user.ign"
 )
 
 func FetchBaseConfig(logger *log.Logger) (types.Config, report.Report, error) {
 	return fetchConfig(logger, baseFilename)
 }
 
-func FetchDefaultConfig(logger *log.Logger) (types.Config, report.Report, error) {
-	return fetchConfig(logger, defaultFilename)
-}
-
-func FetchConfig(f resource.Fetcher) (types.Config, report.Report, error) {
+func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 	return fetchConfig(f.Logger, userFilename)
 }
 

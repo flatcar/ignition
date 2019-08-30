@@ -15,8 +15,8 @@
 package files
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
@@ -25,14 +25,13 @@ func init() {
 }
 
 func ValidateFileHashFromDataURL() types.Test {
-	name := "Validate File Hash from Data URL"
+	name := "files.create.withhash.dataurl"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	config := `{
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "contents": {
 			"source": "data:,example%20file%0A",
@@ -50,7 +49,7 @@ func ValidateFileHashFromDataURL() types.Test {
 			Contents: "example file\n",
 		},
 	})
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -62,14 +61,13 @@ func ValidateFileHashFromDataURL() types.Test {
 }
 
 func ValidateFileHashFromHTTPURL() types.Test {
-	name := "Validate File Hash from HTTP URL"
+	name := "files.create.withhash.http"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	config := `{
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "contents": {
 	        "source": "http://127.0.0.1:8080/contents",
@@ -87,7 +85,7 @@ func ValidateFileHashFromHTTPURL() types.Test {
 			Contents: "asdf\nfdsa",
 		},
 	})
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

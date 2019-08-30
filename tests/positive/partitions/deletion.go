@@ -15,8 +15,8 @@
 package partitions
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
@@ -26,7 +26,7 @@ func init() {
 }
 
 func DeleteOne() types.Test {
-	name := "Delete single partition"
+	name := "partition.delete"
 	in := append(types.GetBaseDisk(), types.Disk{
 		Alignment: types.IgnitionAlignment,
 		Partitions: types.Partitions{
@@ -57,7 +57,7 @@ func DeleteOne() types.Test {
 			]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -69,7 +69,7 @@ func DeleteOne() types.Test {
 }
 
 func DeleteAll() types.Test {
-	name := "Delete all partitions on a disk"
+	name := "partition.delete.all"
 	in := append(types.GetBaseDisk(), types.GetBaseDisk()...)
 	out := append(types.GetBaseDisk(), types.Disk{Alignment: types.IgnitionAlignment})
 	config := `{
@@ -121,7 +121,7 @@ func DeleteAll() types.Test {
 			]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

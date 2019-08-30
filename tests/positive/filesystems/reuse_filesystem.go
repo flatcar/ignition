@@ -15,8 +15,8 @@
 package filesystems
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
@@ -24,7 +24,7 @@ func init() {
 }
 
 func ReuseExistingFilesystem() types.Test {
-	name := "Reuse Existing Filesystem"
+	name := "filesystem.reuse"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	mntDevices := []types.MntDevice{
@@ -36,20 +36,18 @@ func ReuseExistingFilesystem() types.Test {
 	config := `{
 		"ignition": {"version": "$version"},
 		"storage": {
-		    "filesystems": [
-			    {
-					"mount": {
-						"device": "$DEVICE",
-						"wipeFilesystem": false,
-						"format": "xfs",
-						"label": "data",
-						"uuid": "$uuid0"
-					}
-				}
-			]
+			"filesystems": [
+			{
+				"path": "/tmp0",
+				"device": "$DEVICE",
+				"wipeFilesystem": false,
+				"format": "xfs",
+				"label": "data",
+				"uuid": "$uuid0"
+			}]
 		}
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 	in = append(in, types.Disk{
 		Alignment: types.IgnitionAlignment,
 		Partitions: types.Partitions{

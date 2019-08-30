@@ -15,8 +15,8 @@
 package partitions
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
@@ -26,7 +26,7 @@ func init() {
 }
 
 func VerifyBaseDisk() types.Test {
-	name := "Verify the base disk does not change with a matching Ignition spec"
+	name := "partition.match.all"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	config := `{
@@ -40,59 +40,59 @@ func VerifyBaseDisk() types.Test {
 				{
 					"label": "EFI-SYSTEM",
 					"number": 1,
-					"start": 4096,
-					"size": 262144,
+					"startMiB": 2,
+					"sizeMiB": 128,
 					"typeGuid": "C12A7328-F81F-11D2-BA4B-00A0C93EC93B"
 				},
 				{
 					"label": "BIOS-BOOT",
 					"number": 2,
-					"start": 266240,
-					"size": 4096,
+					"startMiB": 130,
+					"sizeMiB": 2,
 					"typeGuid": "21686148-6449-6E6F-744E-656564454649"
 				},
 				{
 					"label": "USR-A",
 					"number": 3,
-					"start": 270336,
-					"size": 2097152,
+					"startMiB": 132,
+					"sizeMiB": 1024,
 					"typeGuid": "5DFBF5F4-2848-4BAC-AA5E-0D9A20B745A6",
 					"guid": "7130c94a-213a-4e5a-8e26-6cce9662f132"
 				},
 				{
 					"label": "USR-B",
 					"number": 4,
-					"start": 2367488,
-					"size": 2097152,
+					"startMiB": 1156,
+					"sizeMiB": 1024,
 					"typeGuid": "5DFBF5F4-2848-4BAC-AA5E-0D9A20B745A6",
 					"guid": "e03dd35c-7c2d-4a47-b3fe-27f15780a57c"
 				},
 				{
 					"label": "OEM",
 					"number": 6,
-					"start": 4464640,
-					"size": 262144,
+					"startMiB": 2180,
+					"sizeMiB": 128,
 					"typeGuid": "0FC63DAF-8483-4772-8E79-3D69D8477DE4"
 				},
 				{
 					"label": "OEM-CONFIG",
 					"number": 7,
-					"start": 4726784,
-					"size": 131072,
+					"startMiB": 2308,
+					"sizeMiB": 64,
 					"typeGuid": "c95dc21a-df0e-4340-8d7b-26cbfa9a03e0"
 				},
 				{
 					"label": "ROOT",
 					"number": 9,
-					"start": 4857856,
-					"size": 12943360,
+					"startMiB": 2372,
+					"sizeMiB": 6320,
 					"typeGuid": "3884DD41-8582-4404-B9A8-E9B84F2DF50E"
 				}
 				]
 			}]
 		}
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -104,7 +104,7 @@ func VerifyBaseDisk() types.Test {
 }
 
 func VerifyBaseDiskWithWipe() types.Test {
-	name := "Verify the base disk does not change with a matching Ignition spec with wipePartitionEntry as true"
+	name := "partition.match.all.withwipe"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	// guid from USR-A is removed so if it does try to recreate partitions, it will assign a random
@@ -120,57 +120,58 @@ func VerifyBaseDiskWithWipe() types.Test {
 				{
 					"label": "EFI-SYSTEM",
 					"number": 1,
-					"start": 4096,
-					"size": 262144,
+					"startMiB": 2,
+					"sizeMiB": 128,
 					"wipePartitionEntry": true,
 					"typeGuid": "C12A7328-F81F-11D2-BA4B-00A0C93EC93B"
 				},
 				{
 					"label": "BIOS-BOOT",
 					"number": 2,
-					"start": 266240,
-					"size": 4096,
+					"startMiB": 130,
+					"sizeMiB": 2,
 					"wipePartitionEntry": true,
 					"typeGuid": "21686148-6449-6E6F-744E-656564454649"
 				},
 				{
 					"label": "USR-A",
 					"number": 3,
-					"start": 270336,
-					"size": 2097152,
+					"startMiB": 132,
+					"sizeMiB": 1024,
+					"typeGuid": "5DFBF5F4-2848-4BAC-AA5E-0D9A20B745A6",
 					"wipePartitionEntry": true,
-					"typeGuid": "5DFBF5F4-2848-4BAC-AA5E-0D9A20B745A6"
+					"guid": "7130c94a-213a-4e5a-8e26-6cce9662f132"
 				},
 				{
 					"label": "USR-B",
 					"number": 4,
-					"start": 2367488,
-					"size": 2097152,
-					"wipePartitionEntry": true,
+					"startMiB": 1156,
+					"sizeMiB": 1024,
 					"typeGuid": "5DFBF5F4-2848-4BAC-AA5E-0D9A20B745A6",
+					"wipePartitionEntry": true,
 					"guid": "e03dd35c-7c2d-4a47-b3fe-27f15780a57c"
 				},
 				{
 					"label": "OEM",
 					"number": 6,
-					"start": 4464640,
-					"size": 262144,
+					"startMiB": 2180,
+					"sizeMiB": 128,
 					"wipePartitionEntry": true,
 					"typeGuid": "0FC63DAF-8483-4772-8E79-3D69D8477DE4"
 				},
 				{
 					"label": "OEM-CONFIG",
 					"number": 7,
-					"start": 4726784,
-					"size": 131072,
+					"startMiB": 2308,
+					"sizeMiB": 64,
 					"wipePartitionEntry": true,
 					"typeGuid": "c95dc21a-df0e-4340-8d7b-26cbfa9a03e0"
 				},
 				{
 					"label": "ROOT",
 					"number": 9,
-					"start": 4857856,
-					"size": 12943360,
+					"startMiB": 2372,
+					"sizeMiB": 6320,
 					"wipePartitionEntry": true,
 					"typeGuid": "3884DD41-8582-4404-B9A8-E9B84F2DF50E"
 				}
@@ -178,7 +179,7 @@ func VerifyBaseDiskWithWipe() types.Test {
 			}]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

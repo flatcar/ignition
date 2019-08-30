@@ -15,8 +15,8 @@
 package partitions
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
@@ -30,7 +30,7 @@ func init() {
 }
 
 func PartitionSizeStart0() types.Test {
-	name := "Create a partition with size and start 0"
+	name := "partition.create.startsize0"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	config := `{
@@ -44,15 +44,15 @@ func PartitionSizeStart0() types.Test {
 				"partitions": [{
 					"label": "fills-disk",
 					"number": 1,
-					"start": 0,
-					"size": 0,
+					"startMiB": 0,
+					"sizeMiB": 0,
 					"typeGuid": "$uuid0",
 					"guid": "$uuid1"
 				}]
 			}]
 		}
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	in = append(in, types.Disk{
 		Alignment: types.IgnitionAlignment,
@@ -80,7 +80,7 @@ func PartitionSizeStart0() types.Test {
 }
 
 func PartitionStartNumber0() types.Test {
-	name := "Create a partition with number and start 0"
+	name := "partition.create.numbersize0"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	config := `{
@@ -93,26 +93,26 @@ func PartitionStartNumber0() types.Test {
 				"wipeTable": false,
 				"partitions": [{
 					"label": "uno",
-					"size": 65536,
+					"sizeMiB": 32,
 					"typeGuid": "$uuid0",
 					"guid": "$uuid1"
 				},
 				{
 					"label": "dos",
-					"size": 65536,
+					"sizeMiB": 32,
 					"typeGuid": "$uuid0",
 					"guid": "$uuid2"
 				},
 				{
 					"label": "tres",
-					"size": 65536,
+					"sizeMiB": 32,
 					"typeGuid": "$uuid0",
 					"guid": "$uuid3"
 				}]
 			}]
 		}
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	in = append(in, types.Disk{
 		Alignment: types.IgnitionAlignment,
@@ -154,7 +154,7 @@ func PartitionStartNumber0() types.Test {
 }
 
 func ResizeRootFillDisk() types.Test {
-	name := "Resize the ROOT partition to fill the disk"
+	name := "partition.resizeroot.withzeros"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	out[0].Partitions[9-2-1].Length = 12943360 + 65536
@@ -168,8 +168,8 @@ func ResizeRootFillDisk() types.Test {
 				"partitions": [{
 					"label": "ROOT",
 					"number": 9,
-					"start": 0,
-					"size": 0,
+					"startMiB": 0,
+					"sizeMiB": 0,
 					"typeGuid": "3884DD41-8582-4404-B9A8-E9B84F2DF50E",
 					"wipePartitionEntry": true
 				}
@@ -177,7 +177,7 @@ func ResizeRootFillDisk() types.Test {
 			}]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -189,7 +189,7 @@ func ResizeRootFillDisk() types.Test {
 }
 
 func VerifyRootFillsDisk() types.Test {
-	name := "Verify the ROOT partition to fills the default disk"
+	name := "partition.match.rootfillsdisk"
 	in := types.GetBaseDisk()
 	out := in
 	config := `{
@@ -202,15 +202,15 @@ func VerifyRootFillsDisk() types.Test {
 				"partitions": [{
 					"label": "ROOT",
 					"number": 9,
-					"start": 0,
-					"size": 0,
+					"startMiB": 0,
+					"sizeMiB": 0,
 					"typeGuid": "3884DD41-8582-4404-B9A8-E9B84F2DF50E"
 				}
 				]
 			}]
 		}
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -222,7 +222,7 @@ func VerifyRootFillsDisk() types.Test {
 }
 
 func VerifyUnspecifiedIsDoNotCare() types.Test {
-	name := "Verify unspecified size/start matches even when its not the max size"
+	name := "partition.match.sizestart.unspecd"
 	in := types.GetBaseDisk()
 	in[0].Partitions = append(in[0].Partitions, &types.Partition{
 		TypeCode: "blank",
@@ -245,7 +245,7 @@ func VerifyUnspecifiedIsDoNotCare() types.Test {
 			}]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -257,7 +257,7 @@ func VerifyUnspecifiedIsDoNotCare() types.Test {
 }
 
 func NumberZeroHappensLast() types.Test {
-	name := "Verify the partitions with number=0 happen are processed last"
+	name := "partition.number0"
 	in := append(types.GetBaseDisk(), types.Disk{
 		Alignment: types.IgnitionAlignment,
 		Partitions: types.Partitions{
@@ -307,7 +307,7 @@ func NumberZeroHappensLast() types.Test {
 			}]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

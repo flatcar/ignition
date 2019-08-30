@@ -22,11 +22,12 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"runtime"
 	"strings"
 
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/distro"
-	"github.com/coreos/ignition/internal/exec/util"
+	"github.com/coreos/ignition/v2/config/v3_1_experimental/types"
+	"github.com/coreos/ignition/v2/internal/distro"
+	"github.com/coreos/ignition/v2/internal/exec/util"
 )
 
 var (
@@ -35,16 +36,13 @@ var (
 
 // createFilesystems creates the filesystems described in config.Storage.Filesystems.
 func (s stage) createFilesystems(config types.Config) error {
-	fss := make([]types.Mount, 0, len(config.Storage.Filesystems))
-	for _, fs := range config.Storage.Filesystems {
-		if fs.Mount != nil {
-			fss = append(fss, *fs.Mount)
-		}
-	}
+	fss := config.Storage.Filesystems
+	s.Logger.Info("fss: %v", fss)
 
 	if len(fss) == 0 {
 		return nil
 	}
+
 	s.Logger.PushPrefix("createFilesystems")
 	defer s.Logger.PopPrefix()
 
@@ -57,35 +55,54 @@ func (s stage) createFilesystems(config types.Config) error {
 		return err
 	}
 
+	// Create filesystems concurrently up to GOMAXPROCS
+	concurrency := runtime.GOMAXPROCS(-1)
+	work := make(chan types.Filesystem, len(fss))
+	results := make(chan error)
+
+	for i := 0; i < concurrency; i++ {
+		go func() {
+			for fs := range work {
+				results <- s.createFilesystem(fs)
+			}
+		}()
+	}
+
 	for _, fs := range fss {
-		if err := s.createFilesystem(fs); err != nil {
-			return err
+		work <- fs
+	}
+	close(work)
+
+	// Return combined errors
+	var errs []string
+	for range fss {
+		if err := <-results; err != nil {
+			errs = append(errs, err.Error())
 		}
+	}
+
+	if len(errs) > 0 {
+		return errors.New(strings.Join(errs, "\n"))
 	}
 
 	return nil
 }
 
-func (s stage) createFilesystem(fs types.Mount) error {
+func (s stage) createFilesystem(fs types.Filesystem) error {
+	if fs.Format == nil {
+		return nil
+	}
 	info, err := s.readFilesystemInfo(fs)
 	if err != nil {
 		return err
 	}
 
-	if fs.Create != nil {
-		// If we are using 2.0.0 semantics...
-
-		if !fs.Create.Force && info.format != "" {
-			s.Logger.Err("filesystem detected at %q (found %s) and force was not requested", fs.Device, info.format)
-			return ErrBadFilesystem
-		}
-	} else if !fs.WipeFilesystem {
+	if fs.WipeFilesystem == nil || !*fs.WipeFilesystem {
 		// If the filesystem isn't forcefully being created, then we need
 		// to check if it is of the correct type or that no filesystem exists.
-
-		if info.format == fs.Format &&
+		if info.format == *fs.Format &&
 			(fs.Label == nil || info.label == *fs.Label) &&
-			(fs.UUID == nil || canonicalizeFilesystemUUID(info.format, info.uuid) == canonicalizeFilesystemUUID(fs.Format, *fs.UUID)) {
+			(fs.UUID == nil || canonicalizeFilesystemUUID(info.format, info.uuid) == canonicalizeFilesystemUUID(*fs.Format, *fs.UUID)) {
 			s.Logger.Info("filesystem at %q is already correctly formatted. Skipping mkfs...", fs.Device)
 			return nil
 		} else if info.format != "" {
@@ -95,18 +112,13 @@ func (s stage) createFilesystem(fs types.Mount) error {
 	}
 
 	mkfs := ""
-	var args []string
-	if fs.Create == nil {
-		args = translateMountOptionSliceToStringSlice(fs.Options)
-	} else {
-		args = translateCreateOptionSliceToStringSlice(fs.Create.Options)
-	}
-	switch fs.Format {
+	args := translateOptionSliceToStringSlice(fs.Options)
+	switch *fs.Format {
 	case "btrfs":
 		mkfs = distro.BtrfsMkfsCmd()
 		args = append(args, "--force")
 		if fs.UUID != nil {
-			args = append(args, "-U", canonicalizeFilesystemUUID(fs.Format, *fs.UUID))
+			args = append(args, "-U", canonicalizeFilesystemUUID(*fs.Format, *fs.UUID))
 		}
 		if fs.Label != nil {
 			args = append(args, "-L", *fs.Label)
@@ -115,7 +127,7 @@ func (s stage) createFilesystem(fs types.Mount) error {
 		mkfs = distro.Ext4MkfsCmd()
 		args = append(args, "-F")
 		if fs.UUID != nil {
-			args = append(args, "-U", canonicalizeFilesystemUUID(fs.Format, *fs.UUID))
+			args = append(args, "-U", canonicalizeFilesystemUUID(*fs.Format, *fs.UUID))
 		}
 		if fs.Label != nil {
 			args = append(args, "-L", *fs.Label)
@@ -124,7 +136,7 @@ func (s stage) createFilesystem(fs types.Mount) error {
 		mkfs = distro.XfsMkfsCmd()
 		args = append(args, "-f")
 		if fs.UUID != nil {
-			args = append(args, "-m", "uuid="+canonicalizeFilesystemUUID(fs.Format, *fs.UUID))
+			args = append(args, "-m", "uuid="+canonicalizeFilesystemUUID(*fs.Format, *fs.UUID))
 		}
 		if fs.Label != nil {
 			args = append(args, "-L", *fs.Label)
@@ -133,7 +145,7 @@ func (s stage) createFilesystem(fs types.Mount) error {
 		mkfs = distro.SwapMkfsCmd()
 		args = append(args, "-f")
 		if fs.UUID != nil {
-			args = append(args, "-U", canonicalizeFilesystemUUID(fs.Format, *fs.UUID))
+			args = append(args, "-U", canonicalizeFilesystemUUID(*fs.Format, *fs.UUID))
 		}
 		if fs.Label != nil {
 			args = append(args, "-L", *fs.Label)
@@ -143,13 +155,13 @@ func (s stage) createFilesystem(fs types.Mount) error {
 		// There is no force flag for mkfs.vfat, it always destroys any data on
 		// the device at which it is pointed.
 		if fs.UUID != nil {
-			args = append(args, "-i", canonicalizeFilesystemUUID(fs.Format, *fs.UUID))
+			args = append(args, "-i", canonicalizeFilesystemUUID(*fs.Format, *fs.UUID))
 		}
 		if fs.Label != nil {
 			args = append(args, "-n", *fs.Label)
 		}
 	default:
-		return fmt.Errorf("unsupported filesystem format: %q", fs.Format)
+		return fmt.Errorf("unsupported filesystem format: %q", *fs.Format)
 	}
 
 	devAlias := util.DeviceAlias(string(fs.Device))
@@ -157,7 +169,7 @@ func (s stage) createFilesystem(fs types.Mount) error {
 	if _, err := s.Logger.LogCmd(
 		exec.Command(mkfs, args...),
 		"creating %q filesystem on %q",
-		fs.Format, devAlias,
+		*fs.Format, devAlias,
 	); err != nil {
 		return fmt.Errorf("mkfs failed: %v", err)
 	}
@@ -166,16 +178,7 @@ func (s stage) createFilesystem(fs types.Mount) error {
 }
 
 // golang--
-func translateMountOptionSliceToStringSlice(opts []types.MountOption) []string {
-	newOpts := make([]string, len(opts))
-	for i, o := range opts {
-		newOpts[i] = string(o)
-	}
-	return newOpts
-}
-
-// golang--
-func translateCreateOptionSliceToStringSlice(opts []types.CreateOption) []string {
+func translateOptionSliceToStringSlice(opts []types.FilesystemOption) []string {
 	newOpts := make([]string, len(opts))
 	for i, o := range opts {
 		newOpts[i] = string(o)
@@ -189,7 +192,7 @@ type filesystemInfo struct {
 	label  string
 }
 
-func (s stage) readFilesystemInfo(fs types.Mount) (filesystemInfo, error) {
+func (s stage) readFilesystemInfo(fs types.Filesystem) (filesystemInfo, error) {
 	res := filesystemInfo{}
 	err := s.Logger.LogOp(
 		func() error {

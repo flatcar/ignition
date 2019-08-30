@@ -35,11 +35,11 @@ source ./build
 
 SRC=$(find . -name '*.go' -not -path "./vendor/*")
 
-PKG=$(cd gopath/src/${REPO_PATH}; go list ./... | \
+PKG=$(go list ./... | \
 	grep --invert-match vendor | grep --invert-match tests)
 
 # https://github.com/golang/go/issues/15067
-PKG_VET=$(cd gopath/src/${REPO_PATH}; go list ./... | \
+PKG_VET=$(go list ./... | \
 	grep --invert-match vendor | \
 	grep --invert-match internal/log)
 
@@ -59,6 +59,7 @@ go vet $PKG_VET
 echo "Running tests..."
 go test -timeout 60s -cover $@ ${PKG} --race
 
+# Disable this until we have spec 3.0.0 stablized and the docs updated
 echo "Checking docs..."
 go run internal/util/tools/docs/docs.go
 

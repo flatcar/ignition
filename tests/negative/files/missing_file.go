@@ -15,25 +15,23 @@
 package files
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
 	register.Register(register.NegativeTest, MissingRemoteContentsHTTP())
 	register.Register(register.NegativeTest, MissingRemoteContentsTFTP())
-	register.Register(register.NegativeTest, MissingRemoteContentsOEM())
 }
 
 func MissingRemoteContentsHTTP() types.Test {
-	name := "Missing File from Remote Contents - HTTP"
+	name := "files.create.http.notfound"
 	in := types.GetBaseDisk()
 	out := in
 	config := `{
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "files": [{
-	      "filesystem": "root",
 	      "path": "/foo/bar",
 	      "contents": {
 	        "source": "http://127.0.0.1:8080/asdf"
@@ -41,7 +39,7 @@ func MissingRemoteContentsHTTP() types.Test {
 	    }]
 	  }
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -53,14 +51,13 @@ func MissingRemoteContentsHTTP() types.Test {
 }
 
 func MissingRemoteContentsTFTP() types.Test {
-	name := "Missing File from Remote Contents - TFTP"
+	name := "files.create.tftp.notfound"
 	in := types.GetBaseDisk()
 	out := in
 	config := `{
           "ignition": { "version": "$version" },
           "storage": {
             "files": [{
-              "filesystem": "root",
               "path": "/foo/bar",
               "contents": {
                 "source": "tftp://127.0.0.1:69/asdf"
@@ -68,34 +65,7 @@ func MissingRemoteContentsTFTP() types.Test {
             }]
           }
         }`
-	configMinVersion := "2.1.0"
-
-	return types.Test{
-		Name:             name,
-		In:               in,
-		Out:              out,
-		Config:           config,
-		ConfigMinVersion: configMinVersion,
-	}
-}
-
-func MissingRemoteContentsOEM() types.Test {
-	name := "Create Files from Remote Contents - OEM"
-	in := types.GetBaseDisk()
-	out := in
-	config := `{
-	  "ignition": { "version": "$version" },
-	  "storage": {
-	    "files": [{
-	      "filesystem": "root",
-	      "path": "/foo/bar",
-	      "contents": {
-	        "source": "oem:///source"
-	      }
-	    }]
-	  }
-	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

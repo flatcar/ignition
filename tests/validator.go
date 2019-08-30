@@ -27,8 +27,8 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/coreos/ignition/internal/exec/util"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/internal/exec/util"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func regexpSearch(itemName, pattern string, data []byte) (string, error) {
@@ -196,7 +196,7 @@ func validatePartitionNodes(t *testing.T, ctx context.Context, partition *types.
 	}
 	for _, node := range partition.RemovedNodes {
 		path := filepath.Join(partition.MountPath, node.Directory, node.Name)
-		if _, err := os.Stat(path); !os.IsNotExist(err) {
+		if _, err := os.Lstat(path); !os.IsNotExist(err) {
 			t.Error("Node was expected to be removed and is present!", path)
 		}
 	}
@@ -213,7 +213,7 @@ func validateFilesDirectoriesAndLinks(t *testing.T, ctx context.Context, expecte
 
 func validateFile(t *testing.T, partition *types.Partition, file types.File) {
 	path := filepath.Join(partition.MountPath, file.Node.Directory, file.Node.Name)
-	fileInfo, err := os.Stat(path)
+	fileInfo, err := os.Lstat(path)
 	if err != nil {
 		t.Errorf("Error stat'ing file %s: %v", path, err)
 		return
@@ -238,7 +238,7 @@ func validateFile(t *testing.T, partition *types.Partition, file types.File) {
 
 func validateDirectory(t *testing.T, partition *types.Partition, dir types.Directory) {
 	path := filepath.Join(partition.MountPath, dir.Node.Directory, dir.Node.Name)
-	dirInfo, err := os.Stat(path)
+	dirInfo, err := os.Lstat(path)
 	if err != nil {
 		t.Errorf("Error stat'ing directory %s: %v", path, err)
 		return
@@ -259,7 +259,7 @@ func validateLink(t *testing.T, partition *types.Partition, link types.Link) {
 	}
 	if link.Hard {
 		targetPath := filepath.Join(partition.MountPath, link.Target)
-		targetInfo, err := os.Stat(targetPath)
+		targetInfo, err := os.Lstat(targetPath)
 		if err != nil {
 			t.Error("Error stat'ing target \"" + targetPath + "\": " + err.Error())
 			return
@@ -289,7 +289,7 @@ func validateLink(t *testing.T, partition *types.Partition, link types.Link) {
 			return
 		}
 		if targetPath != link.Target {
-			t.Error("Actual and expected symbolic link targets don't match")
+			t.Errorf("Actual and expected symbolic link targets don't match. Expected %q, got %q", link.Target, targetPath)
 			return
 		}
 	}
@@ -298,14 +298,14 @@ func validateLink(t *testing.T, partition *types.Partition, link types.Link) {
 
 func validateMode(t *testing.T, path string, mode int) {
 	if mode != 0 {
-		fileInfo, err := os.Stat(path)
+		fileInfo, err := os.Lstat(path)
 		if err != nil {
 			t.Error("Error running stat on node", path, err)
 			return
 		}
 
 		if fileInfo.Mode() != os.FileMode(mode) {
-			t.Error("Node Mode does not match", path, mode, fileInfo.Mode())
+			t.Error("Node Mode does not match", path, os.FileMode(mode), fileInfo.Mode())
 		}
 	}
 }

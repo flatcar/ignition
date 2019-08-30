@@ -27,8 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/ignition/internal/distro"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func run(ctx context.Context, command string, args ...string) ([]byte, error) {
@@ -81,7 +80,8 @@ func prepareRootPartitionForPasswd(ctx context.Context, root *types.Partition) e
 	}
 
 	// TODO: use the architecture, not hardcode amd64
-	_, err := run(ctx, "cp", "bin/amd64/id-stub", filepath.Join(mountPath, distro.IdCmd()))
+	// copy to mountPath/usr/bin/id as it's used by Ignition via a chroot to the mountPath
+	_, err := run(ctx, "cp", "bin/amd64/id-stub", filepath.Join(mountPath, "usr", "bin", "id"))
 	if err != nil {
 		return err
 	}
@@ -160,7 +160,7 @@ func umountPartition(p *types.Partition) error {
 
 // returns true if no error, false if error
 func runIgnition(t *testing.T, ctx context.Context, stage, root, cwd string, appendEnv []string) error {
-	args := []string{"-clear-cache", "-oem", "file", "-stage", stage,
+	args := []string{"-clear-cache", "-platform", "file", "-stage", stage,
 		"-root", root, "-log-to-stdout", "--config-cache", filepath.Join(cwd, "ignition.json")}
 	cmd := exec.CommandContext(ctx, "ignition", args...)
 	t.Log("ignition", args)
@@ -405,7 +405,7 @@ func removeEmpty(strings []string) []string {
 
 func createFilesForPartitions(ctx context.Context, partitions []*types.Partition) error {
 	for _, partition := range partitions {
-		if partition.FilesystemType == "swap" || partition.FilesystemType == "" {
+		if partition.FilesystemType == "swap" || partition.FilesystemType == "" || partition.FilesystemType == "blank" {
 			continue
 		}
 		if err := mountPartition(ctx, partition); err != nil {
@@ -436,8 +436,7 @@ func createFilesFromSlice(basedir string, files []types.File) error {
 		if err != nil {
 			return err
 		}
-		f, err := os.Create(filepath.Join(
-			basedir, file.Directory, file.Name))
+		f, err := os.OpenFile(filepath.Join(basedir, file.Directory, file.Name), os.O_CREATE|os.O_WRONLY, os.FileMode(file.Mode))
 		if err != nil {
 			return err
 		}
@@ -450,6 +449,7 @@ func createFilesFromSlice(basedir string, files []types.File) error {
 			}
 			writer.Flush()
 		}
+		os.Chown(filepath.Join(basedir, file.Directory, file.Name), file.User, file.Group)
 	}
 	return nil
 }
@@ -478,7 +478,7 @@ func createLinksFromSlice(basedir string, links []types.Link) error {
 			return err
 		}
 		if link.Hard {
-			err = os.Link(link.Target, filepath.Join(basedir, link.Directory, link.Name))
+			err = os.Link(filepath.Join(basedir, link.Target), filepath.Join(basedir, link.Directory, link.Name))
 		} else {
 			err = os.Symlink(link.Target, filepath.Join(basedir, link.Directory, link.Name))
 		}

@@ -15,8 +15,12 @@
 package general
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"fmt"
+
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
+
+	"github.com/vincent-petithory/dataurl"
 )
 
 func init() {
@@ -24,17 +28,15 @@ func init() {
 	register.Register(register.NegativeTest, AppendConfigWithInvalidHash())
 	register.Register(register.NegativeTest, ReplaceConfigWithMissingFileHTTP())
 	register.Register(register.NegativeTest, ReplaceConfigWithMissingFileTFTP())
-	register.Register(register.NegativeTest, ReplaceConfigWithMissingFileOEM())
 	register.Register(register.NegativeTest, AppendConfigWithMissingFileHTTP())
 	register.Register(register.NegativeTest, AppendConfigWithMissingFileTFTP())
-	register.Register(register.NegativeTest, AppendConfigWithMissingFileOEM())
-	register.Register(register.NegativeTest, VersionOnlyConfig22())
-	register.Register(register.NegativeTest, VersionOnlyConfig23())
 	register.Register(register.NegativeTest, VersionOnlyConfig24())
+	register.Register(register.NegativeTest, VersionOnlyConfig32())
+	register.Register(register.NegativeTest, MergingCanFail())
 }
 
 func ReplaceConfigWithInvalidHash() types.Test {
-	name := "Replace Config with Invalid Hash"
+	name := "config.replace.badhash"
 	in := types.GetBaseDisk()
 	out := in
 	mntDevices := []types.MntDevice{
@@ -54,7 +56,7 @@ func ReplaceConfigWithInvalidHash() types.Test {
 	    }
 	  }
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -67,7 +69,7 @@ func ReplaceConfigWithInvalidHash() types.Test {
 }
 
 func AppendConfigWithInvalidHash() types.Test {
-	name := "Append Config with Invalid Hash"
+	name := "config.merge.badhash"
 	in := types.GetBaseDisk()
 	out := in
 	mntDevices := []types.MntDevice{
@@ -80,7 +82,7 @@ func AppendConfigWithInvalidHash() types.Test {
 	  "ignition": {
 	    "version": "$version",
 	    "config": {
-	      "append": [{
+	      "merge": [{
 	        "source": "http://127.0.0.1:8080/config",
 			"verification": { "hash": "sha512-1a04c76c17079cd99e688ba4f1ba095b927d3fecf2b1e027af361dfeafb548f7f5f6fdd675aaa2563950db441d893ca77b0c3e965cdcb891784af96e330267d7" }
 	      }]
@@ -88,13 +90,12 @@ func AppendConfigWithInvalidHash() types.Test {
 	  },
       "storage": {
         "files": [{
-          "filesystem": "root",
           "path": "/foo/bar2",
           "contents": { "source": "data:,another%20example%20file%0A" }
         }]
       }
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -107,7 +108,7 @@ func AppendConfigWithInvalidHash() types.Test {
 }
 
 func ReplaceConfigWithMissingFileHTTP() types.Test {
-	name := "Replace Config with Missing File - HTTP"
+	name := "config.replace.http.notfound"
 	in := types.GetBaseDisk()
 	out := in
 	config := `{
@@ -120,7 +121,7 @@ func ReplaceConfigWithMissingFileHTTP() types.Test {
 	    }
 	  }
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -132,7 +133,7 @@ func ReplaceConfigWithMissingFileHTTP() types.Test {
 }
 
 func ReplaceConfigWithMissingFileTFTP() types.Test {
-	name := "Replace Config with Missing File - TFTP"
+	name := "config.replace.tftp.notfound"
 	in := types.GetBaseDisk()
 	out := in
 	config := `{
@@ -145,32 +146,7 @@ func ReplaceConfigWithMissingFileTFTP() types.Test {
 	    }
 	  }
 	}`
-	configMinVersion := "2.1.0"
-
-	return types.Test{
-		Name:             name,
-		In:               in,
-		Out:              out,
-		Config:           config,
-		ConfigMinVersion: configMinVersion,
-	}
-}
-
-func ReplaceConfigWithMissingFileOEM() types.Test {
-	name := "Replace Config with Missing File - OEM"
-	in := types.GetBaseDisk()
-	out := in
-	config := `{
-	  "ignition": {
-	    "version": "$version",
-	    "config": {
-	      "replace": {
-	        "source": "oem:///asdf"
-	      }
-	    }
-	  }
-	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -182,20 +158,20 @@ func ReplaceConfigWithMissingFileOEM() types.Test {
 }
 
 func AppendConfigWithMissingFileHTTP() types.Test {
-	name := "Append Config with Missing File - HTTP"
+	name := "config.merge.http.notfound"
 	in := types.GetBaseDisk()
 	out := in
 	config := `{
 	  "ignition": {
 	    "version": "$version",
 	    "config": {
-	      "append": [{
+	      "merge": [{
 	        "source": "http://127.0.0.1:8080/asdf"
 	      }]
 	    }
 	  }
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -207,20 +183,20 @@ func AppendConfigWithMissingFileHTTP() types.Test {
 }
 
 func AppendConfigWithMissingFileTFTP() types.Test {
-	name := "Append Config with Missing File - TFTP"
+	name := "config.merge.tftp.notfound"
 	in := types.GetBaseDisk()
 	out := in
 	config := `{
 	  "ignition": {
 	    "version": "$version",
 	    "config": {
-	      "append": [{
+	      "merge": [{
 	        "source": "tftp://127.0.0.1:69/asdf"
 	      }]
 	    }
 	  }
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -228,74 +204,11 @@ func AppendConfigWithMissingFileTFTP() types.Test {
 		Out:              out,
 		Config:           config,
 		ConfigMinVersion: configMinVersion,
-	}
-}
-
-func AppendConfigWithMissingFileOEM() types.Test {
-	name := "Append Config with Missing File - OEM"
-	in := types.GetBaseDisk()
-	out := in
-	config := `{
-	  "ignition": {
-	    "version": "$version",
-	    "config": {
-	      "append": [{
-	        "source": "oem:///asdf"
-	      }]
-	    }
-	  }
-	}`
-	configMinVersion := "2.0.0"
-
-	return types.Test{
-		Name:             name,
-		In:               in,
-		Out:              out,
-		Config:           config,
-		ConfigMinVersion: configMinVersion,
-	}
-}
-
-func VersionOnlyConfig22() types.Test {
-	name := "Version Only Config 2.2.0-experimental"
-	in := types.GetBaseDisk()
-	out := in
-	config := `{
-	  "ignition": {
-	    "version": $version"
-	  }
-	}`
-
-	return types.Test{
-		Name:              name,
-		In:                in,
-		Out:               out,
-		Config:            config,
-		ConfigShouldBeBad: true,
-	}
-}
-
-func VersionOnlyConfig23() types.Test {
-	name := "Version Only Config 2.3.0"
-	in := types.GetBaseDisk()
-	out := in
-	config := `{
-	  "ignition": {
-	    "version": "2.3.0"
-	  }
-	}`
-
-	return types.Test{
-		Name:              name,
-		In:                in,
-		Out:               out,
-		Config:            config,
-		ConfigShouldBeBad: true,
 	}
 }
 
 func VersionOnlyConfig24() types.Test {
-	name := "Version Only Config 2.4.0-experimental"
+	name := "config.version.2.4.0-exp"
 	in := types.GetBaseDisk()
 	out := in
 	config := `{
@@ -310,5 +223,77 @@ func VersionOnlyConfig24() types.Test {
 		Out:               out,
 		Config:            config,
 		ConfigShouldBeBad: true,
+	}
+}
+
+func VersionOnlyConfig32() types.Test {
+	name := "config.versions.3.2.0-exp"
+	in := types.GetBaseDisk()
+	out := in
+	config := `{
+	  "ignition": {
+	    "version": "3.2.0-experimental"
+	  }
+	}`
+
+	return types.Test{
+		Name:              name,
+		In:                in,
+		Out:               out,
+		Config:            config,
+		ConfigShouldBeBad: true,
+	}
+}
+
+func MergingCanFail() types.Test {
+	name := "config.merge.failed"
+	configMinVersion := "3.0.0-experimental"
+	in := types.GetBaseDisk()
+	out := in
+	mntDevices := []types.MntDevice{
+		{
+			Label:        "OEM",
+			Substitution: "DEVICE", // no $, since it'll get mangled by the url encoding
+		},
+	}
+	appendedConfig := `{
+	  "ignition": {
+	    "version": "3.0.0"
+	  },
+	  "storage": {
+	    "filesystems": [{
+	      "format": "",
+	      "device": "DEVICE"
+	    }]
+	  }
+	}`
+	du := dataurl.New([]byte(appendedConfig), "text/plain")
+	du.Encoding = dataurl.EncodingASCII // needed to make sure $DEVICE gets decoded correctly
+
+	config := fmt.Sprintf(`{
+	  "ignition": {
+	    "version": "3.0.0",
+	    "config": {
+	      "merge": [{
+	        "source": "%s"
+	      }]
+	    }
+	  },
+	  "storage": {
+	    "filesystems": [{
+	      "path": "/foo",
+	      "format": "ext4",
+	      "device": "DEVICE"
+	    }]
+	  }
+	}`, du.String())
+
+	return types.Test{
+		Name:             name,
+		In:               in,
+		Out:              out,
+		Config:           config,
+		MntDevices:       mntDevices,
+		ConfigMinVersion: configMinVersion,
 	}
 }

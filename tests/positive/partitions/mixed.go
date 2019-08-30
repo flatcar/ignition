@@ -15,8 +15,8 @@
 package partitions
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
@@ -27,7 +27,7 @@ func init() {
 }
 
 func Match1Recreate1Delete1Create1() types.Test {
-	name := "Match 1, recreate 2, delete 3, add 4"
+	name := "partition.match.recreate.delete.add"
 	in := append(types.GetBaseDisk(), types.Disk{
 		Alignment: types.IgnitionAlignment,
 		Partitions: types.Partitions{
@@ -86,14 +86,14 @@ func Match1Recreate1Delete1Create1() types.Test {
 				{
 					"label": "important-data",
 					"number": 1,
-					"start": 2048,
-					"size": 65536
+					"startMiB": 1,
+					"sizeMiB": 32
 				},
 				{
 					"label": "ephemeral-data",
 					"number": 2,
-					"start": 67584,
-					"size": 131072,
+					"startMiB": 33,
+					"sizeMiB": 64,
 					"wipePartitionEntry": true
 				},
 				{
@@ -104,15 +104,15 @@ func Match1Recreate1Delete1Create1() types.Test {
 				{
 					"label": "even-more-data",
 					"number": 4,
-					"start": 198656,
-					"size": 65536
+					"startMiB": 97,
+					"sizeMiB": 32
 				}
 				]
 			}
 			]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -124,7 +124,7 @@ func Match1Recreate1Delete1Create1() types.Test {
 }
 
 func NothingMatches() types.Test {
-	name := "Recreate all three partitions because nothing matches"
+	name := "partition.match.recreate"
 	// partition 1 has the wrong type guid, 2 has the wrong guid and 3 has the wrong size and label
 	// there's a test in complex.go that is similar, but 1 has the wrong size and thus everything
 	// gets moved around (with start/size 0)
@@ -184,24 +184,24 @@ func NothingMatches() types.Test {
 				{
 					"label": "important-data",
 					"number": 1,
-					"start": 2048,
-					"size": 65536,
+					"startMiB": 1,
+					"sizeMiB": 32,
 					"wipePartitionEntry": true,
 					"typeGuid": "$uuid1"
 				},
 				{
 					"label": "ephemeral-data",
 					"number": 2,
-					"start": 67584,
-					"size": 65536,
+					"startMiB": 33,
+					"sizeMiB": 32,
 					"wipePartitionEntry": true,
 					"guid": "$uuid1"
 				},
 				{
 					"label": "even-more-data",
 					"number": 3,
-					"start": 133120,
-					"size": 65536,
+					"startMiB": 65,
+					"sizeMiB": 32,
 					"wipePartitionEntry": true
 				}
 				]
@@ -209,7 +209,7 @@ func NothingMatches() types.Test {
 			]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

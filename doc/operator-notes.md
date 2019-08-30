@@ -10,9 +10,9 @@ Any HTTP response code less than 500 results in the request being completed, and
 
 Ignition will initially wait 100 milliseconds between failed attempts, and the amount of time to wait doubles for each failed attempt until it reaches 5 seconds.
 
-## EC2 and IAM roles
+## AWS and IAM roles
 
-Ignition has support for fetching files over the S3 protocol. When Ignition is running in EC2, it supports using the IAM role given to the EC2 instance to fetch protected assets from S3. If IAM credentials are not successfully fetched, Ignition will attempt to fetch the file with no credentials.
+Ignition has support for fetching files over the S3 protocol. When Ignition is running in Amazon EC2, it supports using the IAM role given to the EC2 instance to fetch protected assets from S3. If IAM credentials are not successfully fetched, Ignition will attempt to fetch the file with no credentials.
 
 
 ## Filesystem-Reuse Semantics
@@ -30,6 +30,10 @@ In the second two cases, where there is a preexisting filesystem, Ignition's beh
 If `wipeFilesystem` is set to true, Ignition will always wipe any preexisting filesystem and create the desired filesystem. Note this will result in any data on the old filesystem being lost.
 
 If `wipeFilesystem` is set to false, Ignition will then attempt to reuse the existing filesystem. If the filesystem is of the correct type, has a matching label, and has a matching UUID, then Ignition will reuse the filesystem. If the label or UUID is not set in the Ignition config, they don't need to match for Ignition to reuse the filesystem. Any preexisting data will be left on the device and will be available to the installation. If the preexisting filesystem is *not* of the correct type, then Ignition will fail, and the machine will fail to boot.
+
+## Path Traversal and Following Symlinks
+
+When resolving paths, Ignition follows symlinks on all but the last element of a path. This ensures existing symlinks on a filesystem can be overwritten while still following symlinks as expected. When writing files, links, or directories, Ignition does not allow following symlinks outside the specified filesystem. When writing files, links, or directories on the `root` filesystem, Ignition follows symlinks as if it were executing in that root; a symlink to `/etc` is followed to `/etc` on the `root` filesystem. When writing files, links, or directories to any other filesystem, Ignition fails if it tries to follow a symlink outside that filesystem.
 
 ## SELinux
 
@@ -99,3 +103,25 @@ Specifying `size` as 0 means the partition should span to the end of the largest
 ### Unspecified partition size
 If `size` is not specified and a partition with the same number exists, it will use the value of the existing partition, unless wipePartitionEntry is set.
 If `size` is not specified and there is no existing partition, or wipePartitionEntry is set, `size` act as if it were set to 0 and use the size of the largest block.
+
+## Config Merging
+
+Ignition supports fetching and merging multiple configs. This replaces the `append` functionality of the Ignition 2.x.0 specification. There are several rules that determine how configs get merged. When a child config is merged with a parent, generally the child config's values override the parent config's values.
+
+### Child configs take precedence when specified
+
+If a parent and child object are being merged, the fields in the child object take precedence over the fields in the parent config. If a field in the child object is not specified, the field from the parent is used instead.
+
+### Most lists are deduplicated
+
+All lists of objects have a field that uniquely identifies that object. If a child config contains an entry that matches an entry already specified in the parent config, those entries are merged. A few sections of the config are exempt from this behavior. See the [configuration specification][config-spec] for a complete listing. Generally the only lists that are simply appended are those that specify arguments to commands like `mkfs` or `mdadm`.
+
+### Files, Directories, and Links are deduplicated across each other
+
+Since files, directories, and links all describe filesystem entries can conflict, these lists are deduplicated across each other. This means a file in a child config can replace a link in the parent, or a directory in a child config can replace a file in the parent.
+
+### Configs are merged in a depth first traversal
+
+A child config can specify children of its own. Those children are merged into their parent config before that config is merged into its own parent. If a config specifies multiple children, those children are merged in the order they appear.
+
+[config-spec]: configuration-v3_0.md

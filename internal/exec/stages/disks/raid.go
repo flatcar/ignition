@@ -23,9 +23,9 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/distro"
-	"github.com/coreos/ignition/internal/exec/util"
+	"github.com/coreos/ignition/v2/config/v3_1_experimental/types"
+	"github.com/coreos/ignition/v2/internal/distro"
+	"github.com/coreos/ignition/v2/internal/exec/util"
 )
 
 func (s stage) createRaids(config types.Config) error {
@@ -47,17 +47,21 @@ func (s stage) createRaids(config types.Config) error {
 	}
 
 	for _, md := range config.Storage.Raid {
+		if md.Spares == nil {
+			zero := 0
+			md.Spares = &zero
+		}
 		args := []string{
 			"--create", md.Name,
 			"--force",
 			"--run",
 			"--homehost", "any",
 			"--level", md.Level,
-			"--raid-devices", fmt.Sprintf("%d", len(md.Devices)-md.Spares),
+			"--raid-devices", fmt.Sprintf("%d", len(md.Devices)-*md.Spares),
 		}
 
-		if md.Spares > 0 {
-			args = append(args, "--spare-devices", fmt.Sprintf("%d", md.Spares))
+		if *md.Spares > 0 {
+			args = append(args, "--spare-devices", fmt.Sprintf("%d", *md.Spares))
 		}
 
 		for _, o := range md.Options {

@@ -17,16 +17,17 @@ package providers
 import (
 	"errors"
 
-	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/log"
-	"github.com/coreos/ignition/internal/resource"
+	"github.com/coreos/ignition/v2/config/v3_1_experimental/types"
+	"github.com/coreos/ignition/v2/internal/log"
+	"github.com/coreos/ignition/v2/internal/resource"
+
+	"github.com/coreos/vcontext/report"
 )
 
 var (
 	ErrNoProvider = errors.New("config provider was not online")
 )
 
-type FuncFetchConfig func(f resource.Fetcher) (types.Config, report.Report, error)
+type FuncFetchConfig func(f *resource.Fetcher) (types.Config, report.Report, error)
 type FuncNewFetcher func(logger *log.Logger) (resource.Fetcher, error)
 type FuncPostStatus func(stageName string, f resource.Fetcher, e error) error

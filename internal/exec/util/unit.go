@@ -18,11 +18,9 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"path/filepath"
 
-	configUtil "github.com/coreos/ignition/config/util"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/distro"
+	"github.com/coreos/ignition/v2/config/v3_1_experimental/types"
+	"github.com/coreos/ignition/v2/internal/distro"
 
 	"github.com/vincent-petithory/dataurl"
 )
@@ -32,10 +30,14 @@ const (
 	DefaultPresetPermissions os.FileMode = 0644
 )
 
-func FileFromSystemdUnit(unit types.Unit, runtime bool) (*FetchOp, error) {
-	u, err := url.Parse(dataurl.EncodeBytes([]byte(unit.Contents)))
+func (ut Util) FileFromSystemdUnit(unit types.Unit, runtime bool) (FetchOp, error) {
+	if unit.Contents == nil {
+		empty := ""
+		unit.Contents = &empty
+	}
+	u, err := url.Parse(dataurl.EncodeBytes([]byte(*unit.Contents)))
 	if err != nil {
-		return nil, err
+		return FetchOp{}, err
 	}
 
 	var path string
@@ -45,29 +47,26 @@ func FileFromSystemdUnit(unit types.Unit, runtime bool) (*FetchOp, error) {
 		path = SystemdUnitsPath()
 	}
 
-	return &FetchOp{
-		Path: filepath.Join(path, string(unit.Name)),
-		Url:  *u,
-		Mode: configUtil.IntToPtr(int(DefaultFilePermissions)),
-	}, nil
-}
-
-func FileFromNetworkdUnit(unit types.Networkdunit) (*FetchOp, error) {
-	u, err := url.Parse(dataurl.EncodeBytes([]byte(unit.Contents)))
-	if err != nil {
-		return nil, err
+	if path, err = ut.JoinPath(path, unit.Name); err != nil {
+		return FetchOp{}, err
 	}
-	return &FetchOp{
-		Path: filepath.Join(NetworkdUnitsPath(), string(unit.Name)),
-		Url:  *u,
-		Mode: configUtil.IntToPtr(int(DefaultFilePermissions)),
+
+	return FetchOp{
+		Node: types.Node{
+			Path: path,
+		},
+		Url: *u,
 	}, nil
 }
 
-func FileFromSystemdUnitDropin(unit types.Unit, dropin types.SystemdDropin, runtime bool) (*FetchOp, error) {
-	u, err := url.Parse(dataurl.EncodeBytes([]byte(dropin.Contents)))
+func (ut Util) FileFromSystemdUnitDropin(unit types.Unit, dropin types.Dropin, runtime bool) (FetchOp, error) {
+	if dropin.Contents == nil {
+		empty := ""
+		dropin.Contents = &empty
+	}
+	u, err := url.Parse(dataurl.EncodeBytes([]byte(*dropin.Contents)))
 	if err != nil {
-		return nil, err
+		return FetchOp{}, err
 	}
 
 	var path string
@@ -77,27 +76,24 @@ func FileFromSystemdUnitDropin(unit types.Unit, dropin types.SystemdDropin, runt
 		path = SystemdDropinsPath(string(unit.Name))
 	}
 
-	return &FetchOp{
-		Path: filepath.Join(path, string(dropin.Name)),
-		Url:  *u,
-		Mode: configUtil.IntToPtr(int(DefaultFilePermissions)),
-	}, nil
-}
-
-func FileFromNetworkdUnitDropin(unit types.Networkdunit, dropin types.NetworkdDropin) (*FetchOp, error) {
-	u, err := url.Parse(dataurl.EncodeBytes([]byte(dropin.Contents)))
-	if err != nil {
-		return nil, err
+	if path, err = ut.JoinPath(path, dropin.Name); err != nil {
+		return FetchOp{}, err
 	}
-	return &FetchOp{
-		Path: filepath.Join(NetworkdDropinsPath(string(unit.Name)), string(dropin.Name)),
-		Url:  *u,
-		Mode: configUtil.IntToPtr(int(DefaultFilePermissions)),
+
+	return FetchOp{
+		Node: types.Node{
+			Path: path,
+		},
+		Url: *u,
 	}, nil
 }
 
-func (u Util) MaskUnit(unit types.Unit) error {
-	path := u.JoinPath(SystemdUnitsPath(), string(unit.Name))
+func (ut Util) MaskUnit(unit types.Unit) error {
+	path, err := ut.JoinPath(SystemdUnitsPath(), unit.Name)
+	if err != nil {
+		return err
+	}
+
 	if err := MkdirForFile(path); err != nil {
 		return err
 	}
@@ -107,39 +103,51 @@ func (u Util) MaskUnit(unit types.Unit) error {
 	return os.Symlink("/dev/null", path)
 }
 
-func (u Util) EnableUnit(unit types.Unit) error {
-	return u.appendLineToPreset(fmt.Sprintf("enable %s", unit.Name))
+func (ut Util) EnableUnit(unit types.Unit) error {
+	return ut.appendLineToPreset(fmt.Sprintf("enable %s", unit.Name))
 }
 
 // presets link in /etc, which doesn't make sense for runtime units
-// Related: https://github.com/coreos/ignition/issues/588
-func (u Util) EnableRuntimeUnit(unit types.Unit, target string) error {
+// Related: https://github.com/coreos/ignition/v2/issues/588
+func (ut Util) EnableRuntimeUnit(unit types.Unit, target string) error {
 	// unless we're running tests locally, we want to affect /run, which will
 	// be carried into the pivot, not a directory named /$DestDir/run
 	if !distro.BlackboxTesting() {
-		u.DestDir = "/"
+		ut.DestDir = "/"
+	}
+
+	nodePath, err := ut.JoinPath(SystemdRuntimeUnitWantsPath(target), unit.Name)
+	if err != nil {
+		return err
+	}
+	targetPath, err := ut.JoinPath("/", SystemdRuntimeUnitsPath(), unit.Name)
+	if err != nil {
+		return err
 	}
 
 	link := types.Link{
 		Node: types.Node{
-			Filesystem: "root",
 			// XXX(jl): make Wants/Required a parameter
-			Path: filepath.Join(SystemdRuntimeUnitWantsPath(target), string(unit.Name)),
+			Path: nodePath,
 		},
 		LinkEmbedded1: types.LinkEmbedded1{
-			Target: filepath.Join("/", SystemdRuntimeUnitsPath(), string(unit.Name)),
+			Target: targetPath,
 		},
 	}
 
-	return u.WriteLink(link)
+	return ut.WriteLink(link)
 }
 
-func (u Util) DisableUnit(unit types.Unit) error {
-	return u.appendLineToPreset(fmt.Sprintf("disable %s", unit.Name))
+func (ut Util) DisableUnit(unit types.Unit) error {
+	return ut.appendLineToPreset(fmt.Sprintf("disable %s", unit.Name))
 }
 
-func (u Util) appendLineToPreset(data string) error {
-	path := u.JoinPath(PresetPath)
+func (ut Util) appendLineToPreset(data string) error {
+	path, err := ut.JoinPath(PresetPath)
+	if err != nil {
+		return err
+	}
+
 	if err := MkdirForFile(path); err != nil {
 		return err
 	}

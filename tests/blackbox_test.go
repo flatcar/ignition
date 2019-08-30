@@ -16,6 +16,7 @@ package blackbox
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -26,15 +27,16 @@ import (
 	"testing"
 	"time"
 
-	config "github.com/coreos/ignition/config/v2_3_experimental"
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/config"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/servers"
+	"github.com/coreos/ignition/v2/tests/types"
 
 	// Register the tests
-	_ "github.com/coreos/ignition/tests/registry"
+	_ "github.com/coreos/ignition/v2/tests/registry"
 
 	// UUID generation tool
-	"github.com/pborman/uuid"
+	"github.com/google/uuid"
 )
 
 var (
@@ -43,14 +45,12 @@ var (
 	testTimeout = time.Second * 60
 	// somewhat of an abuse of contexts but go's got our hands tied
 	killContext = context.TODO()
+
+	// flag for listing all subtests that would be run without running them
+	listSubtests = false
 )
 
 func TestMain(m *testing.M) {
-	httpServer := &HTTPServer{}
-	httpServer.Start()
-	tftpServer := &TFTPServer{}
-	tftpServer.Start()
-
 	interruptChan := make(chan os.Signal, 3)
 	signal.Notify(interruptChan, os.Interrupt, syscall.SIGTERM)
 	tmp, killCancel := context.WithCancel(context.Background())
@@ -65,6 +65,15 @@ func TestMain(m *testing.M) {
 		}
 	}()
 
+	flag.BoolVar(&listSubtests, "list", false, "list tests that would be run without running them")
+	flag.Parse()
+
+	if !listSubtests {
+		httpServer := &servers.HTTPServer{}
+		httpServer.Start()
+		tftpServer := &servers.TFTPServer{}
+		tftpServer.Start()
+	}
 	os.Exit(m.Run())
 }
 
@@ -72,8 +81,12 @@ func TestIgnitionBlackBox(t *testing.T) {
 	for _, test := range register.Tests[register.PositiveTest] {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
-			if killContext.Err() != nil {
+			if killContext.Err() != nil || (testing.Short() && test.ConfigMinVersion != test.ConfigVersion) {
 				t.SkipNow()
+			}
+			if listSubtests {
+				fmt.Println(t.Name())
+				return
 			}
 			t.Parallel()
 			err := outer(t, test, false)
@@ -88,8 +101,12 @@ func TestIgnitionBlackBoxNegative(t *testing.T) {
 	for _, test := range register.Tests[register.NegativeTest] {
 		test := test
 		t.Run(test.Name, func(t *testing.T) {
-			if killContext.Err() != nil {
+			if killContext.Err() != nil || (testing.Short() && test.ConfigMinVersion != test.ConfigVersion) {
 				t.SkipNow()
+			}
+			if listSubtests {
+				fmt.Println(t.Name())
+				return
 			}
 			t.Parallel()
 			err := outer(t, test, true)
@@ -123,19 +140,13 @@ func outer(t *testing.T, test types.Test, negativeTests bool) error {
 		return fmt.Errorf("failed to change mode of temp dir: %v", err)
 	}
 
-	oemLookasideDir := filepath.Join(tmpDirectory, "oem-lookaside")
 	systemConfigDir := filepath.Join(tmpDirectory, "system")
 	var rootPartition *types.Partition
 
 	// Setup
-	err = createFilesFromSlice(oemLookasideDir, test.OEMLookasideFiles)
+	err = createFilesFromSlice(systemConfigDir, test.SystemDirFiles)
 	// Defer before the error handling because the createFilesFromSlice function
 	// can fail after partially-creating things
-	defer os.RemoveAll(oemLookasideDir)
-	if err != nil {
-		return err
-	}
-	err = createFilesFromSlice(systemConfigDir, test.SystemDirFiles)
 	defer os.RemoveAll(systemConfigDir)
 	if err != nil {
 		return err
@@ -155,7 +166,7 @@ func outer(t *testing.T, test types.Test, negativeTests bool) error {
 		// Finish data setup
 		for _, part := range disk.Partitions {
 			if part.GUID == "" {
-				part.GUID = uuid.New()
+				part.GUID = uuid.New().String()
 				if err != nil {
 					return err
 				}
@@ -244,6 +255,8 @@ func outer(t *testing.T, test types.Test, negativeTests bool) error {
 		}
 	}
 
+	t.Logf("Rendered Ignition Config:\n%s", test.Config)
+
 	// If we're not expecting the config to be bad, make sure it passes
 	// validation.
 	if !test.ConfigShouldBeBad {
@@ -262,38 +275,34 @@ func outer(t *testing.T, test types.Test, negativeTests bool) error {
 	}
 
 	// Ignition
-	appendEnv := []string{
-		"IGNITION_OEM_DEVICE=" + test.In[0].Partitions.GetPartition("OEM").Device,
-		"IGNITION_OEM_LOOKASIDE_DIR=" + oemLookasideDir,
-		"IGNITION_SYSTEM_CONFIG_DIR=" + systemConfigDir,
-	}
-	disksErr := runIgnition(t, ctx, "disks", rootPartition.MountPath, tmpDirectory, appendEnv)
-	if !negativeTests && disksErr != nil {
-		return disksErr
-	}
+	appendEnv := test.Env
+	appendEnv = append(appendEnv, "IGNITION_SYSTEM_CONFIG_DIR="+systemConfigDir)
 
-	var filesErr error
-	if disksErr == nil {
-		// Even if we're running negative tests, we shouldn't run the files stage if the disks stage
-		// failed. This is how Ignition was designed to be used.
+	if !negativeTests {
+		if err := runIgnition(t, ctx, "disks", "", tmpDirectory, appendEnv); err != nil {
+			return err
+		}
+
 		if err := mountPartition(ctx, rootPartition); err != nil {
 			return err
 		}
-		filesErr = runIgnition(t, ctx, "files", rootPartition.MountPath, tmpDirectory, appendEnv)
+
+		if err := runIgnition(t, ctx, "mount", rootPartition.MountPath, tmpDirectory, appendEnv); err != nil {
+			return err
+		}
+
+		filesErr := runIgnition(t, ctx, "files", rootPartition.MountPath, tmpDirectory, appendEnv)
+		if err := runIgnition(t, ctx, "umount", rootPartition.MountPath, tmpDirectory, appendEnv); err != nil {
+			return err
+		}
 		if err := umountPartition(rootPartition); err != nil {
 			return err
 		}
-	}
+		if filesErr != nil {
+			return filesErr
+		}
 
-	if !negativeTests && filesErr != nil {
-		return filesErr
-	}
-	if negativeTests && disksErr == nil && filesErr == nil {
-		return fmt.Errorf("Expected failure and ignition succeeded")
-	}
-
-	for _, disk := range test.Out {
-		if !negativeTests {
+		for _, disk := range test.Out {
 			err = validateDisk(t, disk)
 			if err != nil {
 				return err
@@ -304,6 +313,30 @@ func outer(t *testing.T, test types.Test, negativeTests bool) error {
 			}
 			validateFilesDirectoriesAndLinks(t, ctx, disk.Partitions)
 		}
+		return nil
+	} else {
+		if err := runIgnition(t, ctx, "disks", "", tmpDirectory, appendEnv); err != nil {
+			return nil // error is expected
+		}
+
+		if err := mountPartition(ctx, rootPartition); err != nil {
+			return err
+		}
+
+		if err := runIgnition(t, ctx, "mount", rootPartition.MountPath, tmpDirectory, appendEnv); err != nil {
+			return nil // error is expected
+		}
+
+		filesErr := runIgnition(t, ctx, "files", rootPartition.MountPath, tmpDirectory, appendEnv)
+		if err := runIgnition(t, ctx, "umount", rootPartition.MountPath, tmpDirectory, appendEnv); err != nil {
+			return nil
+		}
+		if err := umountPartition(rootPartition); err != nil {
+			return nil
+		}
+		if filesErr != nil {
+			return nil // error is expected
+		}
+		return fmt.Errorf("Expected failure and ignition succeeded")
 	}
-	return nil
 }

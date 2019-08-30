@@ -15,8 +15,8 @@
 package filesystems
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
@@ -28,7 +28,7 @@ func init() {
 }
 
 func ReformatToBTRFS() types.Test {
-	name := "Reformat a Filesystem to Btrfs"
+	name := "filesystem.create.btrfs.wipe"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	mntDevices := []types.MntDevice{
@@ -41,18 +41,14 @@ func ReformatToBTRFS() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "filesystems": [{
-	      "mount": {
-	        "device": "$DEVICE",
-	        "format": "btrfs",
-	        "create": {
-	          "force": true,
-	          "options": [ "--label=OEM", "--uuid=$uuid0" ]
-	        }
-	      }
+	      "path": "/tmp0",
+	      "device": "$DEVICE",
+	      "format": "btrfs",
+	      "wipeFilesystem": true
 	    }]
 	  }
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 	out[0].Partitions.GetPartition("OEM").FilesystemType = "btrfs"
 
 	return types.Test{
@@ -66,7 +62,7 @@ func ReformatToBTRFS() types.Test {
 }
 
 func ReformatToXFS() types.Test {
-	name := "Reformat a Filesystem to XFS"
+	name := "filesystem.create.xfs.wipe"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	mntDevices := []types.MntDevice{
@@ -79,18 +75,16 @@ func ReformatToXFS() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "filesystems": [{
-	      "mount": {
-	        "device": "$DEVICE",
-	        "format": "xfs",
-	        "create": {
-	          "force": true,
-	          "options": [ "-L", "OEM", "-m", "uuid=$uuid0" ]
-	        }
-	      }
+	      "path": "/tmp0",
+	      "device": "$DEVICE",
+	      "format": "xfs",
+	      "label": "OEM",
+	      "uuid": "$uuid0",
+	      "wipeFilesystem": true
 	    }]
 	  }
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 	out[0].Partitions.GetPartition("OEM").FilesystemType = "xfs"
 
 	return types.Test{
@@ -104,7 +98,7 @@ func ReformatToXFS() types.Test {
 }
 
 func ReformatToVFAT() types.Test {
-	name := "Reformat a Filesystem to VFAT"
+	name := "filesystem.create.vfat.wipe"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	mntDevices := []types.MntDevice{
@@ -117,17 +111,16 @@ func ReformatToVFAT() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "filesystems": [{
-	      "mount": {
-	        "device": "$DEVICE",
-	        "format": "vfat",
-	        "label": "OEM",
-		"uuid": "2e24ec82",
-		"wipeFilesystem": true
-	      }
+	      "path": "/tmp0",
+	      "device": "$DEVICE",
+	      "format": "vfat",
+	      "label": "OEM",
+	      "uuid": "2e24ec82",
+	      "wipeFilesystem": true
 	    }]
 	  }
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 	out[0].Partitions.GetPartition("OEM").FilesystemType = "vfat"
 	out[0].Partitions.GetPartition("OEM").FilesystemUUID = "2e24ec82"
 
@@ -142,7 +135,7 @@ func ReformatToVFAT() types.Test {
 }
 
 func ReformatToEXT4() types.Test {
-	name := "Reformat a Filesystem to EXT4"
+	name := "filesystem.create.ext4.wipe"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	mntDevices := []types.MntDevice{
@@ -155,18 +148,16 @@ func ReformatToEXT4() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "filesystems": [{
-	      "mount": {
-	        "device": "$DEVICE",
-	        "format": "ext4",
-	        "create": {
-	          "force": true,
-	          "options": [ "-L", "OEM", "-U", "$uuid0" ]
-	        }
-	      }
+	      "path": "/tmp0",
+	      "device": "$DEVICE",
+	      "format": "ext4",
+	      "label": "OEM",
+	      "uuid": "$uuid0",
+	      "wipeFilesystem": true
 	    }]
 	  }
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 	in[0].Partitions.GetPartition("OEM").FilesystemType = "ext2"
 	out[0].Partitions.GetPartition("OEM").FilesystemType = "ext4"
 	out[0].Partitions.GetPartition("OEM").FilesystemUUID = "$uuid0"
@@ -182,7 +173,7 @@ func ReformatToEXT4() types.Test {
 }
 
 func ReformatToSWAP() types.Test {
-	name := "Reformat a Filesystem to SWAP"
+	name := "filesystem.create.swap.wipe"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	mntDevices := []types.MntDevice{
@@ -195,17 +186,16 @@ func ReformatToSWAP() types.Test {
 	  "ignition": { "version": "$version" },
 	  "storage": {
 	    "filesystems": [{
-	      "mount": {
-	        "device": "$DEVICE",
-	        "format": "swap",
-	        "label": "OEM",
-	        "uuid": "$uuid0",
-		"wipeFilesystem": true
-	      }
+	      "path": "/tmp0",
+	      "device": "$DEVICE",
+	      "format": "swap",
+	      "label": "OEM",
+	      "uuid": "$uuid0",
+	      "wipeFilesystem": true
 	    }]
 	  }
 	}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 	in[0].Partitions.GetPartition("OEM").FilesystemType = "ext2"
 	out[0].Partitions.GetPartition("OEM").FilesystemType = "swap"
 	out[0].Partitions.GetPartition("OEM").FilesystemUUID = "$uuid0"

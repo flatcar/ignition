@@ -18,10 +18,11 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/providers/util"
-	"github.com/coreos/ignition/internal/resource"
+	"github.com/coreos/ignition/v2/config/v3_1_experimental/types"
+	"github.com/coreos/ignition/v2/internal/providers/util"
+	"github.com/coreos/ignition/v2/internal/resource"
+
+	"github.com/coreos/vcontext/report"
 )
 
 const (
@@ -29,7 +30,7 @@ const (
 	defaultFilename   = "config.ign"
 )
 
-func FetchConfig(f resource.Fetcher) (types.Config, report.Report, error) {
+func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 	filename := os.Getenv(cfgFilenameEnvVar)
 	if filename == "" {
 		filename = defaultFilename

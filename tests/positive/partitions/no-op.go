@@ -15,8 +15,8 @@
 package partitions
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
@@ -26,7 +26,7 @@ func init() {
 }
 
 func DoNothing() types.Test {
-	name := "Do nothing when told to add no partitions"
+	name := "parition.no-op"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	config := `{
@@ -41,7 +41,7 @@ func DoNothing() types.Test {
 			]
 		}
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -53,7 +53,7 @@ func DoNothing() types.Test {
 }
 
 func SpecifiedNonexistent() types.Test {
-	name := "Verify partitions with shouldexist=false do not get created"
+	name := "partition.no-op.nonexistent"
 	in := append(types.GetBaseDisk(), types.Disk{Alignment: types.IgnitionAlignment})
 	out := append(types.GetBaseDisk(), types.Disk{Alignment: types.IgnitionAlignment})
 	config := `{
@@ -99,7 +99,7 @@ func SpecifiedNonexistent() types.Test {
 			]
 		}
 	}`
-	configMinVersion := "2.3.0-experimental"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

@@ -15,8 +15,8 @@
 package regression
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
@@ -25,8 +25,7 @@ func init() {
 
 func VFATIgnoresWipeFilesystem() types.Test {
 	// Originally found in https://github.com/coreos/bugs/issues/2055
-
-	name := "Regression: VFAT ignores WipeFilesystem"
+	name := "regression.filesystem.ignoreswipe"
 	in := types.GetBaseDisk()
 	out := in
 	mntDevices := []types.MntDevice{
@@ -39,14 +38,14 @@ func VFATIgnoresWipeFilesystem() types.Test {
                 "ignition": {"version": "$version"},
                 "storage": {
                         "filesystems": [{
-                                "mount": {
-                                        "device": "$DEVICE",
-                                        "format": "vfat",
-                                        "wipeFilesystem": false
-                                }}]
-                        }
+                                "device": "$DEVICE",
+                                "format": "vfat",
+                                "path": "/tmp0",
+                                "wipeFilesystem": false
+                        }]
+                }
         }`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

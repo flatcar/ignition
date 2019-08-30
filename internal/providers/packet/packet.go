@@ -25,10 +25,11 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/providers/util"
-	"github.com/coreos/ignition/internal/resource"
+	"github.com/coreos/ignition/v2/config/v3_1_experimental/types"
+	"github.com/coreos/ignition/v2/internal/providers/util"
+	"github.com/coreos/ignition/v2/internal/resource"
+
+	"github.com/coreos/vcontext/report"
 )
 
 var (
@@ -51,7 +52,7 @@ var (
 	}
 )
 
-func FetchConfig(f resource.Fetcher) (types.Config, report.Report, error) {
+func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 	// Packet's metadata service returns "Not Acceptable" when queried
 	// with the default Accept header.
 	headers := resource.ConfigHeaders
@@ -112,7 +113,7 @@ func postMessage(stageName string, e error, url string) error {
 		}
 	} else {
 		m = mStruct{
-			State:   "succeeded",
+			State:   "running",
 			Message: stageName + " Ignition status: finished successfully",
 		}
 	}

@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// The noop provider does nothing, for use by unimplemented oems.
+// The noop provider does nothing, for use by unimplemented platforms.
 
 package noop
 
 import (
-	"github.com/coreos/ignition/config/shared/errors"
-	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/resource"
+	"github.com/coreos/ignition/v2/config/shared/errors"
+	"github.com/coreos/ignition/v2/config/v3_1_experimental/types"
+	"github.com/coreos/ignition/v2/internal/resource"
+
+	"github.com/coreos/vcontext/report"
 )
 
-func FetchConfig(f resource.Fetcher) (types.Config, report.Report, error) {
+func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 	f.Logger.Debug("noop provider fetching empty config")
 	return types.Config{}, report.Report{}, errors.ErrEmpty
 }

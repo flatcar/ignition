@@ -15,8 +15,8 @@
 package regression
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
@@ -26,7 +26,7 @@ func init() {
 
 func EquivalentFilesystemUUIDsTreatedDistinctEXT4() types.Test {
 	// Originally found in https://github.com/coreos/bugs/issues/2064
-	name := "Regression: Equivalent Filesystem UUIDs treated as distinct - ext4"
+	name := "regression.uuids.ext4"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	mntDevices := []types.MntDevice{
@@ -40,16 +40,15 @@ func EquivalentFilesystemUUIDsTreatedDistinctEXT4() types.Test {
 		"storage": {
 		    "filesystems": [
 		      {
-		        "mount": {
-		          "device": "$DEVICE",
-		          "format": "ext4",
-		          "uuid": "$uuid0"
-		        }
+		        "path": "/tmp0",
+		        "device": "$DEVICE",
+		        "format": "ext4",
+		        "uuid": "$uuid0"
 		      }
 		    ]
 		  }
 		}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 	in[0].Partitions.GetPartition("EFI-SYSTEM").FilesystemType = "ext4"
 	out[0].Partitions.GetPartition("EFI-SYSTEM").FilesystemType = "ext4"
 	in[0].Partitions.GetPartition("EFI-SYSTEM").FilesystemUUID = "$uuid0"
@@ -67,7 +66,7 @@ func EquivalentFilesystemUUIDsTreatedDistinctEXT4() types.Test {
 
 func EquivalentFilesystemUUIDsTreatedDistinctVFAT() types.Test {
 	// Originally found in https://github.com/coreos/bugs/issues/2064
-	name := "Regression: Equivalent Filesystem UUIDs treated as distinct - vfat"
+	name := "regression.uuids.vfat"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	mntDevices := []types.MntDevice{
@@ -81,16 +80,15 @@ func EquivalentFilesystemUUIDsTreatedDistinctVFAT() types.Test {
 		"storage": {
 		    "filesystems": [
 		      {
-		        "mount": {
-		          "device": "$DEVICE",
-		          "format": "vfat",
-		          "uuid": "2E24EC82"
-		        }
+		        "path": "/tmp0",
+		        "device": "$DEVICE",
+		        "format": "vfat",
+		        "uuid": "2E24EC82"
 		      }
 		    ]
 		  }
 		}`
-	configMinVersion := "2.1.0"
+	configMinVersion := "3.0.0"
 	in[0].Partitions.GetPartition("EFI-SYSTEM").FilesystemUUID = "2e24ec82"
 	out[0].Partitions.GetPartition("EFI-SYSTEM").FilesystemUUID = "2e24ec82"
 	out[0].Partitions.GetPartition("EFI-SYSTEM").FilesystemType = "vfat"

@@ -15,8 +15,8 @@
 package partitions
 
 import (
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/coreos/ignition/v2/tests/register"
+	"github.com/coreos/ignition/v2/tests/types"
 )
 
 func init() {
@@ -26,7 +26,7 @@ func init() {
 }
 
 func Partition9DoesNotFillDisk() types.Test {
-	name := "Partition 9 is size 0 but does not fill the disk"
+	name := "partition.match.failstofill"
 	in := types.GetBaseDisk()
 	in[0].Partitions = append(in[0].Partitions, &types.Partition{
 		Number: 10,
@@ -49,7 +49,7 @@ func Partition9DoesNotFillDisk() types.Test {
 			]
 		}
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,
@@ -61,7 +61,7 @@ func Partition9DoesNotFillDisk() types.Test {
 }
 
 func Partition9DoesNotStartCorrectly() types.Test {
-	name := "Partition 9 does not start at the largest chunk"
+	name := "partition.match.failstostart"
 	in := types.GetBaseDisk()
 	//insert a gap before 9
 	tmp := in[0].Partitions[9-2-1]
@@ -87,7 +87,7 @@ func Partition9DoesNotStartCorrectly() types.Test {
 			]
 		}
 	}`
-	configMinVersion := "2.0.0"
+	configMinVersion := "3.0.0"
 
 	return types.Test{
 		Name:             name,

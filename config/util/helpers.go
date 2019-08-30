@@ -19,16 +19,17 @@ func IntToPtr(x int) *int {
 }
 
 func StrToPtr(s string) *string {
-	if s == "" {
-		return nil
-	}
-	return &s
-}
-
-func StrToPtrStrict(s string) *string {
 	return &s
 }
 
 func BoolToPtr(b bool) *bool {
 	return &b
+}
+
+func NilOrEmpty(s *string) bool {
+	return s == nil || *s == ""
+}
+
+func NotEmpty(s *string) bool {
+	return s != nil && *s != ""
 }

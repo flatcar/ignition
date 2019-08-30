@@ -17,14 +17,16 @@ package util
 import (
 	"fmt"
 	"os/exec"
+	"os/user"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
 
-	keys "github.com/coreos/ignition/internal/authorized_keys_d"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/distro"
-	"github.com/coreos/ignition/internal/log"
+	"github.com/coreos/ignition/v2/config/v3_1_experimental/types"
+	"github.com/coreos/ignition/v2/internal/as_user"
+	"github.com/coreos/ignition/v2/internal/distro"
+	"github.com/coreos/ignition/v2/internal/log"
 )
 
 // EnsureUser ensures that the user exists as described. If the user does not
@@ -35,50 +37,37 @@ func (u Util) EnsureUser(c types.PasswdUser) error {
 	if err != nil {
 		return err
 	}
-	if c.Create != nil {
-		cu := c.Create
-		c.Gecos = cu.Gecos
-		c.Groups = translateV2_1UsercreateGroupSliceToPasswdUserGroupSlice(cu.Groups)
-		c.HomeDir = cu.HomeDir
-		c.NoCreateHome = cu.NoCreateHome
-		c.NoLogInit = cu.NoLogInit
-		c.NoUserGroup = cu.NoUserGroup
-		c.PrimaryGroup = cu.PrimaryGroup
-		c.Shell = cu.Shell
-		c.System = cu.System
-		c.UID = cu.UID
-	}
 	args := []string{"--root", u.DestDir}
 
 	var cmd string
 	if exists {
 		cmd = distro.UsermodCmd()
 
-		if c.HomeDir != "" {
-			args = append(args, "--home", c.HomeDir, "--move-home")
+		if c.HomeDir != nil && *c.HomeDir != "" {
+			args = append(args, "--home", *c.HomeDir, "--move-home")
 		}
 	} else {
 		cmd = distro.UseraddCmd()
 
-		if c.HomeDir != "" {
-			args = append(args, "--home-dir", c.HomeDir)
+		if c.HomeDir != nil && *c.HomeDir != "" {
+			args = append(args, "--home-dir", *c.HomeDir)
 		}
 
-		if c.NoCreateHome {
+		if c.NoCreateHome != nil && *c.NoCreateHome {
 			args = append(args, "--no-create-home")
 		} else {
 			args = append(args, "--create-home")
 		}
 
-		if c.NoUserGroup {
+		if c.NoUserGroup != nil && *c.NoUserGroup {
 			args = append(args, "--no-user-group")
 		}
 
-		if c.System {
+		if c.System != nil && *c.System {
 			args = append(args, "--system")
 		}
 
-		if c.NoLogInit {
+		if c.NoLogInit != nil && *c.NoLogInit {
 			args = append(args, "--no-log-init")
 		}
 	}
@@ -100,20 +89,20 @@ func (u Util) EnsureUser(c types.PasswdUser) error {
 			strconv.FormatUint(uint64(*c.UID), 10))
 	}
 
-	if c.Gecos != "" {
-		args = append(args, "--comment", c.Gecos)
+	if c.Gecos != nil && *c.Gecos != "" {
+		args = append(args, "--comment", *c.Gecos)
 	}
 
-	if c.PrimaryGroup != "" {
-		args = append(args, "--gid", c.PrimaryGroup)
+	if c.PrimaryGroup != nil && *c.PrimaryGroup != "" {
+		args = append(args, "--gid", *c.PrimaryGroup)
 	}
 
 	if len(c.Groups) > 0 {
 		args = append(args, "--groups", strings.Join(translateV2_1PasswdUserGroupSliceToStringSlice(c.Groups), ","))
 	}
 
-	if c.Shell != "" {
-		args = append(args, "--shell", c.Shell)
+	if c.Shell != nil && *c.Shell != "" {
+		args = append(args, "--shell", *c.Shell)
 	}
 
 	args = append(args, c.Name)
@@ -121,15 +110,6 @@ func (u Util) EnsureUser(c types.PasswdUser) error {
 	_, err = u.LogCmd(exec.Command(cmd, args...),
 		"creating or modifying user %q", c.Name)
 	return err
-}
-
-// golang--
-func translateV2_1UsercreateGroupSliceToPasswdUserGroupSlice(groups []types.UsercreateGroup) []types.Group {
-	newGroups := make([]types.Group, len(groups))
-	for i, g := range groups {
-		newGroups[i] = types.Group(g)
-	}
-	return newGroups
 }
 
 // CheckIfUserExists will return Info log when user is empty
@@ -160,7 +140,27 @@ func translateV2_1PasswdUserGroupSliceToStringSlice(groups []types.Group) []stri
 	return newGroups
 }
 
-// Add the provided SSH public keys to the user's authorized keys.
+// writeAuthKeysFile writes the content in keys to the path fp for the user,
+// creating any directories in fp as needed.
+func writeAuthKeysFile(u *user.User, fp string, keys []byte) error {
+	if err := as_user.MkdirAll(u, filepath.Dir(fp), 0700); err != nil {
+		return err
+	}
+
+	f, err := as_user.OpenFile(u, fp, syscall.O_WRONLY|syscall.O_CREAT|syscall.O_TRUNC, 0600)
+	if err != nil {
+		return err
+	}
+	if _, err = f.Write(keys); err != nil {
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// AuthorizeSSHKeys adds the provided SSH public keys to the user's authorized keys.
 func (u Util) AuthorizeSSHKeys(c types.PasswdUser) error {
 	if len(c.SSHAuthorizedKeys) == 0 {
 		return nil
@@ -171,12 +171,6 @@ func (u Util) AuthorizeSSHKeys(c types.PasswdUser) error {
 		if err != nil {
 			return fmt.Errorf("unable to lookup user %q", c.Name)
 		}
-
-		akd, err := keys.Open(usr, true)
-		if err != nil {
-			return err
-		}
-		defer akd.Close()
 
 		// TODO(vc): introduce key names to config?
 		// TODO(vc): validate c.SSHAuthorizedKeys well-formedness.
@@ -189,12 +183,10 @@ func (u Util) AuthorizeSSHKeys(c types.PasswdUser) error {
 			ks = ks + "\n"
 		}
 
-		if err := akd.Add("flatcar-ignition", []byte(ks), true, true); err != nil {
-			return err
-		}
-
-		if err := akd.Sync(); err != nil {
-			return err
+		if distro.WriteAuthorizedKeysFragment() {
+			writeAuthKeysFile(usr, filepath.Join(usr.HomeDir, ".ssh", "authorized_keys.d", "ignition"), []byte(ks))
+		} else {
+			writeAuthKeysFile(usr, filepath.Join(usr.HomeDir, ".ssh", "authorized_keys"), []byte(ks))
 		}
 
 		return nil
@@ -242,13 +234,13 @@ func (u Util) CreateGroup(g types.PasswdGroup) error {
 			strconv.FormatUint(uint64(*g.Gid), 10))
 	}
 
-	if g.PasswordHash != "" {
-		args = append(args, "--password", g.PasswordHash)
+	if g.PasswordHash != nil && *g.PasswordHash != "" {
+		args = append(args, "--password", *g.PasswordHash)
 	} else {
 		args = append(args, "--password", "*")
 	}
 
-	if g.System {
+	if g.System != nil && *g.System {
 		args = append(args, "--system")
 	}
 

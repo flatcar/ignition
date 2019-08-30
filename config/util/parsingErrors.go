@@ -15,60 +15,36 @@
 package util
 
 import (
-	"bytes"
-	"errors"
+	"encoding/json"
+	"fmt"
 
-	configErrors "github.com/coreos/ignition/config/shared/errors"
-	"github.com/coreos/ignition/config/v2_3_experimental/types"
-	"github.com/coreos/ignition/config/validate/report"
+	"github.com/coreos/ignition/v2/config/shared/errors"
 
-	json "github.com/ajeddeloh/go-json"
-	"go4.org/errorutil"
+	"github.com/coreos/vcontext/path"
+	"github.com/coreos/vcontext/report"
+	"github.com/coreos/vcontext/tree"
 )
 
-var (
-	ErrValidConfig = errors.New("HandleParseErrors called with a valid config")
-)
-
-// HandleParseErrors will attempt to unmarshal an invalid rawConfig into the
-// latest config struct, so as to generate a report.Report from the errors. It
-// will always return an error. This is called after config/v* parse functions
-// chain has failed to parse a config.
-func HandleParseErrors(rawConfig []byte) (report.Report, error) {
-	config := types.Config{}
-	err := json.Unmarshal(rawConfig, &config)
+// HandleParseErrors will attempt to unmarshal an invalid rawConfig into "to".
+// If it fails to unmarsh it will generate a report.Report from the errors.
+func HandleParseErrors(rawConfig []byte, to interface{}) (report.Report, error) {
+	r := report.Report{}
+	err := json.Unmarshal(rawConfig, to)
 	if err == nil {
-		return report.Report{}, ErrValidConfig
+		return report.Report{}, nil
 	}
 
-	// Handle json syntax and type errors first, since they are fatal but have offset info
-	if serr, ok := err.(*json.SyntaxError); ok {
-		line, col, highlight := errorutil.HighlightBytePosition(bytes.NewReader(rawConfig), serr.Offset)
-		return report.Report{
-				Entries: []report.Entry{{
-					Kind:      report.EntryError,
-					Message:   serr.Error(),
-					Line:      line,
-					Column:    col,
-					Highlight: highlight,
-				}},
-			},
-			configErrors.ErrInvalid
+	var node tree.Leaf
+	switch t := err.(type) {
+	case *json.SyntaxError:
+		node.Marker = tree.MarkerFromIndices(t.Offset, -1)
+	case *json.UnmarshalTypeError:
+		node.Marker = tree.MarkerFromIndices(t.Offset, -1)
 	}
+	tree.FixLineColumn(node, rawConfig)
+	fmt.Printf("%+v\n", node.Marker.StartP.Index)
+	r.AddOnError(path.ContextPath{Tag: "json"}, err)
+	r.Correlate(node)
 
-	if terr, ok := err.(*json.UnmarshalTypeError); ok {
-		line, col, highlight := errorutil.HighlightBytePosition(bytes.NewReader(rawConfig), terr.Offset)
-		return report.Report{
-				Entries: []report.Entry{{
-					Kind:      report.EntryError,
-					Message:   terr.Error(),
-					Line:      line,
-					Column:    col,
-					Highlight: highlight,
-				}},
-			},
-			configErrors.ErrInvalid
-	}
-
-	return report.ReportFromError(err, report.EntryError), err
+	return r, errors.ErrInvalid
 }
