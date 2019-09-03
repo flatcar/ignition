@@ -177,7 +177,7 @@ func ResizeRootFillDisk() types.Test {
 			}]
 		}
 	}`
-	configMinVersion := "2.3.0"
+	configMinVersion := "2.3.0-experimental"
 
 	return types.Test{
 		Name:             name,
@@ -245,7 +245,7 @@ func VerifyUnspecifiedIsDoNotCare() types.Test {
 			}]
 		}
 	}`
-	configMinVersion := "2.3.0"
+	configMinVersion := "2.3.0-experimental"
 
 	return types.Test{
 		Name:             name,
@@ -307,7 +307,7 @@ func NumberZeroHappensLast() types.Test {
 			}]
 		}
 	}`
-	configMinVersion := "2.3.0"
+	configMinVersion := "2.3.0-experimental"
 
 	return types.Test{
 		Name:             name,

@@ -16,9 +16,6 @@
 
 package as_user
 
-// See blkid.go for compiler warning comment.
-
-// #cgo CFLAGS: -Werror=implicit-function-declaration
 // #include "as_user.h"
 import "C"
 

@@ -25,18 +25,14 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/earlyrand"
 	"github.com/coreos/ignition/internal/log"
 	"github.com/coreos/ignition/internal/util"
 	"github.com/coreos/ignition/internal/version"
 
 	"github.com/vincent-petithory/dataurl"
-
-	"golang.org/x/net/http/httpproxy"
 )
 
 const (
@@ -63,11 +59,9 @@ type HttpClient struct {
 	cas       map[types.CaReference][]byte
 }
 
-func (f *Fetcher) UpdateHttpTimeoutsAndCAs(timeouts types.Timeouts, cas []types.CaReference, proxy types.Proxy) error {
+func (f *Fetcher) UpdateHttpTimeoutsAndCAs(timeouts types.Timeouts, cas []types.CaReference) error {
 	if f.client == nil {
-		if err := f.newHttpClient(); err != nil {
-			return err
-		}
+		f.newHttpClient()
 	}
 
 	// Update timeouts
@@ -84,12 +78,6 @@ func (f *Fetcher) UpdateHttpTimeoutsAndCAs(timeouts types.Timeouts, cas []types.
 	f.client.timeout = f.client.client.Timeout
 
 	f.client.transport.ResponseHeaderTimeout = time.Duration(responseHeader) * time.Second
-	f.client.client.Transport = f.client.transport
-
-	// Update proxy
-	f.client.transport.Proxy = func(req *http.Request) (*url.URL, error) {
-		return proxyFuncFromIgnitionConfig(proxy)(req.URL)
-	}
 	f.client.client.Transport = f.client.transport
 
 	// Update CAs
@@ -125,7 +113,7 @@ func (f *Fetcher) UpdateHttpTimeoutsAndCAs(timeouts types.Timeouts, cas []types.
 	}
 
 	f.client.transport.TLSClientConfig = &tls.Config{RootCAs: pool}
-
+	f.client.client.Transport = f.client.transport
 	return nil
 }
 
@@ -183,17 +171,8 @@ func (f *Fetcher) RewriteCAsWithDataUrls(cas []types.CaReference) error {
 	return nil
 }
 
-// DefaultHTTPClient builds the default `http.client` for Ignition.
-func defaultHTTPClient() (*http.Client, error) {
-	urand, err := earlyrand.UrandomReader()
-	if err != nil {
-		return nil, err
-	}
-
-	tlsConfig := tls.Config{
-		Rand: urand,
-	}
-	transport := http.Transport{
+func (f *Fetcher) newHttpClient() {
+	transport := &http.Transport{
 		ResponseHeaderTimeout: time.Duration(defaultHttpResponseHeaderTimeout) * time.Second,
 		Dial: (&net.Dialer{
 			Timeout:   30 * time.Second,
@@ -202,30 +181,17 @@ func defaultHTTPClient() (*http.Client, error) {
 				PreferGo: true,
 			},
 		}).Dial,
-		TLSClientConfig:     &tlsConfig,
 		TLSHandshakeTimeout: 10 * time.Second,
 	}
-	client := http.Client{
-		Transport: &transport,
-	}
-	return &client, nil
-}
-
-// newHttpClient populates the fetcher with the default HTTP client.
-func (f *Fetcher) newHttpClient() error {
-	defaultClient, err := defaultHTTPClient()
-	if err != nil {
-		return err
-	}
-
 	f.client = &HttpClient{
-		client:    defaultClient,
+		client: &http.Client{
+			Transport: transport,
+		},
 		logger:    f.Logger,
 		timeout:   time.Duration(defaultHttpTotalTimeout) * time.Second,
-		transport: defaultClient.Transport.(*http.Transport),
+		transport: transport,
 		cas:       make(map[types.CaReference][]byte),
 	}
-	return nil
 }
 
 // getReaderWithHeader performs an HTTP GET on the provided URL with the
@@ -280,23 +246,4 @@ func (c HttpClient) getReaderWithHeader(url string, header http.Header) (io.Read
 			return nil, 0, cancelFn, ErrTimeout
 		}
 	}
-}
-
-func proxyFuncFromIgnitionConfig(proxy types.Proxy) func(*url.URL) (*url.URL, error) {
-	noProxy := translateNoProxySliceToString(proxy.NoProxy)
-	cfg := &httpproxy.Config{
-		HTTPProxy:  proxy.HTTPProxy,
-		HTTPSProxy: proxy.HTTPSProxy,
-		NoProxy:    noProxy,
-	}
-
-	return cfg.ProxyFunc()
-}
-
-func translateNoProxySliceToString(items []types.NoProxyItem) string {
-	newItems := make([]string, len(items))
-	for i, o := range items {
-		newItems[i] = string(o)
-	}
-	return strings.Join(newItems, ",")
 }

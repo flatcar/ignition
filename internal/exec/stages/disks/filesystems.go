@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
-	"runtime"
 	"strings"
 
 	"github.com/coreos/ignition/internal/config/types"
@@ -58,34 +57,10 @@ func (s stage) createFilesystems(config types.Config) error {
 		return err
 	}
 
-	// Create filesystems concurrently up to GOMAXPROCS
-	concurrency := runtime.GOMAXPROCS(-1)
-	work := make(chan types.Mount, len(fss))
-	results := make(chan error)
-
-	for i := 0; i < concurrency; i++ {
-		go func() {
-			for fs := range work {
-				results <- s.createFilesystem(fs)
-			}
-		}()
-	}
-
 	for _, fs := range fss {
-		work <- fs
-	}
-	close(work)
-
-	// Return combined errors
-	var errs []string
-	for range fss {
-		if err := <-results; err != nil {
-			errs = append(errs, err.Error())
+		if err := s.createFilesystem(fs); err != nil {
+			return err
 		}
-	}
-
-	if len(errs) > 0 {
-		return errors.New(strings.Join(errs, "\n"))
 	}
 
 	return nil

@@ -21,15 +21,15 @@ import (
 
 func init() {
 	// Tests that just create partitions with no 0s
-	register.Register(register.PositiveTest, CreatePartitionMiB())
-	register.Register(register.PositiveTest, CreatePartitionMiBWithStart())
-	register.Register(register.PositiveTest, WipeAndCreateNewPartitionsMiB())
-	register.Register(register.PositiveTest, AppendPartitionsMiB())
-	register.Register(register.PositiveTest, ResizeRootMiB())
+	register.Register(register.PositiveTest, CreatePartitionMB())
+	register.Register(register.PositiveTest, CreatePartitionMBWithStart())
+	register.Register(register.PositiveTest, WipeAndCreateNewPartitionsMB())
+	register.Register(register.PositiveTest, AppendPartitionsMB())
+	register.Register(register.PositiveTest, ResizeRootMB())
 }
 
-func CreatePartitionMiB() types.Test {
-	name := "Create a single partition on a blank disk using MiBs"
+func CreatePartitionMB() types.Test {
+	name := "Create a single partition on a blank disk using MBs"
 	in := append(types.GetBaseDisk(), types.Disk{Alignment: types.IgnitionAlignment})
 	out := append(types.GetBaseDisk(), types.Disk{
 		Alignment: types.IgnitionAlignment,
@@ -54,7 +54,7 @@ func CreatePartitionMiB() types.Test {
 				"partitions": [
 				{
 					"number": 1,
-					"sizeMiB": 32,
+					"size-mb": 32,
 					"label": "create-partition",
 					"typeGuid": "B921B045-1DF0-41C3-AF44-4C6F280D3FAE",
 					"guid": "05AE8178-224E-4744-862A-4F4B042662D0"
@@ -69,12 +69,12 @@ func CreatePartitionMiB() types.Test {
 		In:               in,
 		Out:              out,
 		Config:           config,
-		ConfigMinVersion: "2.3.0",
+		ConfigMinVersion: "2.3.0-experimental",
 	}
 }
 
-func CreatePartitionMiBWithStart() types.Test {
-	name := "Create a single partition on a blank disk using MiBs providing the starting sector"
+func CreatePartitionMBWithStart() types.Test {
+	name := "Create a single partition on a blank disk using MBs providing the starting sector"
 	in := append(types.GetBaseDisk(), types.Disk{Alignment: types.IgnitionAlignment})
 	out := append(types.GetBaseDisk(), types.Disk{
 		Alignment: types.IgnitionAlignment,
@@ -99,8 +99,8 @@ func CreatePartitionMiBWithStart() types.Test {
 				"partitions": [
 				{
 					"number": 1,
-					"startMiB": 1,
-					"sizeMiB": 32,
+					"start-mb": 1,
+					"size-mb": 32,
 					"label": "create-partition",
 					"typeGuid": "B921B045-1DF0-41C3-AF44-4C6F280D3FAE",
 					"guid": "05AE8178-224E-4744-862A-4F4B042662D0"
@@ -115,12 +115,12 @@ func CreatePartitionMiBWithStart() types.Test {
 		In:               in,
 		Out:              out,
 		Config:           config,
-		ConfigMinVersion: "2.3.0",
+		ConfigMinVersion: "2.3.0-experimental",
 	}
 }
 
-func WipeAndCreateNewPartitionsMiB() types.Test {
-	name := "Wipe disk and create new partitions using MiB"
+func WipeAndCreateNewPartitionsMB() types.Test {
+	name := "Wipe disk and create new partitions using MB"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	config := `{
@@ -136,14 +136,14 @@ func WipeAndCreateNewPartitionsMiB() types.Test {
 				{
 					"label": "important-data",
 					"number": 1,
-					"sizeMiB": 32,
+					"size-mb": 32,
 					"typeGuid": "B921B045-1DF0-41C3-AF44-4C6F280D3FAE",
 					"guid": "8A7A6E26-5E8F-4CCA-A654-46215D4696AC"
 				},
 				{
 					"label": "ephemeral-data",
 					"number": 2,
-					"sizeMiB": 64,
+					"size-mb": 64,
 					"typeGuid": "CA7D7CCB-63ED-4C53-861C-1742536059CC",
 					"guid": "A51034E6-26B3-48DF-BEED-220562AC7AD1"
 				}
@@ -199,12 +199,12 @@ func WipeAndCreateNewPartitionsMiB() types.Test {
 		In:               in,
 		Out:              out,
 		Config:           config,
-		ConfigMinVersion: "2.3.0",
+		ConfigMinVersion: "2.3.0-experimental",
 	}
 }
 
-func AppendPartitionsMiB() types.Test {
-	name := "Append partition to an existing partition table using MiBs"
+func AppendPartitionsMB() types.Test {
+	name := "Append partition to an existing partition table using MBs"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	config := `{
@@ -218,14 +218,14 @@ func AppendPartitionsMiB() types.Test {
 				"partitions": [{
 					"label": "additional-partition",
 					"number": 3,
-					"sizeMiB": 32,
+					"size-mb": 32,
 					"typeGuid": "F39C522B-9966-4429-A8F8-417CD5D83E5E",
 					"guid": "3ED3993F-0016-422B-B134-09FCBA6F66EF"
 				},
 				{
 					"label": "additional-partition2",
 					"number": 4,
-					"sizeMiB": 32,
+					"size-mb": 32,
 					"typeGuid": "F39C522B-9966-4429-A8F8-417CD5D83E5E",
 					"guid": "accedd09-76c2-4363-9893-f5689a78c47f"
 				}]
@@ -291,12 +291,12 @@ func AppendPartitionsMiB() types.Test {
 		In:               in,
 		Out:              out,
 		Config:           config,
-		ConfigMinVersion: "2.3.0",
+		ConfigMinVersion: "2.3.0-experimental",
 	}
 }
 
-func ResizeRootMiB() types.Test {
-	name := "Resize the ROOT partition to be bigger using MiBs"
+func ResizeRootMB() types.Test {
+	name := "Resize the ROOT partition to be bigger using MBs"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
 	out[0].Partitions[9-2-1].Length = 12943360 + 65536
@@ -310,7 +310,7 @@ func ResizeRootMiB() types.Test {
 				"partitions": [{
 					"label": "ROOT",
 					"number": 9,
-					"sizeMiB": 6352,
+					"size-mb": 6352,
 					"typeGuid": "3884DD41-8582-4404-B9A8-E9B84F2DF50E",
 					"guid": "3ED3993F-0016-422B-B134-09FCBA6F66EF",
 					"wipePartitionEntry": true
@@ -325,6 +325,6 @@ func ResizeRootMiB() types.Test {
 		In:               in,
 		Out:              out,
 		Config:           config,
-		ConfigMinVersion: "2.3.0",
+		ConfigMinVersion: "2.3.0-experimental",
 	}
 }

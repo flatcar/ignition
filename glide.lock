@@ -1,5 +1,5 @@
-hash: fbe6ec8cd703126ac43fc71c09d6d6fe61b750d10c5443a939729e8d97eb8875
-updated: 2019-03-21T23:41:51.799706304Z
+hash: 45ef0dd196a7294a2c1926416e22a2d031531d12302e680dc55999706ded86a7
+updated: 2018-09-17T14:38:31.888054059-07:00
 imports:
 - name: github.com/ajeddeloh/go-json
   version: 73d058cf8437a1989030afe571eeab9f90eebbbd
@@ -38,16 +38,18 @@ imports:
   subpackages:
   - semver
 - name: github.com/coreos/go-systemd
-  version: 9002847aa1425fb6ac49077c0a630b3b67e0fbfd
+  version: 39ca1b05acc7ad1220e09f133283b8859a8b71ab
   subpackages:
   - dbus
   - unit
 - name: github.com/go-ini/ini
-  version: 300e940a926eb277d3901b20bdfcc54928ad3642
+  version: 20b96f641a5ea98f2f8619ff4f3e061cff4833bd
 - name: github.com/godbus/dbus
-  version: 66d97aec3384421e393c2a76b770a1b5c31d07a8
+  version: a389bdde4dd695d414e47b755e95e72b7826432c
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jmespath/go-jmespath
-  version: 0b12d6b521d83fc7f755e7cfc1b1fbdd35a01a74
+  version: c01cf91b011868172fdcd9f41838e80c9d716264
 - name: github.com/pborman/uuid
   version: e790cca94e6cc75c7064b1332e63811d4aae1a53
 - name: github.com/pin/tftp
@@ -62,6 +64,10 @@ imports:
   subpackages:
   - rpcvmx
   - vmcheck
+- name: github.com/spf13/cobra
+  version: 7b2c5ac9fc04fc5efafb60700713d4fa609b777b
+- name: github.com/spf13/pflag
+  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/vincent-petithory/dataurl
   version: 9a301d65acbb728fcc3ace14f45f511a4cfeea9c
 - name: github.com/vmware/vmw-guestinfo
@@ -76,18 +82,6 @@ imports:
   version: 03efcb870d84809319ea509714dd6d19a1498483
   subpackages:
   - errorutil
-- name: golang.org/x/net
-  version: 1272bf9dcd53ea65c09668fb4c76e65deb740072
-  subpackages:
-  - http/httpproxy
-  - idna
-- name: golang.org/x/text
-  version: fe223c5a2583471b2791ca99e716c65b4a76117e
-  subpackages:
-  - secure/bidirule
-  - transform
-  - unicode/bidi
-  - unicode/norm
 testImports:
 - name: github.com/davecgh/go-spew
   version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9

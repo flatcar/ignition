@@ -43,9 +43,6 @@
         },
         "security": {
           "$ref": "#/definitions/ignition/definitions/security"
-        },
-        "proxy": {
-          "$ref": "#/definitions/ignition/definitions/proxy"
         }
       },
       "definitions": {
@@ -75,23 +72,6 @@
                     "$ref": "#/definitions/ignition/definitions/ca-reference"
                   }
                 }
-              }
-            }
-          }
-        },
-        "proxy": {
-          "type": "object",
-          "properties": {
-            "httpProxy": {
-              "type": "string"
-            },
-            "httpsProxy": {
-              "type": "string"
-            },
-            "noProxy": {
-              "type": "array",
-              "items": {
-                "type": "string"
               }
             }
           }
@@ -315,10 +295,10 @@
             "start": {
               "type": ["integer", "null"]
             },
-            "sizeMiB": {
+            "size-mb": {
               "type": ["integer", "null"]
             },
-            "startMiB": {
+            "start-mb": {
               "type": ["integer", "null"]
             },
             "typeGuid": {

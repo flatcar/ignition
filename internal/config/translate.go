@@ -15,7 +15,7 @@
 package config
 
 import (
-	from "github.com/coreos/ignition/config/v2_4_experimental/types"
+	from "github.com/coreos/ignition/config/v2_3_experimental/types"
 	"github.com/coreos/ignition/internal/config/types"
 )
 
@@ -62,13 +62,6 @@ func Translate(old from.Config) types.Config {
 					Hash: x.Verification.Hash,
 				},
 			})
-		}
-		return res
-	}
-	translateNoProxySlice := func(old []from.NoProxyItem) []types.NoProxyItem {
-		var res []types.NoProxyItem
-		for _, x := range old {
-			res = append(res, types.NoProxyItem(x))
 		}
 		return res
 	}
@@ -212,9 +205,9 @@ func Translate(old from.Config) types.Config {
 				Label:              x.Label,
 				Number:             x.Number,
 				Size:               x.Size,
-				SizeMiB:            x.SizeMiB,
+				SizeMb:             x.SizeMb,
 				Start:              x.Start,
-				StartMiB:           x.StartMiB,
+				StartMb:            x.StartMb,
 				TypeGUID:           x.TypeGUID,
 				ShouldExist:        x.ShouldExist,
 				WipePartitionEntry: x.WipePartitionEntry,
@@ -380,11 +373,6 @@ func Translate(old from.Config) types.Config {
 				TLS: types.TLS{
 					CertificateAuthorities: translateCertificateAuthoritySlice(old.Ignition.Security.TLS.CertificateAuthorities),
 				},
-			},
-			Proxy: types.Proxy{
-				HTTPProxy:  old.Ignition.Proxy.HTTPProxy,
-				HTTPSProxy: old.Ignition.Proxy.HTTPSProxy,
-				NoProxy:    translateNoProxySlice(old.Ignition.Proxy.NoProxy),
 			},
 		},
 		Networkd: types.Networkd{
