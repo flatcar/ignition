@@ -15,6 +15,8 @@
 package exec
 
 import (
+	"crypto/sha512"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -38,7 +40,7 @@ import (
 )
 
 const (
-	DefaultFetchTimeout = time.Minute
+	DefaultFetchTimeout = 2 * time.Minute
 )
 
 // Engine represents the entity that fetches and executes a configuration.
@@ -94,9 +96,17 @@ func (e Engine) Run(stageName string) error {
 	e.Logger.PushPrefix(stageName)
 	defer e.Logger.PopPrefix()
 
-	if err = stages.Get(stageName).Create(e.Logger, e.Root, *e.Fetcher).Run(config.Append(baseConfig, config.Append(systemBaseConfig, cfg))); err != nil {
+	fullConfig := config.Append(baseConfig, config.Append(systemBaseConfig, cfg))
+	if err = stages.Get(stageName).Create(e.Logger, e.Root, *e.Fetcher).Run(fullConfig); err != nil {
 		// e.Logger could be nil
 		fmt.Fprintf(os.Stderr, "%s failed", stageName)
+		tmp, jsonerr := json.MarshalIndent(fullConfig, "", "  ")
+		if jsonerr != nil {
+			// Nothing else to do with this error
+			fmt.Fprintf(os.Stderr, "Could not marshal full config: %v", err)
+		} else {
+			fmt.Fprintf(os.Stderr, "Full config:\n%s", string(tmp))
+		}
 		return err
 	}
 	e.Logger.Info("%s passed", stageName)
@@ -115,7 +125,7 @@ func (e *Engine) acquireConfig() (cfg types.Config, err error) {
 		}
 		// Create an http client and fetcher with the timeouts from the cached
 		// config
-		err = e.Fetcher.UpdateHttpTimeoutsAndCAs(cfg.Ignition.Timeouts, cfg.Ignition.Security.TLS.CertificateAuthorities)
+		err = e.Fetcher.UpdateHttpTimeoutsAndCAs(cfg.Ignition.Timeouts, cfg.Ignition.Security.TLS.CertificateAuthorities, cfg.Ignition.Proxy)
 		if err != nil {
 			e.Logger.Crit("failed to update timeouts and CAs for fetcher: %v", err)
 			return
@@ -126,7 +136,8 @@ func (e *Engine) acquireConfig() (cfg types.Config, err error) {
 	// Create a new http client and fetcher with the timeouts set via the flags,
 	// since we don't have a config with timeout values we can use
 	timeout := int(e.FetchTimeout.Seconds())
-	err = e.Fetcher.UpdateHttpTimeoutsAndCAs(types.Timeouts{HTTPTotal: &timeout}, nil)
+	emptyProxy := types.Proxy{}
+	err = e.Fetcher.UpdateHttpTimeoutsAndCAs(types.Timeouts{HTTPTotal: &timeout}, nil, emptyProxy)
 	if err != nil {
 		e.Logger.Crit("failed to update timeouts and CAs for fetcher: %v", err)
 		return
@@ -141,7 +152,7 @@ func (e *Engine) acquireConfig() (cfg types.Config, err error) {
 
 	// Update the http client to use the timeouts and CAs from the newly fetched
 	// config
-	err = e.Fetcher.UpdateHttpTimeoutsAndCAs(cfg.Ignition.Timeouts, cfg.Ignition.Security.TLS.CertificateAuthorities)
+	err = e.Fetcher.UpdateHttpTimeoutsAndCAs(cfg.Ignition.Timeouts, cfg.Ignition.Security.TLS.CertificateAuthorities, cfg.Ignition.Proxy)
 	if err != nil {
 		e.Logger.Crit("failed to update timeouts and CAs for fetcher: %v", err)
 		return
@@ -199,7 +210,7 @@ func (e *Engine) fetchProviderConfig() (types.Config, error) {
 
 	// Replace the HTTP client in the fetcher to be configured with the
 	// timeouts of the config
-	err = e.Fetcher.UpdateHttpTimeoutsAndCAs(cfg.Ignition.Timeouts, cfg.Ignition.Security.TLS.CertificateAuthorities)
+	err = e.Fetcher.UpdateHttpTimeoutsAndCAs(cfg.Ignition.Timeouts, cfg.Ignition.Security.TLS.CertificateAuthorities, cfg.Ignition.Proxy)
 	if err != nil {
 		return types.Config{}, err
 	}
@@ -223,7 +234,7 @@ func (e *Engine) renderConfig(cfg types.Config) (types.Config, error) {
 
 		// Replace the HTTP client in the fetcher to be configured with the
 		// timeouts of the new config
-		err = e.Fetcher.UpdateHttpTimeoutsAndCAs(newCfg.Ignition.Timeouts, newCfg.Ignition.Security.TLS.CertificateAuthorities)
+		err = e.Fetcher.UpdateHttpTimeoutsAndCAs(newCfg.Ignition.Timeouts, newCfg.Ignition.Security.TLS.CertificateAuthorities, newCfg.Ignition.Proxy)
 		if err != nil {
 			return types.Config{}, err
 		}
@@ -242,7 +253,7 @@ func (e *Engine) renderConfig(cfg types.Config) (types.Config, error) {
 		// been rendered, so we can use the new config's timeouts and CAs when
 		// fetching more configs.
 		cfgForFetcherSettings := config.Append(appendedCfg, newCfg)
-		err = e.Fetcher.UpdateHttpTimeoutsAndCAs(cfgForFetcherSettings.Ignition.Timeouts, cfgForFetcherSettings.Ignition.Security.TLS.CertificateAuthorities)
+		err = e.Fetcher.UpdateHttpTimeoutsAndCAs(cfgForFetcherSettings.Ignition.Timeouts, cfgForFetcherSettings.Ignition.Security.TLS.CertificateAuthorities, cfgForFetcherSettings.Ignition.Proxy)
 		if err != nil {
 			return types.Config{}, err
 		}
@@ -269,7 +280,14 @@ func (e *Engine) fetchReferencedConfig(cfgRef types.ConfigReference) (types.Conf
 	if err != nil {
 		return types.Config{}, err
 	}
-	e.Logger.Debug("fetched referenced config: %s", string(rawCfg))
+
+	hash := sha512.Sum512(rawCfg)
+	if u.Scheme != "data" {
+		e.Logger.Debug("fetched referenced config at %s with SHA512: %s", cfgRef.Source, hex.EncodeToString(hash[:]))
+	} else {
+		// data url's might contain secrets
+		e.Logger.Debug("fetched referenced config from data url with SHA512: %s", hex.EncodeToString(hash[:]))
+	}
 
 	if err := util.AssertValid(cfgRef.Verification, rawCfg); err != nil {
 		return types.Config{}, err
@@ -286,6 +304,7 @@ func (e *Engine) fetchReferencedConfig(cfgRef types.ConfigReference) (types.Conf
 
 func (e Engine) logReport(r report.Report) {
 	for _, entry := range r.Entries {
+		entry.Highlight = "" // might contain secrets, don't log when Ignition runs
 		switch entry.Kind {
 		case report.EntryError:
 			e.Logger.Crit("%v", entry)
