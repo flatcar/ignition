@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 Copyright (c) 2009 The Go Authors. All rights reserved.
+=======
+<<<<<<< HEAD:vendor/github.com/pborman/uuid/LICENSE
+Copyright (c) 2009,2014 Google Inc. All rights reserved.
+=======
+Copyright (c) 2009 The Go Authors. All rights reserved.
+>>>>>>> 2275.2.0:vendor/golang.org/x/net/LICENSE
+>>>>>>> 2275.2.0
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
