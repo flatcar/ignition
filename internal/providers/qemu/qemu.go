@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // The QEMU provider fetches a local configuration from the firmware config
-// interface (opt/com.coreos/config).
+// interface (opt/org.flatcar-linux/config).
 
 package qemu
 
@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	firmwareConfigPath = "/sys/firmware/qemu_fw_cfg/by_name/opt/com.coreos/config/raw"
+	firmwareConfigPath = "/sys/firmware/qemu_fw_cfg/by_name/opt/org.flatcar-linux/config/raw"
 )
 
 func FetchConfig(f resource.Fetcher) (types.Config, report.Report, error) {
