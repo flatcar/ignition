@@ -23,6 +23,7 @@ import (
 	"github.com/coreos/ignition/internal/exec"
 	"github.com/coreos/ignition/internal/exec/stages"
 	_ "github.com/coreos/ignition/internal/exec/stages/disks"
+	_ "github.com/coreos/ignition/internal/exec/stages/fetch"
 	_ "github.com/coreos/ignition/internal/exec/stages/files"
 	"github.com/coreos/ignition/internal/log"
 	"github.com/coreos/ignition/internal/oem"
@@ -71,6 +72,7 @@ func main() {
 	defer logger.Close()
 
 	logger.Info(version.String)
+	logger.Info("Stage: %v", flags.stage)
 
 	if flags.clearCache {
 		if err := os.Remove(flags.configCache); err != nil {
