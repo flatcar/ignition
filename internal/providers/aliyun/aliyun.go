@@ -1,4 +1,4 @@
-// Copyright 2016 CoreOS, Inc.
+// Copyright 2019 Red Hat
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,35 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package file
+// The aliyun provider fetches a remote configuration from the
+// aliyun user-data metadata service URL.
+
+package aliyun
 
 import (
-	"io/ioutil"
-	"os"
+	"net/url"
 
-	"github.com/coreos/ignition/config/validate/report"
 	"github.com/coreos/ignition/internal/config/types"
 	"github.com/coreos/ignition/internal/providers/util"
 	"github.com/coreos/ignition/internal/resource"
+
+	"github.com/coreos/ignition/config/validate/report"
 )
 
-const (
-	cfgFilenameEnvVar = "IGNITION_CONFIG_FILE"
-	defaultFilename   = "config.ign"
+var (
+	userdataUrl = url.URL{
+		Scheme: "http",
+		Host:   "100.100.100.200",
+		Path:   "latest/user-data",
+	}
 )
 
 func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
-	filename := os.Getenv(cfgFilenameEnvVar)
-	if filename == "" {
-		filename = defaultFilename
-		f.Logger.Info("using default filename")
-	}
-	f.Logger.Info("using config file at %q", filename)
-
-	rawConfig, err := ioutil.ReadFile(filename)
-	if err != nil {
-		f.Logger.Err("couldn't read config %q: %v", filename, err)
+	data, err := f.FetchToBuffer(userdataUrl, resource.FetchOptions{
+		Headers: resource.ConfigHeaders,
+	})
+	if err != nil && err != resource.ErrNotFound {
 		return types.Config{}, report.Report{}, err
 	}
-	return util.ParseConfig(f.Logger, rawConfig)
+
+	return util.ParseConfig(f.Logger, data)
 }
