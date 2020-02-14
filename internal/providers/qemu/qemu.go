@@ -28,8 +28,11 @@ import (
 	"github.com/coreos/ignition/internal/resource"
 )
 
-const (
-	firmwareConfigPath = "/sys/firmware/qemu_fw_cfg/by_name/opt/org.flatcar-linux/config/raw"
+var (
+	firmwareConfigPaths = []string{
+		"/sys/firmware/qemu_fw_cfg/by_name/opt/org.flatcar-linux/config/raw",
+		"/sys/firmware/qemu_fw_cfg/by_name/opt/com.coreos/config/raw",
+	}
 )
 
 func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
@@ -38,12 +41,15 @@ func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 		return types.Config{}, report.Report{}, err
 	}
 
-	data, err := ioutil.ReadFile(firmwareConfigPath)
-	if os.IsNotExist(err) {
-		f.Logger.Info("QEMU firmware config was not found. Ignoring...")
-	} else if err != nil {
-		f.Logger.Err("couldn't read QEMU firmware config: %v", err)
-		return types.Config{}, report.Report{}, err
+	data := []byte{}
+	for _, path := range firmwareConfigPaths {
+		data, err = ioutil.ReadFile(path)
+		if os.IsNotExist(err) {
+			f.Logger.Info("QEMU firmware config was not found. Ignoring...")
+		} else if err != nil {
+			f.Logger.Err("couldn't read QEMU firmware config %v: %v", path, err)
+			return types.Config{}, report.Report{}, err
+		}
 	}
 
 	return util.ParseConfig(f.Logger, data)
