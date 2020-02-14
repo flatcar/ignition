@@ -1,4 +1,4 @@
-// Copyright 2016 CoreOS, Inc.
+// Copyright 2019 Red Hat
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,44 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// The QEMU provider fetches a local configuration from the firmware config
-// interface (opt/org.flatcar-linux/config).
+// The aliyun provider fetches a remote configuration from the
+// aliyun user-data metadata service URL.
 
-package qemu
+package aliyun
 
 import (
-	"io/ioutil"
-	"os"
-	"os/exec"
+	"net/url"
 
-	"github.com/coreos/ignition/config/validate/report"
 	"github.com/coreos/ignition/internal/config/types"
 	"github.com/coreos/ignition/internal/providers/util"
 	"github.com/coreos/ignition/internal/resource"
+
+	"github.com/coreos/ignition/config/validate/report"
 )
 
 var (
-	firmwareConfigPaths = []string{
-		"/sys/firmware/qemu_fw_cfg/by_name/opt/org.flatcar-linux/config/raw",
-		"/sys/firmware/qemu_fw_cfg/by_name/opt/com.coreos/config/raw",
+	userdataUrl = url.URL{
+		Scheme: "http",
+		Host:   "100.100.100.200",
+		Path:   "latest/user-data",
 	}
 )
 
 func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
-	_, err := f.Logger.LogCmd(exec.Command("modprobe", "qemu_fw_cfg"), "loading QEMU firmware config module")
-	if err != nil {
+	data, err := f.FetchToBuffer(userdataUrl, resource.FetchOptions{
+		Headers: resource.ConfigHeaders,
+	})
+	if err != nil && err != resource.ErrNotFound {
 		return types.Config{}, report.Report{}, err
-	}
-
-	data := []byte{}
-	for _, path := range firmwareConfigPaths {
-		data, err = ioutil.ReadFile(path)
-		if os.IsNotExist(err) {
-			f.Logger.Info("QEMU firmware config was not found. Ignoring...")
-		} else if err != nil {
-			f.Logger.Err("couldn't read QEMU firmware config %v: %v", path, err)
-			return types.Config{}, report.Report{}, err
-		}
 	}
 
 	return util.ParseConfig(f.Logger, data)
