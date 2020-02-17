@@ -49,6 +49,8 @@ func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 		} else if err != nil {
 			f.Logger.Err("couldn't read QEMU firmware config %v: %v", path, err)
 			return types.Config{}, report.Report{}, err
+		} else {
+			break
 		}
 	}
 
