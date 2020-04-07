@@ -18,6 +18,8 @@
 package vmware
 
 import (
+	"net/url"
+
 	"github.com/coreos/ignition/v2/config/v3_4_experimental/types"
 	"github.com/coreos/ignition/v2/internal/providers"
 	"github.com/coreos/ignition/v2/internal/providers/util"
@@ -36,26 +38,83 @@ func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 		return types.Config{}, report.Report{}, providers.ErrNoProvider
 	}
 
-	config, err := fetchRawConfig(f)
-	if err != nil {
-		return types.Config{}, report.Report{}, err
+	config, err := fetchDataConfig(f)
+	if err == nil && len(config) == 0 {
+		config, err = fetchUrlConfig(f)
 	}
-
-	decodedData, err := decodeConfig(config)
 	if err != nil {
-		f.Logger.Debug("failed to decode config: %v", err)
 		return types.Config{}, report.Report{}, err
 	}
 
 	f.Logger.Debug("config successfully fetched")
-	return util.ParseConfig(f.Logger, decodedData)
+	return util.ParseConfig(f.Logger, config)
 }
 
-func fetchRawConfig(f *resource.Fetcher) (config, error) {
+func fetchDataConfig(f *resource.Fetcher) ([]byte, error) {
+	var data string
+	var encoding string
+	var err error
+
+	data, err = getVariable(f, "ignition.config.data")
+	if err == nil && data != "" {
+		encoding, err = getVariable(f, "ignition.config.data.encoding")
+	} else {
+		data, err = getVariable(f, "coreos.config.data")
+		if err == nil && data != "" {
+			encoding, err = getVariable(f, "coreos.config.data.encoding")
+		}
+	}
+	// Do not check against err from "encoding" because leaving it empty is ok
+	if data == "" {
+		f.Logger.Debug("failed to fetch config")
+		return []byte{}, nil
+	}
+
+	decodedData, err := decodeConfig(config{
+		data:     data,
+		encoding: encoding,
+	})
+	if err != nil {
+		f.Logger.Debug("failed to decode config: %v", err)
+		return nil, err
+	}
+
+	return decodedData, nil
+}
+
+func fetchUrlConfig(f *resource.Fetcher) ([]byte, error) {
+	rawUrl, err := getVariable(f, "ignition.config.url")
+	if err != nil || rawUrl == "" {
+		rawUrl, err = getVariable(f, "coreos.config.url")
+	}
+	if err != nil || rawUrl == "" {
+		f.Logger.Info("no config URL provided")
+		return []byte{}, nil
+	}
+
+	f.Logger.Debug("found url: %q", rawUrl)
+
+	url, err := url.Parse(rawUrl)
+	if err != nil {
+		f.Logger.Err("failed to parse url: %v", err)
+		return nil, err
+	}
+	if url == nil {
+		return []byte{}, nil
+	}
+
+	data, err := f.FetchToBuffer(*url, resource.FetchOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+func getVariable(f *resource.Fetcher, key string) (string, error) {
 	info := rpcvmx.NewConfig()
 
 	var ovfData string
-	var ovfEncoding string
 
 	ovfEnv, err := info.String("ovfenv", "")
 	if err != nil {
@@ -65,26 +124,18 @@ func fetchRawConfig(f *resource.Fetcher) (config, error) {
 		env, err := ovf.ReadEnvironment([]byte(ovfEnv))
 		if err != nil {
 			f.Logger.Warning("failed to parse OVF environment: %v. Continuing...", err)
+		} else {
+			ovfData = env.Properties["guestinfo."+key]
 		}
-
-		ovfData = env.Properties["guestinfo.ignition.config.data"]
-		ovfEncoding = env.Properties["guestinfo.ignition.config.data.encoding"]
 	}
 
-	data, err := info.String("ignition.config.data", ovfData)
+	// The guest variables get preference over the ovfenv variables which are given here as fallback
+	data, err := info.String(key, ovfData)
 	if err != nil {
-		f.Logger.Debug("failed to fetch config: %v", err)
-		return config{}, err
+		f.Logger.Debug("failed to fetch variable, falling back to ovfenv value: %v", err)
+		return ovfData, nil
 	}
 
-	encoding, err := info.String("ignition.config.data.encoding", ovfEncoding)
-	if err != nil {
-		f.Logger.Debug("failed to fetch config encoding: %v", err)
-		return config{}, err
-	}
-
-	return config{
-		data:     data,
-		encoding: encoding,
-	}, nil
+	// An empty string will be returned if nothing was found
+	return data, nil
 }
