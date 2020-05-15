@@ -197,7 +197,7 @@
 // regions different from the Session's region.
 //
 //   svc := s3.New(sess, &aws.Config{
-//       Region: aws.String(ednpoints.UsWest2RegionID),
+//       Region: aws.String(endpoints.UsWest2RegionID),
 //   })
 //
 // See the Config type in the aws package for more information and additional
@@ -403,3 +403,9 @@
 //   	fmt.Printf("successfully uploaded file to %s/%s\n", bucket, key)
 //   }
 package sdk
+
+import (
+	"github.com/jmespath/go-jmespath"
+)
+
+const _ = jmespath.ASTEmpty

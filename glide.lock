@@ -1,12 +1,13 @@
-hash: fbe6ec8cd703126ac43fc71c09d6d6fe61b750d10c5443a939729e8d97eb8875
-updated: 2019-03-21T23:41:51.799706304Z
+hash: c6d5bcb064e0815065eed4bdf292c8e00806f16316cef513d3b57f92db0fa1b9
+updated: 2020-05-14T18:14:40.746014081-07:00
 imports:
 - name: github.com/ajeddeloh/go-json
   version: 73d058cf8437a1989030afe571eeab9f90eebbbd
 - name: github.com/aws/aws-sdk-go
-  version: c861d27d0304a79f727e9a8a4e2ac1e74602fdc0
+  version: c4af927837ebbd1a7a2112eea36972f9a0732ba4
   subpackages:
   - aws
+  - aws/arn
   - aws/awserr
   - aws/awsutil
   - aws/client
@@ -15,24 +16,40 @@ imports:
   - aws/credentials
   - aws/credentials/ec2rolecreds
   - aws/credentials/endpointcreds
+  - aws/credentials/processcreds
   - aws/credentials/stscreds
+  - aws/csm
   - aws/defaults
   - aws/ec2metadata
   - aws/endpoints
   - aws/request
   - aws/session
   - aws/signer/v4
+  - internal/context
+  - internal/ini
+  - internal/s3err
+  - internal/sdkio
+  - internal/sdkmath
+  - internal/sdkrand
+  - internal/sdkuri
   - internal/shareddefaults
+  - internal/strings
+  - internal/sync/singleflight
   - private/protocol
+  - private/protocol/eventstream
+  - private/protocol/eventstream/eventstreamapi
+  - private/protocol/json/jsonutil
   - private/protocol/query
   - private/protocol/query/queryutil
   - private/protocol/rest
   - private/protocol/restxml
   - private/protocol/xml/xmlutil
   - service/s3
+  - service/s3/internal/arn
   - service/s3/s3iface
   - service/s3/s3manager
   - service/sts
+  - service/sts/stsiface
 - name: github.com/coreos/go-semver
   version: 294930c1e79c64e7dbe360054274fdad492c8cf5
   subpackages:
@@ -42,8 +59,6 @@ imports:
   subpackages:
   - dbus
   - unit
-- name: github.com/go-ini/ini
-  version: 300e940a926eb277d3901b20bdfcc54928ad3642
 - name: github.com/godbus/dbus
   version: 66d97aec3384421e393c2a76b770a1b5c31d07a8
 - name: github.com/jmespath/go-jmespath
@@ -65,7 +80,7 @@ imports:
 - name: github.com/vincent-petithory/dataurl
   version: 9a301d65acbb728fcc3ace14f45f511a4cfeea9c
 - name: github.com/vmware/vmw-guestinfo
-  version: 25eff159a728be87e103a0b8045e08273f4dbec4
+  version: 687661b8bd8e72a55ac988ecdb2a1cdef76fa78d
   subpackages:
   - bdoor
   - message
@@ -77,12 +92,12 @@ imports:
   subpackages:
   - errorutil
 - name: golang.org/x/net
-  version: 1272bf9dcd53ea65c09668fb4c76e65deb740072
+  version: a91f0712d120a21e49061d61eb6ba9b88cb0d376
   subpackages:
   - http/httpproxy
   - idna
 - name: golang.org/x/text
-  version: fe223c5a2583471b2791ca99e716c65b4a76117e
+  version: 81608d7e9c6863c922f599e4ff1329a685218c0d
   subpackages:
   - secure/bidirule
   - transform
