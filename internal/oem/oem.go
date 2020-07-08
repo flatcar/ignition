@@ -32,6 +32,7 @@ import (
 	"github.com/coreos/ignition/internal/providers/qemu"
 	"github.com/coreos/ignition/internal/providers/virtualbox"
 	"github.com/coreos/ignition/internal/providers/vmware"
+	"github.com/coreos/ignition/internal/providers/vultr"
 	"github.com/coreos/ignition/internal/registry"
 	"github.com/coreos/ignition/internal/resource"
 )
@@ -155,6 +156,10 @@ func init() {
 	configs.Register(Config{
 		name:  "vmware",
 		fetch: vmware.FetchConfig,
+	})
+	configs.Register(Config{
+		name:  "vultr",
+		fetch: vultr.FetchConfig,
 	})
 	configs.Register(Config{
 		name:  "interoute",

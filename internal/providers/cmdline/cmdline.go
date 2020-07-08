@@ -32,8 +32,9 @@ import (
 )
 
 const (
-	cmdlineUrlFlagLegacy = "flatcar.config.url"
-	cmdlineUrlFlag       = "ignition.config.url"
+	cmdlineUrlFlagLegacyCoreOS = "coreos.config.url"
+	cmdlineUrlFlagLegacy       = "flatcar.config.url"
+	cmdlineUrlFlag             = "ignition.config.url"
 )
 
 func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
@@ -84,7 +85,7 @@ func parseCmdline(cmdline []byte) (url string) {
 		parts := strings.SplitN(strings.TrimSpace(arg), "=", 2)
 		key := parts[0]
 
-		if key == cmdlineUrlFlagLegacy || key == cmdlineUrlFlag {
+		if key == cmdlineUrlFlagLegacy || key == cmdlineUrlFlagLegacyCoreOS || key == cmdlineUrlFlag {
 			if len(parts) == 2 {
 				url = parts[1]
 			}
