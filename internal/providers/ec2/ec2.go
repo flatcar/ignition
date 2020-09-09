@@ -18,9 +18,18 @@
 package ec2
 
 import (
+	"bytes"
+	"errors"
+	"io"
+	"io/ioutil"
+	"mime"
+	"mime/multipart"
+	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/coreos/ignition/config/validate/report"
+	"github.com/coreos/ignition/internal/config"
 	"github.com/coreos/ignition/internal/config/types"
 	"github.com/coreos/ignition/internal/log"
 	"github.com/coreos/ignition/internal/providers/util"
@@ -38,15 +47,56 @@ var (
 		Host:   "169.254.169.254",
 		Path:   "2009-04-04/user-data",
 	}
+	ErrNoBoundary      = errors.New("found multipart message but no boundary; could not parse")
+	ErrMultipleConfigs = errors.New("found multiple configs in multipart response")
 )
 
 func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
+	var ResponseHeaders http.Header
+
 	data, err := f.FetchToBuffer(userdataUrl, resource.FetchOptions{
-		Headers: resource.ConfigHeaders,
+		Headers:         resource.ConfigHeaders,
+		ResponseHeaders: &ResponseHeaders,
 	})
 	if err != nil && err != resource.ErrNotFound {
 		return types.Config{}, report.Report{}, err
 	}
+
+	// cluster API for AWS returns the Ignition config as a section of a multipart sequence.
+	// Detect if we got a multipart message, ensure that there is only one Ignition config,
+	// and extract it.
+	mediaType, params, err := mime.ParseMediaType(ResponseHeaders.Get("Content-Type"))
+	if err != nil || mediaType != "multipart/mixed" {
+		// either unset or not multipart/mixed, just return the blob
+		// we don't require proper Content-Type headers
+		return config.Parse(data)
+	}
+	boundary, ok := params["boundary"]
+	if !ok {
+		return types.Config{}, report.Report{}, ErrNoBoundary
+	}
+	mpReader := multipart.NewReader(bytes.NewReader(data), boundary)
+	var ignConfig []byte
+	for {
+		part, err := mpReader.NextPart()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return types.Config{}, report.Report{}, err
+		}
+		partType := part.Header.Get("Content-Type")
+		if strings.HasPrefix(partType, "application/vnd.coreos.ignition+json") {
+			if ignConfig != nil {
+				// found more than one ignition config, die.
+				return types.Config{}, report.Report{}, ErrMultipleConfigs
+			}
+			ignConfig, err = ioutil.ReadAll(part)
+			if err != nil {
+				return types.Config{}, report.Report{}, err
+			}
+		}
+	}
+	data = ignConfig
 
 	// Determine the partition and region this instance is in
 	regionHint, err := ec2metadata.New(f.AWSSession).Region()
