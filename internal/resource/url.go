@@ -596,8 +596,17 @@ func (f *Fetcher) mountOEM(oemMountPath string) error {
 		},
 		"mounting %q at %q", distro.OEMDevicePath(), oemMountPath,
 	); err != nil {
-		return fmt.Errorf("failed to mount device %q at %q: %v",
+		f.Logger.Err("failed to mount ext4 device %q at %q, trying btrfs: %v",
 			distro.OEMDevicePath(), oemMountPath, err)
+		if err := f.Logger.LogOp(
+			func() error {
+				return syscall.Mount(dev[0], oemMountPath, "btrfs", 0, "")
+			},
+			"mounting %q at %q", distro.OEMDevicePath(), oemMountPath,
+		); err != nil {
+			return fmt.Errorf("failed to mount btrfs device %q at %q: %v",
+				distro.OEMDevicePath(), oemMountPath, err)
+		}
 	}
 
 	return nil
