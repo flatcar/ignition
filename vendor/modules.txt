@@ -12,6 +12,8 @@ cloud.google.com/go/internal/version
 cloud.google.com/go/storage
 # github.com/BurntSushi/toml v0.3.1
 github.com/BurntSushi/toml
+# github.com/ajeddeloh/go-json v0.0.0-20200220154158-5ae607161559
+github.com/ajeddeloh/go-json
 # github.com/aws/aws-sdk-go v1.30.28
 ## explicit
 github.com/aws/aws-sdk-go/aws
@@ -63,6 +65,8 @@ github.com/coreos/go-json
 # github.com/coreos/go-semver v0.3.0
 ## explicit
 github.com/coreos/go-semver/semver
+# github.com/coreos/go-systemd v0.0.0-20181031085051-9002847aa142
+github.com/coreos/go-systemd/unit
 # github.com/coreos/go-systemd/v22 v22.0.0
 ## explicit
 github.com/coreos/go-systemd/v22/dbus
@@ -77,6 +81,31 @@ github.com/coreos/vcontext/tree
 github.com/coreos/vcontext/validate
 # github.com/davecgh/go-spew v1.1.0
 github.com/davecgh/go-spew/spew
+# github.com/flatcar-linux/ign-converter v0.0.0-20220224173206-08d77b59df9d
+## explicit
+github.com/flatcar-linux/ign-converter/translate/v24tov31
+github.com/flatcar-linux/ign-converter/util
+# github.com/flatcar-linux/ignition v0.36.2-0.20220107144332-c956607ca6e9
+## explicit
+github.com/flatcar-linux/ignition/config/shared/errors
+github.com/flatcar-linux/ignition/config/shared/validations
+github.com/flatcar-linux/ignition/config/util
+github.com/flatcar-linux/ignition/config/v1
+github.com/flatcar-linux/ignition/config/v1/types
+github.com/flatcar-linux/ignition/config/v2_0
+github.com/flatcar-linux/ignition/config/v2_0/types
+github.com/flatcar-linux/ignition/config/v2_1
+github.com/flatcar-linux/ignition/config/v2_1/types
+github.com/flatcar-linux/ignition/config/v2_2
+github.com/flatcar-linux/ignition/config/v2_2/types
+github.com/flatcar-linux/ignition/config/v2_3
+github.com/flatcar-linux/ignition/config/v2_3/types
+github.com/flatcar-linux/ignition/config/v2_4
+github.com/flatcar-linux/ignition/config/v2_4/types
+github.com/flatcar-linux/ignition/config/validate
+github.com/flatcar-linux/ignition/config/validate/astjson
+github.com/flatcar-linux/ignition/config/validate/astnode
+github.com/flatcar-linux/ignition/config/validate/report
 # github.com/godbus/dbus/v5 v5.0.3
 github.com/godbus/dbus/v5
 # github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e
@@ -110,12 +139,10 @@ github.com/pin/tftp
 github.com/pin/tftp/netascii
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/smartystreets/goconvey v0.0.0-20190222223459-a17d461953aa
-## explicit
-# github.com/stretchr/testify v1.5.1
+# github.com/stretchr/testify v1.7.0
 ## explicit
 github.com/stretchr/testify/assert
-# github.com/vincent-petithory/dataurl v0.0.0-20160330182126-9a301d65acbb
+# github.com/vincent-petithory/dataurl v1.0.0
 ## explicit
 github.com/vincent-petithory/dataurl
 # github.com/vmware/vmw-guestinfo v0.0.0-20170707015358-25eff159a728
@@ -129,7 +156,6 @@ github.com/vmware/vmw-guestinfo/vmcheck
 ## explicit
 github.com/vmware/vmw-ovflib
 # go.opencensus.io v0.22.5
-## explicit
 go.opencensus.io
 go.opencensus.io/internal
 go.opencensus.io/internal/tagencoding
@@ -146,6 +172,8 @@ go.opencensus.io/trace
 go.opencensus.io/trace/internal
 go.opencensus.io/trace/propagation
 go.opencensus.io/trace/tracestate
+# go4.org v0.0.0-20200104003542-c7e774b10ea0
+go4.org/errorutil
 # golang.org/x/lint v0.0.0-20200302205851-738671d3881b
 golang.org/x/lint
 golang.org/x/lint/golint
@@ -174,13 +202,12 @@ golang.org/x/oauth2/jwt
 ## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.3
+# golang.org/x/text v0.3.7
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
 # golang.org/x/tools v0.0.0-20200610160956-3e83d1e96d0e
-## explicit
 golang.org/x/tools/cmd/goimports
 golang.org/x/tools/go/analysis
 golang.org/x/tools/go/analysis/passes/inspect
@@ -234,7 +261,6 @@ google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
 # google.golang.org/genproto v0.0.0-20200610104632-a5b850bcf112
-## explicit
 google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/iam/v1
 google.golang.org/genproto/googleapis/rpc/code
@@ -316,8 +342,8 @@ google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
 google.golang.org/protobuf/types/pluginpb
-# gopkg.in/yaml.v2 v2.2.2
-gopkg.in/yaml.v2
+# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+gopkg.in/yaml.v3
 # honnef.co/go/tools v0.0.1-2020.1.4
 honnef.co/go/tools/arg
 honnef.co/go/tools/cmd/staticcheck
