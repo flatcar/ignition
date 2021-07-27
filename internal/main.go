@@ -41,6 +41,7 @@ func main() {
 		fetchTimeout time.Duration
 		needNet      string
 		platform     platform.Name
+		oem          platform.Name
 		root         string
 		stage        stages.Name
 		stateFile    string
@@ -52,6 +53,7 @@ func main() {
 	flag.DurationVar(&flags.fetchTimeout, "fetch-timeout", exec.DefaultFetchTimeout, "initial duration for which to wait for config")
 	flag.StringVar(&flags.needNet, "neednet", "/run/ignition/neednet", "flag file to write from fetch-offline if networking is needed")
 	flag.Var(&flags.platform, "platform", fmt.Sprintf("current platform. %v", platform.Names()))
+	flag.Var(&flags.oem, "oem", fmt.Sprintf("current oem. %v", platform.Names()))
 	flag.StringVar(&flags.root, "root", "/", "root of the filesystem")
 	flag.Var(&flags.stage, "stage", fmt.Sprintf("execution stage. %v", stages.Names()))
 	flag.StringVar(&flags.stateFile, "state-file", "/run/ignition/state", "where to store internal state")
@@ -65,14 +67,21 @@ func main() {
 		return
 	}
 
-	if flags.platform == "" {
-		fmt.Fprint(os.Stderr, "'--platform' must be provided\n")
+	// keep compatiblity with --oem
+	if flags.platform == "" && flags.oem == "" {
+		fmt.Fprint(os.Stderr, "'--platform' or '--oem' must be provided\n")
 		os.Exit(2)
 	}
 
 	if flags.stage == "" {
 		fmt.Fprint(os.Stderr, "'--stage' must be provided\n")
 		os.Exit(2)
+	}
+
+	// if --oem is set it means --platform is not known, we can
+	// safely override it then
+	if flags.oem != "" {
+		flags.platform = flags.oem
 	}
 
 	logger := log.New(flags.logToStdout)
