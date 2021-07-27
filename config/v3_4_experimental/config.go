@@ -15,6 +15,10 @@
 package v3_4_experimental
 
 import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/coreos/ignition/config/v2_4"
 	"github.com/coreos/ignition/v2/config/merge"
 	"github.com/coreos/ignition/v2/config/shared/errors"
 	"github.com/coreos/ignition/v2/config/util"
@@ -25,6 +29,8 @@ import (
 
 	"github.com/coreos/go-semver/semver"
 	"github.com/coreos/vcontext/report"
+
+	"github.com/coreos/ign-converter/translate/v24tov31"
 )
 
 func Merge(parent, child types.Config) types.Config {
@@ -65,6 +71,38 @@ func ParseCompatibleVersion(raw []byte) (types.Config, report.Report, error) {
 	version, rpt, err := util.GetConfigVersion(raw)
 	if err != nil {
 		return types.Config{}, rpt, err
+	}
+
+	// if the version is 2.x, we
+	// convert it to 3.1
+	if version.Major == 2 {
+		// Parse should fallback on every 2.x supported version
+		cfg, _, err := v2_4.Parse(raw)
+		if err != nil || rpt.IsFatal() {
+			return types.Config{}, report.Report{}, fmt.Errorf("unable to parse 2.x ignition: %w", err)
+		}
+
+		/*
+			map[string]string{} is required by the ign-converter
+			Ignition Spec 3 will mount filesystems at the mountpoint specified by path when running.
+			Filesystems no longer have the name field and files, links, and directories no longer specify the filesystem by name.
+			This means to translate filesystems (with the exception of root),
+			you must also provide a mapping of filesystem name to absolute path, e.g.
+			```
+			map[string]string{"var": "/var"}
+			```
+		*/
+		newCfg, err := v24tov31.Translate(cfg, map[string]string{})
+		if err != nil {
+			return types.Config{}, report.Report{}, fmt.Errorf("unable to translate 2.x ignition to 3.1: %w", err)
+
+		}
+
+		// update raw in place to continue with the 3.x logic
+		raw, err = json.Marshal(newCfg)
+		if err != nil {
+			return types.Config{}, report.Report{}, fmt.Errorf("unable to render JSON: %w", err)
+		}
 	}
 
 	if version == types.MaxVersion {
