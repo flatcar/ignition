@@ -9,19 +9,17 @@ require (
 	github.com/coreos/go-semver v0.3.0
 	github.com/coreos/go-systemd/v22 v22.0.0
 	github.com/coreos/vcontext v0.0.0-20211021162308-f1dbbca7bef4
+	github.com/flatcar-linux/ign-converter v0.0.0-20220201171211-4c51e21c9dd6
+	github.com/flatcar-linux/ignition v0.36.2-0.20220107144332-c956607ca6e9
 	github.com/google/renameio v0.1.0
 	github.com/google/uuid v1.1.1
 	github.com/pin/tftp v2.1.0+incompatible
-	github.com/smartystreets/goconvey v0.0.0-20190222223459-a17d461953aa // indirect
-	github.com/stretchr/testify v1.5.1
-	github.com/vincent-petithory/dataurl v0.0.0-20160330182126-9a301d65acbb
+	github.com/stretchr/testify v1.7.0
+	github.com/vincent-petithory/dataurl v1.0.0
 	github.com/vmware/vmw-guestinfo v0.0.0-20170707015358-25eff159a728
 	github.com/vmware/vmw-ovflib v0.0.0-20170608004843-1f217b9dc714
-	go.opencensus.io v0.22.5 // indirect
 	golang.org/x/net v0.0.0-20200602114024-627f9648deb9
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20200610111108-226ff32320da
-	golang.org/x/tools v0.0.0-20200610160956-3e83d1e96d0e // indirect
 	google.golang.org/api v0.26.0
-	google.golang.org/genproto v0.0.0-20200610104632-a5b850bcf112 // indirect
 )
