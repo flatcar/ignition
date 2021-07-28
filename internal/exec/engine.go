@@ -19,12 +19,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/coreos/go-systemd/v22/journal"
@@ -182,42 +180,15 @@ func logStructuredJournalEntry(cfgInfo state.FetchedConfig) error {
 // config (writing an empty provider config if it is empty). In all other
 // stages it will attempt to fetch from the local cache only.
 func (e *Engine) acquireConfig(stageName string) (cfg types.Config, err error) {
-	switch {
-	case strings.HasPrefix(stageName, "fetch"):
-		cfg, err = e.acquireProviderConfig()
+	cfg, err = e.acquireProviderConfig()
 
-		// if we've successfully fetched and cached the configs, log about them
-		if err == nil {
-			for _, cfgInfo := range e.State.FetchedConfigs {
-				if logerr := logStructuredJournalEntry(cfgInfo); logerr != nil {
-					e.Logger.Info("failed to log systemd journal entry: %v", logerr)
-				}
+	// if we've successfully fetched and cached the configs, log about them
+	if err == nil {
+		for _, cfgInfo := range e.State.FetchedConfigs {
+			if logerr := logStructuredJournalEntry(cfgInfo); logerr != nil {
+				e.Logger.Info("failed to log systemd journal entry: %v", logerr)
 			}
 		}
-	default:
-		cfg, err = e.acquireCachedConfig()
-	}
-	return
-}
-
-// acquireCachedConfig returns the configuration from a local cache if
-// available
-func (e *Engine) acquireCachedConfig() (cfg types.Config, err error) {
-	var b []byte
-	b, err = ioutil.ReadFile(e.ConfigCache)
-	if err != nil {
-		return
-	}
-	if err = json.Unmarshal(b, &cfg); err != nil {
-		e.Logger.Crit("failed to parse cached config: %v", err)
-		return
-	}
-	// Create an http client and fetcher with the timeouts from the cached
-	// config
-	err = e.Fetcher.UpdateHttpTimeoutsAndCAs(cfg.Ignition.Timeouts, cfg.Ignition.Security.TLS.CertificateAuthorities, cfg.Ignition.Proxy)
-	if err != nil {
-		e.Logger.Crit("failed to update timeouts and CAs for fetcher: %v", err)
-		return
 	}
 	return
 }
