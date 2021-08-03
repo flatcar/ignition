@@ -248,6 +248,21 @@ func (s stage) mapEntriesToFilesystems(config types.Config) (map[types.Filesyste
 	return entryMap, nil
 }
 
+func (s *stage) mountAuto(dev, mnt string) error {
+	var err error
+	// try to mount all possible formats from config/v2_*/types/filesystem.go (without "swap")
+	formats := []string{"ext4", "btrfs", "xfs", "vfat"}
+	for _, tryFormat := range formats {
+		if err = s.Logger.LogOp(
+			func() error { return syscall.Mount(dev, mnt, tryFormat, 0, "") },
+			"mounting %q at %q (trying %q)", dev, mnt, tryFormat,
+		); err == nil {
+			return nil
+		}
+	}
+	return fmt.Errorf("failed to mount device %q at %q (tried %v): %v", dev, mnt, formats, err)
+}
+
 // createEntries creates any files or directories listed for the filesystem in Storage.{Files,Directories}.
 func (s *stage) createEntries(fs types.Filesystem, files []filesystemEntry) error {
 	s.Logger.PushPrefix("createFiles")
@@ -263,13 +278,9 @@ func (s *stage) createEntries(fs types.Filesystem, files []filesystemEntry) erro
 		defer os.Remove(mnt)
 
 		dev := string(fs.Mount.Device)
-		format := string(fs.Mount.Format)
 
-		if err := s.Logger.LogOp(
-			func() error { return syscall.Mount(dev, mnt, format, 0, "") },
-			"mounting %q at %q", dev, mnt,
-		); err != nil {
-			return fmt.Errorf("failed to mount device %q at %q: %v", dev, mnt, err)
+		if err := s.mountAuto(dev, mnt); err != nil {
+			return err
 		}
 		defer s.Logger.LogOp(
 			func() error { return syscall.Unmount(mnt, 0) },
