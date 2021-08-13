@@ -15,6 +15,7 @@
 package system
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -37,6 +38,11 @@ const (
 // FetchBaseConfig fetches base config fragments from the `base.d` and platform config fragments from
 // the `base.platform.d/platform`(if available), and merge them in the right order.
 func FetchBaseConfig(logger *log.Logger, platformName string) (types.Config, report.Report, error) {
+	fullBaseConfigV2, fullReport, err := fetchBaseDirectoryConfig(logger, "")
+	if err != nil {
+		return types.Config{}, fullReport, fmt.Errorf("unable to fetch V2 base config: %w", err)
+	}
+
 	fullBaseConfig, fullReport, err := fetchBaseDirectoryConfig(logger, "base.d")
 	if err != nil {
 		return types.Config{}, fullReport, err
@@ -48,6 +54,7 @@ func FetchBaseConfig(logger *log.Logger, platformName string) (types.Config, rep
 		logger.Info("no config at %q: %v", platformDir, err)
 	}
 	fullBaseConfig = latest.Merge(fullBaseConfig, basePlatformDConfig)
+	fullBaseConfig = latest.Merge(fullBaseConfig, fullBaseConfigV2)
 	fullReport.Merge(basePlatformDReport)
 	return fullBaseConfig, fullReport, nil
 }
