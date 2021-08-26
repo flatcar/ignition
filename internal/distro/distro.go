@@ -23,7 +23,6 @@ import (
 // -X github.com/coreos/ignition/internal/distro.mdadmCmd=/opt/bin/mdadm
 var (
 	// Device node directories and paths
-	diskByIDDir       = "/dev/disk/by-id"
 	diskByLabelDir    = "/dev/disk/by-label"
 	diskByPartUUIDDir = "/dev/disk/by-partuuid"
 	oemDevicePath     = "/dev/disk/by-label/OEM"
@@ -59,7 +58,6 @@ var (
 	blackboxTesting = "false"
 )
 
-func DiskByIDDir() string       { return diskByIDDir }
 func DiskByLabelDir() string    { return diskByLabelDir }
 func DiskByPartUUIDDir() string { return diskByPartUUIDDir }
 func OEMDevicePath() string     { return fromEnv("OEM_DEVICE", oemDevicePath) }

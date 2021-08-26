@@ -71,6 +71,8 @@ func cResultToErr(res C.result_t, device string) error {
 		return fmt.Errorf("bad partition index specified for device %q", device)
 	case C.RESULT_GET_PARTLIST_FAILED:
 		return fmt.Errorf("failed to get list of partitions on %q", device)
+	case C.RESULT_GET_CACHE_FAILED:
+		return fmt.Errorf("failed to retrieve cache")
 	case C.RESULT_DISK_HAS_NO_TYPE:
 		return fmt.Errorf("%q has no type string, despite having a partition table", device)
 	case C.RESULT_DISK_NOT_GPT:
@@ -79,6 +81,8 @@ func cResultToErr(res C.result_t, device string) error {
 		return fmt.Errorf("internal error. bad params passed while handling %q", device)
 	case C.RESULT_OVERFLOW:
 		return fmt.Errorf("internal error. libblkid returned impossibly large value when handling %q", device)
+	case C.RESULT_MAX_BLOCK_DEVICES:
+		return fmt.Errorf("found too many filesystems of the specified type")
 	case C.RESULT_NO_TOPO:
 		return fmt.Errorf("failed to get topology information for %q", device)
 	case C.RESULT_NO_SECTOR_SIZE:
@@ -145,4 +149,21 @@ func filesystemLookup(device string, fieldName string) (string, error) {
 		return "", err
 	}
 	return string(buf[:bytes.IndexByte(buf[:], 0)]), nil
+}
+
+// GetBlockDevices returns a slice of block devices with the given filesystem
+func GetBlockDevices(fstype string) ([]string, error) {
+	var dev C.struct_block_device_list
+	res := C.blkid_get_block_devices(C.CString(fstype), &dev)
+
+	if res != C.RESULT_OK {
+		return nil, cResultToErr(res, "")
+	}
+
+	length := int(dev.count)
+	blkDeviceList := make([]string, length)
+	for i := 0; i < length; i++ {
+		blkDeviceList[i] = C.GoString(&dev.path[i][0])
+	}
+	return blkDeviceList, nil
 }
