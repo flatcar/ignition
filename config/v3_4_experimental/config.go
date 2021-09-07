@@ -73,9 +73,9 @@ func ParseCompatibleVersion(raw []byte) (types.Config, report.Report, error) {
 		return types.Config{}, rpt, err
 	}
 
-	// if the version is 2.x, we
+	// if the version is 2.x or 1.x, we
 	// convert it to 3.1
-	if version.Major == 2 {
+	if version.Major != 3 {
 		// Parse should fallback on every 2.x supported version
 		cfg, _, err := v2_4.Parse(raw)
 		if err != nil || rpt.IsFatal() {
