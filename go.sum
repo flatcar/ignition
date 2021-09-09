@@ -158,6 +158,16 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/stretchr/testify v1.5.1 h1:nOGnQDM7FYENwehXlg/kFVnos3rEvtKTjRvOWSzb6H4=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
+github.com/tormath1/ign-converter v0.0.0-20210909131245-66a1ebdeb561 h1:ZjcZmCBv7yjWrA1SE0CmJrsI6VT36hHqxTh7oeRtH2U=
+github.com/tormath1/ign-converter v0.0.0-20210909131245-66a1ebdeb561/go.mod h1:YIGeTMRyog3fsRko4vTpRMK/ohHncaqCE1q/QfzeyX0=
+github.com/tormath1/ign-converter v0.0.0-20210909161425-22b5d456bd1c h1:TjNjhIaSWPYjNO4R3aDcPDkh3R5lqh+F14cQTeNuQf4=
+github.com/tormath1/ign-converter v0.0.0-20210909161425-22b5d456bd1c/go.mod h1:YIGeTMRyog3fsRko4vTpRMK/ohHncaqCE1q/QfzeyX0=
+github.com/tormath1/ign-converter v0.0.0-20210909162132-e7a37664fe36 h1:uM6xaaQMdnAtkZR3eXvOCHNxuQ8FH4zaT72kdDX36lg=
+github.com/tormath1/ign-converter v0.0.0-20210909162132-e7a37664fe36/go.mod h1:YIGeTMRyog3fsRko4vTpRMK/ohHncaqCE1q/QfzeyX0=
+github.com/tormath1/ign-converter v0.0.0-20210909174103-8d41c3ac17d1 h1:fhArSUdOKzuQi+ntzQfJSv7d9DpG4N+Ufxs1+UCOuP0=
+github.com/tormath1/ign-converter v0.0.0-20210909174103-8d41c3ac17d1/go.mod h1:YIGeTMRyog3fsRko4vTpRMK/ohHncaqCE1q/QfzeyX0=
+github.com/tormath1/ign-converter v0.0.0-20210910091147-29dddbaf6fcf h1:XXxrnuzGQXnIPaVAgy8C6kO7WPtUP2uFukczI/2QTiY=
+github.com/tormath1/ign-converter v0.0.0-20210910091147-29dddbaf6fcf/go.mod h1:YIGeTMRyog3fsRko4vTpRMK/ohHncaqCE1q/QfzeyX0=
 github.com/vincent-petithory/dataurl v0.0.0-20160330182126-9a301d65acbb h1:lyL3z7vYwTWXf4/bI+A01+cCSnfhKIBhy+SQ46Z/ml8=
 github.com/vincent-petithory/dataurl v0.0.0-20160330182126-9a301d65acbb/go.mod h1:FHafX5vmDzyP+1CQATJn7WFKc9CvnvxyvZy6I1MrG/U=
 github.com/vmware/vmw-guestinfo v0.0.0-20170707015358-25eff159a728 h1:sH9mEk+flyDxiUa5BuPiuhDETMbzrt9A20I2wktMvRQ=

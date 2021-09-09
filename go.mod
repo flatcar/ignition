@@ -8,13 +8,14 @@ require (
 	github.com/aws/aws-sdk-go v1.30.28
 	github.com/coreos/go-semver v0.3.0
 	github.com/coreos/go-systemd/v22 v22.0.0
-	github.com/coreos/ign-converter v0.0.0-20210702054104-d7bbcbd8997c
+	github.com/coreos/ign-converter v0.0.0-20210702054104-d7bbcbd8997c // indirect
 	github.com/coreos/ignition v0.35.0
 	github.com/coreos/vcontext v0.0.0-20210407161507-4ee6c745c8bd
 	github.com/google/renameio v0.1.0
 	github.com/google/uuid v1.1.1
 	github.com/pin/tftp v2.1.0+incompatible
 	github.com/stretchr/testify v1.5.1
+	github.com/tormath1/ign-converter v0.0.0-20210910091147-29dddbaf6fcf
 	github.com/vincent-petithory/dataurl v0.0.0-20160330182126-9a301d65acbb
 	github.com/vmware/vmw-guestinfo v0.0.0-20170707015358-25eff159a728
 	github.com/vmware/vmw-ovflib v0.0.0-20170608004843-1f217b9dc714

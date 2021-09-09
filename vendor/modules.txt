@@ -74,7 +74,6 @@ github.com/coreos/go-systemd/v22/journal
 github.com/coreos/go-systemd/v22/unit
 # github.com/coreos/ign-converter v0.0.0-20210702054104-d7bbcbd8997c
 ## explicit
-github.com/coreos/ign-converter/translate/v24tov31
 github.com/coreos/ign-converter/util
 # github.com/coreos/ignition v0.35.0
 ## explicit
@@ -143,6 +142,9 @@ github.com/pmezard/go-difflib/difflib
 # github.com/stretchr/testify v1.5.1
 ## explicit
 github.com/stretchr/testify/assert
+# github.com/tormath1/ign-converter v0.0.0-20210910091147-29dddbaf6fcf
+## explicit
+github.com/tormath1/ign-converter/translate/v24tov31
 # github.com/vincent-petithory/dataurl v0.0.0-20160330182126-9a301d65acbb
 ## explicit
 github.com/vincent-petithory/dataurl

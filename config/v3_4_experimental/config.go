@@ -30,7 +30,7 @@ import (
 	"github.com/coreos/go-semver/semver"
 	"github.com/coreos/vcontext/report"
 
-	"github.com/coreos/ign-converter/translate/v24tov31"
+	"github.com/tormath1/ign-converter/translate/v24tov31"
 )
 
 func Merge(parent, child types.Config) types.Config {
