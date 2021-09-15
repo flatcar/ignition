@@ -21,7 +21,6 @@
 package qemu
 
 import (
-	"errors"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -46,8 +45,9 @@ func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 		return types.Config{}, report.Report{}, err
 	}
 
+	data := []byte{}
 	for _, path := range firmwareConfigPaths {
-		data, err := ioutil.ReadFile(path)
+		data, err = ioutil.ReadFile(path)
 		if err != nil && os.IsNotExist(err) {
 			f.Logger.Info("QEMU firmware config was not found. Ignoring...")
 			continue
@@ -61,5 +61,5 @@ func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 		return util.ParseConfig(f.Logger, data)
 	}
 
-	return types.Config{}, report.Report{}, errors.New("unable to fetch a config")
+	return util.ParseConfig(f.Logger, data)
 }
