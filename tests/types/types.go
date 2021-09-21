@@ -97,6 +97,7 @@ type Test struct {
 	In                []Disk // Disk state before running Ignition
 	Out               []Disk // Expected disk state after running Ignition
 	MntDevices        []MntDevice
+	OEMLookasideFiles []File
 	SystemDirFiles    []File
 	Env               []string // Environment variables for Ignition
 	Config            string
