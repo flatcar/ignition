@@ -23,13 +23,17 @@ import (
 // -X github.com/flatcar-linux/ignition/v2/internal/distro.mdadmCmd=/opt/bin/mdadm
 var (
 	// Device node directories and paths
-	diskByLabelDir = "/dev/disk/by-label"
+	diskByLabelDir    = "/dev/disk/by-label"
+	diskByPartUUIDDir = "/dev/disk/by-partuuid"
+	oemDevicePath     = "/dev/disk/by-label/OEM"
 
 	// initrd file paths
 	kernelCmdlinePath = "/proc/cmdline"
 	bootIDPath        = "/proc/sys/kernel/random/boot_id"
 	// initramfs directory containing distro-provided base config
 	systemConfigDir = "/usr/lib/ignition"
+	// initramfs directory to check before retrieving file from OEM partition
+	oemLookasideDir = "/usr/share/oem"
 
 	// Helper programs
 	groupaddCmd = "groupadd"
@@ -78,11 +82,14 @@ var (
 	resultFilePath          = "/etc/.ignition-result.json"
 )
 
-func DiskByLabelDir() string { return diskByLabelDir }
+func DiskByLabelDir() string    { return diskByLabelDir }
+func DiskByPartUUIDDir() string { return diskByPartUUIDDir }
+func OEMDevicePath() string     { return fromEnv("OEM_DEVICE", oemDevicePath) }
 
 func KernelCmdlinePath() string { return kernelCmdlinePath }
 func BootIDPath() string        { return bootIDPath }
 func SystemConfigDir() string   { return fromEnv("SYSTEM_CONFIG_DIR", systemConfigDir) }
+func OEMLookasideDir() string   { return fromEnv("OEM_LOOKASIDE_DIR", oemLookasideDir) }
 
 func GroupaddCmd() string { return groupaddCmd }
 func GroupdelCmd() string { return groupdelCmd }
