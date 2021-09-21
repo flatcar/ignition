@@ -7,7 +7,7 @@ nav_order: 8
 
 Ignition is currently only supported for the following platforms:
 
-* Bare Metal - Use the `ignition.config.url` kernel parameter to provide a URL to the configuration. The URL can use the `http://`, `https://`, `tftp://`, `s3://`, or `gs://` schemes to specify a remote config.
+* Bare Metal - Use the `ignition.config.url` kernel parameter to provide a URL to the configuration. The URL can use the `http://`, `https://`, `tftp://`, `s3://`, or `gs://` schemes to specify a remote config or the `oem://` scheme to specify a local config, rooted in `/usr/share/oem`.
 * [Amazon Web Services] - Ignition will read its configuration from the instance userdata. Cloud SSH keys are handled separately.
 * [Microsoft Azure] - Ignition will read its configuration from the custom data provided to the instance. Cloud SSH keys are handled separately.
 * [Microsoft Azure Stack] - Ignition will read its configuration from the custom data provided to the instance. Cloud SSH keys are handled separately.

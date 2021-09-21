@@ -29,12 +29,14 @@ func init() {
 	register.Register(register.NegativeTest, ReplaceConfigWithMissingFileHTTP())
 	register.Register(register.NegativeTest, ReplaceConfigWithInvalidHeaderHTTP())
 	register.Register(register.NegativeTest, ReplaceConfigWithMissingFileTFTP())
+	register.Register(register.NegativeTest, ReplaceConfigWithMissingFileOEM())
 	register.Register(register.NegativeTest, AppendConfigWithMissingFileHTTP())
 	register.Register(register.NegativeTest, AppendConfigWithInvalidHeaderHTTP())
 	register.Register(register.NegativeTest, AppendConfigWithMissingFileTFTP())
 	register.Register(register.NegativeTest, VersionOnlyConfig25())
 	register.Register(register.NegativeTest, VersionOnlyConfig35())
 	register.Register(register.NegativeTest, MergingCanFail())
+	register.Register(register.NegativeTest, AppendConfigWithMissingFileOEM())
 }
 
 func ReplaceConfigWithInvalidHash() types.Test {
@@ -185,6 +187,31 @@ func ReplaceConfigWithMissingFileTFTP() types.Test {
 	}
 }
 
+func ReplaceConfigWithMissingFileOEM() types.Test {
+	name := "Replace Config with Missing File - OEM"
+	in := types.GetBaseDisk()
+	out := in
+	config := `{
+	  "ignition": {
+	    "version": "$version",
+	    "config": {
+	      "replace": {
+	        "source": "oem:///asdf"
+	      }
+	    }
+	  }
+	}`
+	configMinVersion := "3.0.0-experimental"
+
+	return types.Test{
+		Name:             name,
+		In:               in,
+		Out:              out,
+		Config:           config,
+		ConfigMinVersion: configMinVersion,
+	}
+}
+
 func AppendConfigWithMissingFileHTTP() types.Test {
 	name := "config.merge.http.notfound"
 	in := types.GetBaseDisk()
@@ -251,6 +278,31 @@ func AppendConfigWithMissingFileTFTP() types.Test {
 	  }
 	}`
 	configMinVersion := "3.0.0"
+
+	return types.Test{
+		Name:             name,
+		In:               in,
+		Out:              out,
+		Config:           config,
+		ConfigMinVersion: configMinVersion,
+	}
+}
+
+func AppendConfigWithMissingFileOEM() types.Test {
+	name := "Append Config with Missing File - OEM"
+	in := types.GetBaseDisk()
+	out := in
+	config := `{
+	  "ignition": {
+	    "version": "$version",
+	    "config": {
+	      "append": [{
+	        "source": "oem:///asdf"
+	      }]
+	    }
+	  }
+	}`
+	configMinVersion := "3.0.0-experimental"
 
 	return types.Test{
 		Name:             name,

@@ -29,6 +29,7 @@ func init() {
 	register.Register(register.PositiveTest, CreateFileFromRemoteContentsHTTPUsingHeadersWithRedirect())
 	register.Register(register.PositiveTest, CreateFileFromRemoteContentsHTTPUsingOverwrittenHeaders())
 	register.Register(register.PositiveTest, CreateFileFromRemoteContentsTFTP())
+	register.Register(register.PositiveTest, CreateFileFromRemoteContentsOEM())
 }
 
 func CreateFileFromRemoteContentsHTTP() types.Test {
@@ -243,6 +244,49 @@ func CreateFileFromRemoteContentsTFTP() types.Test {
 		},
 	})
 	configMinVersion := "3.0.0"
+
+	return types.Test{
+		Name:             name,
+		In:               in,
+		Out:              out,
+		Config:           config,
+		ConfigMinVersion: configMinVersion,
+	}
+}
+
+func CreateFileFromRemoteContentsOEM() types.Test {
+	name := "Create Files from Remote Contents - OEM"
+	in := types.GetBaseDisk()
+	out := types.GetBaseDisk()
+	config := `{
+	  "ignition": { "version": "$version" },
+	  "storage": {
+	    "files": [{
+	      "path": "/foo/bar",
+	      "contents": {
+	        "source": "oem:///source"
+	      }
+	    }]
+	  }
+	}`
+	in[0].Partitions.AddFiles("OEM", []types.File{
+		{
+			Node: types.Node{
+				Name: "source",
+			},
+			Contents: "asdf\nfdsa",
+		},
+	})
+	out[0].Partitions.AddFiles("ROOT", []types.File{
+		{
+			Node: types.Node{
+				Name:      "bar",
+				Directory: "foo",
+			},
+			Contents: "asdf\nfdsa",
+		},
+	})
+	configMinVersion := "3.0.0-experimental"
 
 	return types.Test{
 		Name:             name,
