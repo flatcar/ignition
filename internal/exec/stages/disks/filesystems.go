@@ -126,7 +126,7 @@ func (s stage) createFilesystem(fs types.Filesystem) error {
 		}
 		// If the filesystem isn't forcefully being created, then we need
 		// to check if it is of the correct type or that no filesystem exists.
-		if info.Type == fileSystemFormat &&
+		if (info.Type == fileSystemFormat || info.Label == "OEM") &&
 			(fs.Label == nil || info.Label == *fs.Label) &&
 			(fs.UUID == nil || canonicalizeFilesystemUUID(info.Type, info.UUID) == canonicalizeFilesystemUUID(fileSystemFormat, *fs.UUID)) {
 			s.Logger.Info("filesystem at %q is already correctly formatted. Skipping mkfs...", fs.Device)
