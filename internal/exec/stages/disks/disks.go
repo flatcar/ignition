@@ -22,13 +22,13 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/distro"
-	"github.com/coreos/ignition/internal/exec/stages"
-	"github.com/coreos/ignition/internal/exec/util"
-	"github.com/coreos/ignition/internal/log"
-	"github.com/coreos/ignition/internal/resource"
-	"github.com/coreos/ignition/internal/systemd"
+	"github.com/flatcar-linux/ignition/internal/config/types"
+	"github.com/flatcar-linux/ignition/internal/distro"
+	"github.com/flatcar-linux/ignition/internal/exec/stages"
+	"github.com/flatcar-linux/ignition/internal/exec/util"
+	"github.com/flatcar-linux/ignition/internal/log"
+	"github.com/flatcar-linux/ignition/internal/resource"
+	"github.com/flatcar-linux/ignition/internal/systemd"
 )
 
 const (

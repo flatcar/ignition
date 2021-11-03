@@ -17,7 +17,7 @@ package v2_4_experimental
 import (
 	"reflect"
 
-	"github.com/coreos/ignition/config/v2_4_experimental/types"
+	"github.com/flatcar-linux/ignition/config/v2_4_experimental/types"
 )
 
 // Append appends newConfig to oldConfig and returns the result. Appending one

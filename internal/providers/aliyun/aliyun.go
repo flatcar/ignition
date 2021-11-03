@@ -20,11 +20,11 @@ package aliyun
 import (
 	"net/url"
 
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/providers/util"
-	"github.com/coreos/ignition/internal/resource"
+	"github.com/flatcar-linux/ignition/internal/config/types"
+	"github.com/flatcar-linux/ignition/internal/providers/util"
+	"github.com/flatcar-linux/ignition/internal/resource"
 
-	"github.com/coreos/ignition/config/validate/report"
+	"github.com/flatcar-linux/ignition/config/validate/report"
 )
 
 var (

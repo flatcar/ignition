@@ -17,10 +17,10 @@
 package noop
 
 import (
-	"github.com/coreos/ignition/config/shared/errors"
-	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/resource"
+	"github.com/flatcar-linux/ignition/config/shared/errors"
+	"github.com/flatcar-linux/ignition/config/validate/report"
+	"github.com/flatcar-linux/ignition/internal/config/types"
+	"github.com/flatcar-linux/ignition/internal/resource"
 )
 
 func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {

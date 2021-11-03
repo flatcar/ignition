@@ -20,9 +20,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/coreos/ignition/config/util"
-	v2_0 "github.com/coreos/ignition/config/v2_0/types"
-	"github.com/coreos/ignition/config/v2_1/types"
+	"github.com/flatcar-linux/ignition/config/util"
+	v2_0 "github.com/flatcar-linux/ignition/config/v2_0/types"
+	"github.com/flatcar-linux/ignition/config/v2_1/types"
 )
 
 func TestTranslateFromV2_0(t *testing.T) {

@@ -18,10 +18,10 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 
-	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/log"
+	"github.com/flatcar-linux/ignition/config/validate/report"
+	"github.com/flatcar-linux/ignition/internal/config"
+	"github.com/flatcar-linux/ignition/internal/config/types"
+	"github.com/flatcar-linux/ignition/internal/log"
 )
 
 func ParseConfig(logger *log.Logger, rawConfig []byte) (types.Config, report.Report, error) {

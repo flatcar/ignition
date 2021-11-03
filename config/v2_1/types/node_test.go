@@ -18,9 +18,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coreos/ignition/config/shared/errors"
-	"github.com/coreos/ignition/config/util"
-	"github.com/coreos/ignition/config/validate/report"
+	"github.com/flatcar-linux/ignition/config/shared/errors"
+	"github.com/flatcar-linux/ignition/config/util"
+	"github.com/flatcar-linux/ignition/config/validate/report"
 )
 
 func TestNodeValidatePath(t *testing.T) {

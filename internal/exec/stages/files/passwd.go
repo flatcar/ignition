@@ -17,7 +17,7 @@ package files
 import (
 	"fmt"
 
-	"github.com/coreos/ignition/internal/config/types"
+	"github.com/flatcar-linux/ignition/internal/config/types"
 )
 
 // createPasswd creates the users and groups as described in config.Passwd.

@@ -22,8 +22,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/coreos/ignition/tests/register"
-	"github.com/coreos/ignition/tests/types"
+	"github.com/flatcar-linux/ignition/tests/register"
+	"github.com/flatcar-linux/ignition/tests/types"
 )
 
 func init() {

@@ -15,9 +15,9 @@
 package config
 
 import (
-	currentExperimental "github.com/coreos/ignition/config/v2_4_experimental"
-	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
+	currentExperimental "github.com/flatcar-linux/ignition/config/v2_4_experimental"
+	"github.com/flatcar-linux/ignition/config/validate/report"
+	"github.com/flatcar-linux/ignition/internal/config/types"
 )
 
 func Parse(rawConfig []byte) (types.Config, report.Report, error) {

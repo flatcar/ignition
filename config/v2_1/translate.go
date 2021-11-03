@@ -17,9 +17,9 @@ package v2_1
 import (
 	"strings"
 
-	"github.com/coreos/ignition/config/util"
-	v2_0 "github.com/coreos/ignition/config/v2_0/types"
-	"github.com/coreos/ignition/config/v2_1/types"
+	"github.com/flatcar-linux/ignition/config/util"
+	v2_0 "github.com/flatcar-linux/ignition/config/v2_0/types"
+	"github.com/flatcar-linux/ignition/config/v2_1/types"
 )
 
 // golang--
