@@ -18,7 +18,7 @@ import (
 	"io"
 
 	json "github.com/ajeddeloh/go-json"
-	"github.com/coreos/ignition/config/validate/astnode"
+	"github.com/flatcar-linux/ignition/config/validate/astnode"
 	"go4.org/errorutil"
 )
 

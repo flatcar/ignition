@@ -28,11 +28,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/earlyrand"
-	"github.com/coreos/ignition/internal/log"
-	"github.com/coreos/ignition/internal/util"
-	"github.com/coreos/ignition/internal/version"
+	"github.com/flatcar-linux/ignition/internal/config/types"
+	"github.com/flatcar-linux/ignition/internal/earlyrand"
+	"github.com/flatcar-linux/ignition/internal/log"
+	"github.com/flatcar-linux/ignition/internal/util"
+	"github.com/flatcar-linux/ignition/internal/version"
 
 	"github.com/vincent-petithory/dataurl"
 

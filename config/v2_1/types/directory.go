@@ -15,7 +15,7 @@
 package types
 
 import (
-	"github.com/coreos/ignition/config/validate/report"
+	"github.com/flatcar-linux/ignition/config/validate/report"
 )
 
 func (d Directory) ValidateMode() report.Report {

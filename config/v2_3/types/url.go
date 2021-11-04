@@ -19,7 +19,7 @@ import (
 
 	"github.com/vincent-petithory/dataurl"
 
-	"github.com/coreos/ignition/config/shared/errors"
+	"github.com/flatcar-linux/ignition/config/shared/errors"
 )
 
 func validateURL(s string) error {

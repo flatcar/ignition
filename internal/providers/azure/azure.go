@@ -24,12 +24,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
-	execUtil "github.com/coreos/ignition/internal/exec/util"
-	"github.com/coreos/ignition/internal/log"
-	"github.com/coreos/ignition/internal/providers/util"
-	"github.com/coreos/ignition/internal/resource"
+	"github.com/flatcar-linux/ignition/config/validate/report"
+	"github.com/flatcar-linux/ignition/internal/config/types"
+	execUtil "github.com/flatcar-linux/ignition/internal/exec/util"
+	"github.com/flatcar-linux/ignition/internal/log"
+	"github.com/flatcar-linux/ignition/internal/providers/util"
+	"github.com/flatcar-linux/ignition/internal/resource"
 )
 
 const (

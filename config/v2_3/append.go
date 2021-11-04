@@ -17,7 +17,7 @@ package v2_3
 import (
 	"reflect"
 
-	"github.com/coreos/ignition/config/v2_3/types"
+	"github.com/flatcar-linux/ignition/config/v2_3/types"
 )
 
 // Append appends newConfig to oldConfig and returns the result. Appending one

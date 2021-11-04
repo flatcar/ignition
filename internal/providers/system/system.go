@@ -19,13 +19,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/distro"
-	"github.com/coreos/ignition/internal/log"
-	"github.com/coreos/ignition/internal/providers"
-	"github.com/coreos/ignition/internal/providers/util"
-	"github.com/coreos/ignition/internal/resource"
+	"github.com/flatcar-linux/ignition/config/validate/report"
+	"github.com/flatcar-linux/ignition/internal/config/types"
+	"github.com/flatcar-linux/ignition/internal/distro"
+	"github.com/flatcar-linux/ignition/internal/log"
+	"github.com/flatcar-linux/ignition/internal/providers"
+	"github.com/flatcar-linux/ignition/internal/providers/util"
+	"github.com/flatcar-linux/ignition/internal/resource"
 )
 
 const (

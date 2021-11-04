@@ -19,8 +19,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/coreos/ignition/internal/log"
-	"github.com/coreos/ignition/internal/resource"
+	"github.com/flatcar-linux/ignition/internal/log"
+	"github.com/flatcar-linux/ignition/internal/resource"
 )
 
 var (

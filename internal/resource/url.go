@@ -31,11 +31,11 @@ import (
 	"strings"
 	"syscall"
 
-	configErrors "github.com/coreos/ignition/config/shared/errors"
-	"github.com/coreos/ignition/internal/distro"
-	"github.com/coreos/ignition/internal/log"
-	"github.com/coreos/ignition/internal/systemd"
-	"github.com/coreos/ignition/internal/util"
+	configErrors "github.com/flatcar-linux/ignition/config/shared/errors"
+	"github.com/flatcar-linux/ignition/internal/distro"
+	"github.com/flatcar-linux/ignition/internal/log"
+	"github.com/flatcar-linux/ignition/internal/systemd"
+	"github.com/flatcar-linux/ignition/internal/util"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"

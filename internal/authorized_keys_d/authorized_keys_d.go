@@ -28,7 +28,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/coreos/ignition/internal/authorized_keys_d/as_user"
+	"github.com/flatcar-linux/ignition/internal/authorized_keys_d/as_user"
 )
 
 const (

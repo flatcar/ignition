@@ -21,10 +21,10 @@ import (
 	"strings"
 	"syscall"
 
-	keys "github.com/coreos/ignition/internal/authorized_keys_d"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/distro"
-	"github.com/coreos/ignition/internal/log"
+	keys "github.com/flatcar-linux/ignition/internal/authorized_keys_d"
+	"github.com/flatcar-linux/ignition/internal/config/types"
+	"github.com/flatcar-linux/ignition/internal/distro"
+	"github.com/flatcar-linux/ignition/internal/log"
 )
 
 // EnsureUser ensures that the user exists as described. If the user does not

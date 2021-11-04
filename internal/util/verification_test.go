@@ -18,7 +18,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coreos/ignition/internal/config/types"
+	"github.com/flatcar-linux/ignition/internal/config/types"
 )
 
 func TestAssertValid(t *testing.T) {

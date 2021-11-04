@@ -22,10 +22,10 @@ import (
 	"sort"
 	"syscall"
 
-	configUtil "github.com/coreos/ignition/config/util"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/exec/util"
-	"github.com/coreos/ignition/internal/log"
+	configUtil "github.com/flatcar-linux/ignition/config/util"
+	"github.com/flatcar-linux/ignition/internal/config/types"
+	"github.com/flatcar-linux/ignition/internal/exec/util"
+	"github.com/flatcar-linux/ignition/internal/log"
 )
 
 // createFilesystemsEntries creates the files described in config.Storage.{Files,Directories}.

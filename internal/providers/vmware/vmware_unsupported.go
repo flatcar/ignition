@@ -22,9 +22,9 @@ package vmware
 import (
 	"errors"
 
-	"github.com/coreos/ignition/config/validate/report"
-	"github.com/coreos/ignition/internal/config/types"
-	"github.com/coreos/ignition/internal/resource"
+	"github.com/flatcar-linux/ignition/config/validate/report"
+	"github.com/flatcar-linux/ignition/internal/config/types"
+	"github.com/flatcar-linux/ignition/internal/resource"
 )
 
 func FetchConfig(_ *resource.Fetcher) (types.Config, report.Report, error) {

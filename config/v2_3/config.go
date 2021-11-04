@@ -15,11 +15,11 @@
 package v2_3
 
 import (
-	"github.com/coreos/ignition/config/shared/errors"
-	"github.com/coreos/ignition/config/v2_2"
-	"github.com/coreos/ignition/config/v2_3/types"
-	"github.com/coreos/ignition/config/validate"
-	"github.com/coreos/ignition/config/validate/report"
+	"github.com/flatcar-linux/ignition/config/shared/errors"
+	"github.com/flatcar-linux/ignition/config/v2_2"
+	"github.com/flatcar-linux/ignition/config/v2_3/types"
+	"github.com/flatcar-linux/ignition/config/validate"
+	"github.com/flatcar-linux/ignition/config/validate/report"
 
 	json "github.com/ajeddeloh/go-json"
 	"github.com/coreos/go-semver/semver"

@@ -20,8 +20,8 @@ import (
 	"github.com/coreos/go-semver/semver"
 	"github.com/stretchr/testify/assert"
 
-	v1 "github.com/coreos/ignition/config/v1/types"
-	"github.com/coreos/ignition/config/v2_0/types"
+	v1 "github.com/flatcar-linux/ignition/config/v1/types"
+	"github.com/flatcar-linux/ignition/config/v2_0/types"
 )
 
 func TestTranslateFromV1(t *testing.T) {

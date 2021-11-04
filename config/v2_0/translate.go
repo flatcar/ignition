@@ -17,8 +17,8 @@ package v2_0
 import (
 	"fmt"
 
-	v1 "github.com/coreos/ignition/config/v1/types"
-	"github.com/coreos/ignition/config/v2_0/types"
+	v1 "github.com/flatcar-linux/ignition/config/v1/types"
+	"github.com/flatcar-linux/ignition/config/v2_0/types"
 	"github.com/vincent-petithory/dataurl"
 )
 

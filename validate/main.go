@@ -21,8 +21,8 @@ import (
 	"os"
 	"strings"
 
-	config "github.com/coreos/ignition/config/v2_4_experimental"
-	"github.com/coreos/ignition/internal/version"
+	config "github.com/flatcar-linux/ignition/config/v2_4_experimental"
+	"github.com/flatcar-linux/ignition/internal/version"
 )
 
 var (

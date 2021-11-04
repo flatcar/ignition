@@ -15,8 +15,8 @@
 package config
 
 import (
-	from "github.com/coreos/ignition/config/v2_4_experimental/types"
-	"github.com/coreos/ignition/internal/config/types"
+	from "github.com/flatcar-linux/ignition/config/v2_4_experimental/types"
+	"github.com/flatcar-linux/ignition/internal/config/types"
 )
 
 func intToPtr(x int) *int {

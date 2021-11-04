@@ -19,8 +19,8 @@ import (
 
 	"github.com/coreos/go-semver/semver"
 
-	"github.com/coreos/ignition/config/shared/errors"
-	"github.com/coreos/ignition/config/validate/report"
+	"github.com/flatcar-linux/ignition/config/shared/errors"
+	"github.com/flatcar-linux/ignition/config/validate/report"
 )
 
 type Ignition struct {

@@ -20,14 +20,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/coreos/ignition/internal/exec"
-	"github.com/coreos/ignition/internal/exec/stages"
-	_ "github.com/coreos/ignition/internal/exec/stages/disks"
-	_ "github.com/coreos/ignition/internal/exec/stages/fetch"
-	_ "github.com/coreos/ignition/internal/exec/stages/files"
-	"github.com/coreos/ignition/internal/log"
-	"github.com/coreos/ignition/internal/oem"
-	"github.com/coreos/ignition/internal/version"
+	"github.com/flatcar-linux/ignition/internal/exec"
+	"github.com/flatcar-linux/ignition/internal/exec/stages"
+	_ "github.com/flatcar-linux/ignition/internal/exec/stages/disks"
+	_ "github.com/flatcar-linux/ignition/internal/exec/stages/fetch"
+	_ "github.com/flatcar-linux/ignition/internal/exec/stages/files"
+	"github.com/flatcar-linux/ignition/internal/log"
+	"github.com/flatcar-linux/ignition/internal/oem"
+	"github.com/flatcar-linux/ignition/internal/version"
 )
 
 func main() {
