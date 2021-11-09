@@ -30,21 +30,6 @@ Add whatever validation logic is necessary to `config/v${LATEST_EXPERIMENTAL}/ty
 
 Finally, make whatever changes are necessary to `internal` to handle the new spec.
 
-## Vendor
-
-Install [glide](https://github.com/Masterminds/glide) and [glide-vc](https://github.com/sgotti/glide-vc) to manage dependencies in the `vendor` directory.
-
-```sh
-go get -u github.com/Masterminds/glide
-go get -u github.com/sgotti/glide-vc
-```
-
-Edit the `glide.yaml` file to update a dependency or add a new dependency. Then make vendor.
-
-```sh
-make vendor
-```
-
 ## Running Blackbox Tests on Container Linux
 
 Build both the Ignition & test binaries inside of a docker container, for this example it will be building from the ignition-builder-1.8 image and targeting the amd64 architecture.
