@@ -69,7 +69,7 @@ github.com/sigma/vmw-guestinfo/vmcheck
 # github.com/stretchr/testify v1.7.0
 ## explicit
 github.com/stretchr/testify/assert
-# github.com/vincent-petithory/dataurl v0.0.0-20160330182126-9a301d65acbb
+# github.com/vincent-petithory/dataurl v1.0.0
 ## explicit
 github.com/vincent-petithory/dataurl
 # github.com/vmware/vmw-guestinfo v0.0.0-20170707015358-25eff159a728
