@@ -21,6 +21,6 @@ require (
 	github.com/vmware/vmw-ovflib v0.0.0-20170608004843-1f217b9dc714
 	go4.org v0.0.0-20160314031811-03efcb870d84
 	golang.org/x/net v0.0.0-20190320064053-1272bf9dcd53
-	golang.org/x/text v0.3.1-0.20190321115727-fe223c5a2583 // indirect
+	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
