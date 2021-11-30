@@ -87,7 +87,7 @@ go4.org/errorutil
 ## explicit
 golang.org/x/net/http/httpproxy
 golang.org/x/net/idna
-# golang.org/x/text v0.3.1-0.20190321115727-fe223c5a2583
+# golang.org/x/text v0.3.7
 ## explicit
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
