@@ -18,8 +18,6 @@
 package ec2
 
 import (
-	"net/url"
-
 	"github.com/flatcar-linux/ignition/config/validate/report"
 	"github.com/flatcar-linux/ignition/internal/config/types"
 	"github.com/flatcar-linux/ignition/internal/log"
@@ -32,18 +30,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 )
 
-var (
-	userdataUrl = url.URL{
-		Scheme: "http",
-		Host:   "169.254.169.254",
-		Path:   "2009-04-04/user-data",
-	}
-)
-
 func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
-	data, err := f.FetchToBuffer(userdataUrl, resource.FetchOptions{
-		Headers: resource.ConfigHeaders,
-	})
+	data, err := ec2metadata.New(f.AWSSession).GetUserData()
 	if err != nil && err != resource.ErrNotFound {
 		return types.Config{}, report.Report{}, err
 	}
@@ -55,11 +43,11 @@ func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 	}
 	f.S3RegionHint = regionHint
 
-	return util.ParseConfig(f.Logger, data)
+	return util.ParseConfig(f.Logger, []byte(data))
 }
 
 func NewFetcher(l *log.Logger) (resource.Fetcher, error) {
-	sess, err := session.NewSession(&aws.Config{})
+	sess, err := session.NewSession(aws.NewConfig())
 	if err != nil {
 		return resource.Fetcher{}, err
 	}
