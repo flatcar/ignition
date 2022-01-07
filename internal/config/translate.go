@@ -15,7 +15,7 @@
 package config
 
 import (
-	from "github.com/flatcar-linux/ignition/config/v2_4_experimental/types"
+	from "github.com/flatcar-linux/ignition/config/v2_4/types"
 	"github.com/flatcar-linux/ignition/internal/config/types"
 )
 
@@ -35,6 +35,16 @@ func boolToPtr(b bool) *bool {
 }
 
 func Translate(old from.Config) types.Config {
+	translateHTTPHeaderSlice := func(old []from.HTTPHeader) []types.HTTPHeader {
+		var res []types.HTTPHeader
+		for _, x := range old {
+			res = append(res, types.HTTPHeader{
+				Name:  x.Name,
+				Value: x.Value,
+			})
+		}
+		return res
+	}
 	translateConfigReference := func(old *from.ConfigReference) *types.ConfigReference {
 		if old == nil {
 			return nil
@@ -44,6 +54,7 @@ func Translate(old from.Config) types.Config {
 			Verification: types.Verification{
 				Hash: old.Verification.Hash,
 			},
+			HTTPHeaders: translateHTTPHeaderSlice(old.HTTPHeaders),
 		}
 	}
 	translateConfigReferenceSlice := func(old []from.ConfigReference) []types.ConfigReference {
@@ -61,6 +72,7 @@ func Translate(old from.Config) types.Config {
 				Verification: types.Verification{
 					Hash: x.Verification.Hash,
 				},
+				HTTPHeaders: translateHTTPHeaderSlice(x.HTTPHeaders),
 			})
 		}
 		return res
@@ -245,6 +257,7 @@ func Translate(old from.Config) types.Config {
 						Verification: types.Verification{
 							Hash: x.Contents.Verification.Hash,
 						},
+						HTTPHeaders: translateHTTPHeaderSlice(x.Contents.HTTPHeaders),
 					},
 					Mode:   x.Mode,
 					Append: x.Append,

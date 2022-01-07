@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v2_4_experimental
+package v2_4
 
 import (
 	from "github.com/flatcar-linux/ignition/config/v2_3/types"
-	"github.com/flatcar-linux/ignition/config/v2_4_experimental/types"
+	"github.com/flatcar-linux/ignition/config/v2_4/types"
 )
 
 func intToPtr(x int) *int {

@@ -28,8 +28,9 @@ import (
 	"github.com/flatcar-linux/ignition/config/util"
 	"github.com/flatcar-linux/ignition/config/validate/astjson"
 	"github.com/flatcar-linux/ignition/config/validate/report"
+
 	// Import into the same namespace to keep config definitions clean
-	. "github.com/flatcar-linux/ignition/config/v2_4_experimental/types"
+	. "github.com/flatcar-linux/ignition/config/v2_4/types"
 )
 
 func TestValidate(t *testing.T) {

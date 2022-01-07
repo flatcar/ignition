@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package v2_4_experimental
+package v2_4
 
 import (
 	"github.com/flatcar-linux/ignition/config/shared/errors"
 	"github.com/flatcar-linux/ignition/config/v2_3"
-	"github.com/flatcar-linux/ignition/config/v2_4_experimental/types"
+	"github.com/flatcar-linux/ignition/config/v2_4/types"
 	"github.com/flatcar-linux/ignition/config/validate"
 	"github.com/flatcar-linux/ignition/config/validate/report"
 
