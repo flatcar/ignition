@@ -21,9 +21,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/coreos/ignition/v2/config/shared/errors"
-	"github.com/coreos/ignition/v2/internal/log"
-	"github.com/coreos/ignition/v2/internal/util"
+	"github.com/flatcar-linux/ignition/v2/config/shared/errors"
+	"github.com/flatcar-linux/ignition/v2/internal/log"
+	"github.com/flatcar-linux/ignition/v2/internal/util"
 )
 
 func TestDataUrl(t *testing.T) {

@@ -15,8 +15,8 @@
 package regression
 
 import (
-	"github.com/coreos/ignition/v2/tests/register"
-	"github.com/coreos/ignition/v2/tests/types"
+	"github.com/flatcar-linux/ignition/v2/tests/register"
+	"github.com/flatcar-linux/ignition/v2/tests/types"
 )
 
 func init() {
@@ -24,7 +24,7 @@ func init() {
 }
 
 func VFATIgnoresWipeFilesystem() types.Test {
-	// Originally found in https://github.com/coreos/bugs/issues/2055
+	// Originally found in https://github.com/flatcar-linux/bugs/issues/2055
 	name := "regression.filesystem.ignoreswipe"
 	in := types.GetBaseDisk()
 	out := in

@@ -22,14 +22,14 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/coreos/ignition/v2/config/v3_4_experimental/types"
-	"github.com/coreos/ignition/v2/internal/distro"
-	"github.com/coreos/ignition/v2/internal/exec/stages"
-	"github.com/coreos/ignition/v2/internal/exec/util"
-	"github.com/coreos/ignition/v2/internal/log"
-	"github.com/coreos/ignition/v2/internal/resource"
-	"github.com/coreos/ignition/v2/internal/state"
-	"github.com/coreos/ignition/v2/internal/systemd"
+	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar-linux/ignition/v2/internal/distro"
+	"github.com/flatcar-linux/ignition/v2/internal/exec/stages"
+	"github.com/flatcar-linux/ignition/v2/internal/exec/util"
+	"github.com/flatcar-linux/ignition/v2/internal/log"
+	"github.com/flatcar-linux/ignition/v2/internal/resource"
+	"github.com/flatcar-linux/ignition/v2/internal/state"
+	"github.com/flatcar-linux/ignition/v2/internal/systemd"
 )
 
 const (
@@ -112,7 +112,7 @@ func (s stage) Run(config types.Config) error {
 	// sitting in the inotify queue. In practice the uevent queue will
 	// be the slow one, so this should be good enough.
 	//
-	// Test case: boot failure in coreos.ignition.*.btrfsroot kola test.
+	// Test case: boot failure in flatcar-linux.ignition.*.btrfsroot kola test.
 	//
 	// Additionally, partitioning (and possibly creating raid) suffers
 	// the same problem. To be safe, always settle.

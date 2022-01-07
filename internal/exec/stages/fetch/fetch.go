@@ -19,12 +19,12 @@
 package fetch
 
 import (
-	"github.com/coreos/ignition/v2/config/v3_4_experimental/types"
-	"github.com/coreos/ignition/v2/internal/exec/stages"
-	"github.com/coreos/ignition/v2/internal/exec/util"
-	"github.com/coreos/ignition/v2/internal/log"
-	"github.com/coreos/ignition/v2/internal/resource"
-	"github.com/coreos/ignition/v2/internal/state"
+	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar-linux/ignition/v2/internal/exec/stages"
+	"github.com/flatcar-linux/ignition/v2/internal/exec/util"
+	"github.com/flatcar-linux/ignition/v2/internal/log"
+	"github.com/flatcar-linux/ignition/v2/internal/resource"
+	"github.com/flatcar-linux/ignition/v2/internal/state"
 )
 
 const (

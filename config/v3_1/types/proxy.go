@@ -17,7 +17,7 @@ package types
 import (
 	"net/url"
 
-	"github.com/coreos/ignition/v2/config/shared/errors"
+	"github.com/flatcar-linux/ignition/v2/config/shared/errors"
 
 	"github.com/coreos/vcontext/path"
 	"github.com/coreos/vcontext/report"

@@ -19,10 +19,10 @@ import (
 	"io/ioutil"
 	"os/exec"
 
-	"github.com/coreos/ignition/v2/config/util"
-	"github.com/coreos/ignition/v2/config/v3_4_experimental/types"
-	"github.com/coreos/ignition/v2/internal/distro"
-	"github.com/coreos/ignition/v2/internal/log"
+	"github.com/flatcar-linux/ignition/v2/config/util"
+	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar-linux/ignition/v2/internal/distro"
+	"github.com/flatcar-linux/ignition/v2/internal/log"
 )
 
 type Operation struct {

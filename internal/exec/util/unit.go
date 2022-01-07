@@ -21,9 +21,9 @@ import (
 	"path/filepath"
 	"syscall"
 
-	cutil "github.com/coreos/ignition/v2/config/util"
-	"github.com/coreos/ignition/v2/config/v3_4_experimental/types"
-	"github.com/coreos/ignition/v2/internal/distro"
+	cutil "github.com/flatcar-linux/ignition/v2/config/util"
+	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar-linux/ignition/v2/internal/distro"
 
 	"github.com/vincent-petithory/dataurl"
 )
@@ -165,7 +165,7 @@ func (ut Util) EnableUnit(enabledUnit string) error {
 }
 
 // presets link in /etc, which doesn't make sense for runtime units
-// Related: https://github.com/coreos/ignition/v2/issues/588
+// Related: https://github.com/flatcar-linux/ignition/v2/issues/588
 func (ut Util) EnableRuntimeUnit(unit types.Unit, target string) error {
 	// unless we're running tests locally, we want to affect /run, which will
 	// be carried into the pivot, not a directory named /$DestDir/run

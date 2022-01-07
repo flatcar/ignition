@@ -15,8 +15,8 @@
 package regression
 
 import (
-	"github.com/coreos/ignition/v2/tests/register"
-	"github.com/coreos/ignition/v2/tests/types"
+	"github.com/flatcar-linux/ignition/v2/tests/register"
+	"github.com/flatcar-linux/ignition/v2/tests/types"
 )
 
 func init() {
@@ -25,7 +25,7 @@ func init() {
 }
 
 func EquivalentFilesystemUUIDsTreatedDistinctEXT4() types.Test {
-	// Originally found in https://github.com/coreos/bugs/issues/2064
+	// Originally found in https://github.com/flatcar-linux/bugs/issues/2064
 	name := "regression.uuids.ext4"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()
@@ -65,7 +65,7 @@ func EquivalentFilesystemUUIDsTreatedDistinctEXT4() types.Test {
 }
 
 func EquivalentFilesystemUUIDsTreatedDistinctVFAT() types.Test {
-	// Originally found in https://github.com/coreos/bugs/issues/2064
+	// Originally found in https://github.com/flatcar-linux/bugs/issues/2064
 	name := "regression.uuids.vfat"
 	in := types.GetBaseDisk()
 	out := types.GetBaseDisk()

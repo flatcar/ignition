@@ -26,13 +26,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coreos/ignition/v2/config"
-	"github.com/coreos/ignition/v2/tests/register"
-	"github.com/coreos/ignition/v2/tests/servers"
-	"github.com/coreos/ignition/v2/tests/types"
+	"github.com/flatcar-linux/ignition/v2/config"
+	"github.com/flatcar-linux/ignition/v2/tests/register"
+	"github.com/flatcar-linux/ignition/v2/tests/servers"
+	"github.com/flatcar-linux/ignition/v2/tests/types"
 
 	// Register the tests
-	_ "github.com/coreos/ignition/v2/tests/registry"
+	_ "github.com/flatcar-linux/ignition/v2/tests/registry"
 
 	// UUID generation tool
 	"github.com/google/uuid"

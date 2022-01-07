@@ -16,12 +16,12 @@ package register
 
 import (
 	"github.com/coreos/go-semver/semver"
-	types30 "github.com/coreos/ignition/v2/config/v3_0/types"
-	types31 "github.com/coreos/ignition/v2/config/v3_1/types"
-	types32 "github.com/coreos/ignition/v2/config/v3_2/types"
-	types33 "github.com/coreos/ignition/v2/config/v3_3/types"
-	types_exp "github.com/coreos/ignition/v2/config/v3_4_experimental/types"
-	"github.com/coreos/ignition/v2/tests/types"
+	types30 "github.com/flatcar-linux/ignition/v2/config/v3_0/types"
+	types31 "github.com/flatcar-linux/ignition/v2/config/v3_1/types"
+	types32 "github.com/flatcar-linux/ignition/v2/config/v3_2/types"
+	types33 "github.com/flatcar-linux/ignition/v2/config/v3_3/types"
+	types_exp "github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar-linux/ignition/v2/tests/types"
 )
 
 type TestType int

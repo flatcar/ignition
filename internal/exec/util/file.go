@@ -26,11 +26,11 @@ import (
 	"path/filepath"
 	"strconv"
 
-	cutil "github.com/coreos/ignition/v2/config/util"
-	"github.com/coreos/ignition/v2/config/v3_4_experimental/types"
-	"github.com/coreos/ignition/v2/internal/log"
-	"github.com/coreos/ignition/v2/internal/resource"
-	"github.com/coreos/ignition/v2/internal/util"
+	cutil "github.com/flatcar-linux/ignition/v2/config/util"
+	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar-linux/ignition/v2/internal/log"
+	"github.com/flatcar-linux/ignition/v2/internal/resource"
+	"github.com/flatcar-linux/ignition/v2/internal/util"
 
 	"golang.org/x/sys/unix"
 )

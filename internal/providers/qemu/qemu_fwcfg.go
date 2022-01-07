@@ -16,7 +16,7 @@
 // +build !s390x,!ppc64le
 
 // The default QEMU provider fetches a local configuration from the firmware
-// config interface (opt/com.coreos/config). Platforms without support for
+// config interface (opt/com.flatcar-linux/config). Platforms without support for
 // qemu_fw_cfg should use the blockdev implementation instead.
 
 package qemu
@@ -30,9 +30,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/ignition/v2/config/v3_4_experimental/types"
-	"github.com/coreos/ignition/v2/internal/providers/util"
-	"github.com/coreos/ignition/v2/internal/resource"
+	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar-linux/ignition/v2/internal/providers/util"
+	"github.com/flatcar-linux/ignition/v2/internal/resource"
 
 	"github.com/coreos/vcontext/report"
 )

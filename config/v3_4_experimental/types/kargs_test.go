@@ -17,7 +17,7 @@ package types
 import (
 	"testing"
 
-	"github.com/coreos/ignition/v2/config/validate"
+	"github.com/flatcar-linux/ignition/v2/config/validate"
 )
 
 func TestKernelArgumentsValidate(t *testing.T) {

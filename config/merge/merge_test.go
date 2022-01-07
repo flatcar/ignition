@@ -17,9 +17,9 @@ package merge
 import (
 	"testing"
 
-	"github.com/coreos/ignition/v2/config/util"
-	v3_2 "github.com/coreos/ignition/v2/config/v3_2/types"
-	"github.com/coreos/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar-linux/ignition/v2/config/util"
+	v3_2 "github.com/flatcar-linux/ignition/v2/config/v3_2/types"
+	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
 
 	"github.com/coreos/vcontext/path"
 	"github.com/stretchr/testify/assert"
@@ -1352,7 +1352,7 @@ func TestMerge(t *testing.T) {
 // We are explicitly testing 3.2.0 because it mistakenly has struct
 // pointers. These should not exist but ended up in the Clevis & Luks
 // structs in spec 3.2.0.
-// https://github.com/coreos/ignition/issues/1132
+// https://github.com/flatcar-linux/ignition/issues/1132
 func TestMergeStructPointers(t *testing.T) {
 	type test struct {
 		in1        v3_2.Config

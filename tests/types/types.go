@@ -190,7 +190,7 @@ func GetBaseDisk() []Disk {
 				}, {
 					Number:         9,
 					Label:          "ROOT",
-					TypeCode:       "coreos-resize",
+					TypeCode:       "flatcar-linux-resize",
 					Length:         262144,
 					FilesystemType: "ext4",
 				},
