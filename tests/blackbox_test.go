@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	config "github.com/flatcar-linux/ignition/config/v2_4_experimental"
+	config "github.com/flatcar-linux/ignition/config/v2_4"
 	"github.com/flatcar-linux/ignition/tests/register"
 	"github.com/flatcar-linux/ignition/tests/types"
 

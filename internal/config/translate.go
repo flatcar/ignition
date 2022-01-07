@@ -15,7 +15,7 @@
 package config
 
 import (
-	from "github.com/flatcar-linux/ignition/config/v2_4_experimental/types"
+	from "github.com/flatcar-linux/ignition/config/v2_4/types"
 	"github.com/flatcar-linux/ignition/internal/config/types"
 )
 

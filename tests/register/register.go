@@ -21,7 +21,7 @@ import (
 	types21 "github.com/flatcar-linux/ignition/config/v2_1/types"
 	types22 "github.com/flatcar-linux/ignition/config/v2_2/types"
 	types23 "github.com/flatcar-linux/ignition/config/v2_3/types"
-	types24 "github.com/flatcar-linux/ignition/config/v2_4_experimental/types"
+	types24 "github.com/flatcar-linux/ignition/config/v2_4/types"
 	"github.com/flatcar-linux/ignition/tests/types"
 )
 
