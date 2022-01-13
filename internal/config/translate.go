@@ -289,6 +289,13 @@ func Translate(old from.Config) types.Config {
 		}
 		return res
 	}
+	translateMountCleanExceptSlice := func(old []from.CleanExceptItem) []types.CleanExceptItem {
+		var res []types.CleanExceptItem
+		for _, x := range old {
+			res = append(res, types.CleanExceptItem(x))
+		}
+		return res
+	}
 	translateMount := func(old *from.Mount) *types.Mount {
 		if old == nil {
 			return nil
@@ -301,6 +308,7 @@ func Translate(old from.Config) types.Config {
 			Options:        translateMountOptionSlice(old.Options),
 			UUID:           old.UUID,
 			WipeFilesystem: old.WipeFilesystem,
+			CleanExcept:    translateMountCleanExceptSlice(old.CleanExcept),
 		}
 	}
 	translateFilesystemSlice := func(old []from.Filesystem) []types.Filesystem {

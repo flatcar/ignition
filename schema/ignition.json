@@ -374,6 +374,12 @@
             "wipeFilesystem": {
               "type": "boolean"
             },
+            "cleanExcept": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "label": {
               "type": ["string", "null"]
             },

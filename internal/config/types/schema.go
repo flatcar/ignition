@@ -8,6 +8,8 @@ type CaReference struct {
 	Verification Verification `json:"verification,omitempty"`
 }
 
+type CleanExceptItem string
+
 type Config struct {
 	Ignition Ignition `json:"ignition"`
 	Networkd Networkd `json:"networkd,omitempty"`
@@ -103,13 +105,14 @@ type LinkEmbedded1 struct {
 }
 
 type Mount struct {
-	Create         *Create       `json:"create,omitempty"`
-	Device         string        `json:"device"`
-	Format         string        `json:"format"`
-	Label          *string       `json:"label,omitempty"`
-	Options        []MountOption `json:"options,omitempty"`
-	UUID           *string       `json:"uuid,omitempty"`
-	WipeFilesystem bool          `json:"wipeFilesystem,omitempty"`
+	CleanExcept    []CleanExceptItem `json:"cleanExcept,omitempty"`
+	Create         *Create           `json:"create,omitempty"`
+	Device         string            `json:"device"`
+	Format         string            `json:"format"`
+	Label          *string           `json:"label,omitempty"`
+	Options        []MountOption     `json:"options,omitempty"`
+	UUID           *string           `json:"uuid,omitempty"`
+	WipeFilesystem bool              `json:"wipeFilesystem,omitempty"`
 }
 
 type MountOption string
