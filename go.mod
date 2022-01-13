@@ -4,11 +4,16 @@ go 1.16
 
 require (
 	github.com/ajeddeloh/go-json v0.0.0-20160803184958-73d058cf8437
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
+	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
 	github.com/aws/aws-sdk-go v1.8.39
 	github.com/coreos/go-semver v0.1.0
 	github.com/coreos/go-systemd v0.0.0-20181031085051-9002847aa142
+	github.com/coreos/ignition v0.35.0
+	github.com/gedex/inflector v0.0.0-20170307190818-16278e9db813 // indirect
 	github.com/go-ini/ini v1.25.4 // indirect
 	github.com/godbus/dbus v0.0.0-20181025153459-66d97aec3384 // indirect
+	github.com/idubinskiy/schematyper v0.0.0-20190118213059-f71b40dac30d // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8 // indirect
 	github.com/pborman/uuid v0.0.0-20170612153648-e790cca94e6c
 	github.com/pin/tftp v2.1.0+incompatible
@@ -22,5 +27,6 @@ require (
 	go4.org v0.0.0-20160314031811-03efcb870d84
 	golang.org/x/net v0.0.0-20190320064053-1272bf9dcd53
 	golang.org/x/text v0.3.7 // indirect
+	gopkg.in/alecthomas/kingpin.v2 v2.2.6 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
