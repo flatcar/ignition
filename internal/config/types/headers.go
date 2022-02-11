@@ -17,7 +17,7 @@ package types
 import (
 	"net/http"
 
-	"github.com/coreos/ignition/config/shared/errors"
+	"github.com/flatcar-linux/ignition/config/shared/errors"
 )
 
 // Parse generates standard net/http headers from the data in HTTPHeaders
