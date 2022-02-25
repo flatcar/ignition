@@ -430,9 +430,14 @@ func translateFilesystems(fss []old.Filesystem, m map[string]string) (ret []type
 			}
 		}
 
+		format := f.Mount.Format
+		if f.Name == "oem" && (wipe == nil || !*wipe) {
+			format = "btrfs"
+		}
+
 		ret = append(ret, types.Filesystem{
 			Device:         f.Mount.Device,
-			Format:         util.StrP(f.Mount.Format),
+			Format:         util.StrP(format),
 			WipeFilesystem: wipe,
 			Label:          f.Mount.Label,
 			UUID:           f.Mount.UUID,

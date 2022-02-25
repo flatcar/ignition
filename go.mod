@@ -9,7 +9,7 @@ require (
 	github.com/coreos/go-semver v0.3.0
 	github.com/coreos/go-systemd/v22 v22.0.0
 	github.com/coreos/vcontext v0.0.0-20211021162308-f1dbbca7bef4
-	github.com/flatcar-linux/ign-converter v0.0.0-20220224173206-08d77b59df9d
+	github.com/flatcar-linux/ign-converter v0.0.0-20220228180422-1b7c4c7d9031
 	github.com/flatcar-linux/ignition v0.36.2-0.20220107144332-c956607ca6e9
 	github.com/google/renameio v0.1.0
 	github.com/google/uuid v1.1.1

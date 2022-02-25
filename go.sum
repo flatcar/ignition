@@ -68,8 +68,8 @@ github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymF
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
-github.com/flatcar-linux/ign-converter v0.0.0-20220224173206-08d77b59df9d h1:CGrw4VPJ03a3RupItN9/AidoCsbjzUmiVGad+FHWKuo=
-github.com/flatcar-linux/ign-converter v0.0.0-20220224173206-08d77b59df9d/go.mod h1:UUAW2Tc6VFZAg8OTW8mbB5kUUbsztk1slAK0S9LBymc=
+github.com/flatcar-linux/ign-converter v0.0.0-20220228180422-1b7c4c7d9031 h1:pbNG6q6Osuay8N0cR1B9exyhLahbATJiBmpC3wV/K8M=
+github.com/flatcar-linux/ign-converter v0.0.0-20220228180422-1b7c4c7d9031/go.mod h1:UUAW2Tc6VFZAg8OTW8mbB5kUUbsztk1slAK0S9LBymc=
 github.com/flatcar-linux/ignition v0.36.2-0.20220107144332-c956607ca6e9 h1:ylZtVGQbncco+kTkUky6TOYL6+kx2R4Vv36nKreSgWw=
 github.com/flatcar-linux/ignition v0.36.2-0.20220107144332-c956607ca6e9/go.mod h1:JzHCIdCu9dy0xtezyBit/aOY4QIlJ12UYU6nXNPnnRE=
 github.com/flatcar-linux/ignition/v2 v2.2.1-0.20220107090316-32908ec8bade/go.mod h1:edsyBkLOoqVhT99HwgWUXip9QNrR1dC2NF4oGhQj1gY=

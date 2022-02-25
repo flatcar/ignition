@@ -153,8 +153,12 @@ func FSGeneration(name string, fsMap map[string]string) (string, error) {
 
 	if _, ok := fsMap[name]; !ok {
 		addedSuffixCounter += 1
-		// generate a new path
-		fsMap[name] = "/tmp/" + name + "-ign" + strconv.FormatUint(addedSuffixCounter, 10)
+		if name == "oem" {
+			fsMap[name] = "/usr/share/oem"
+		} else {
+			// generate a new path
+			fsMap[name] = "/tmp/" + name + "-ign" + strconv.FormatUint(addedSuffixCounter, 10)
+		}
 	}
 
 	counterMutex.Unlock()
