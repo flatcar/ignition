@@ -1,4 +1,4 @@
-module github.com/coreos/ignition/v2
+module github.com/flatcar-linux/ignition/v2
 
 go 1.15
 

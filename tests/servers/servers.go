@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/ignition/v2/tests/fixtures"
+	"github.com/flatcar-linux/ignition/v2/tests/fixtures"
 	"github.com/pin/tftp"
 )
 

@@ -19,11 +19,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/coreos/ignition/v2/config/shared/errors"
-	cutil "github.com/coreos/ignition/v2/config/util"
-	"github.com/coreos/ignition/v2/config/v3_4_experimental/types"
-	"github.com/coreos/ignition/v2/internal/exec/util"
-	"github.com/coreos/ignition/v2/internal/systemd"
+	"github.com/flatcar-linux/ignition/v2/config/shared/errors"
+	cutil "github.com/flatcar-linux/ignition/v2/config/util"
+	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar-linux/ignition/v2/internal/exec/util"
+	"github.com/flatcar-linux/ignition/v2/internal/systemd"
 )
 
 // Preset holds the information about
@@ -43,7 +43,7 @@ func (s *stage) warnOnOldSystemdVersion() error {
 		return err
 	}
 	if systemdVersion < 240 {
-		s.Logger.Warning("The version of systemd (%q) is less than 240. Enabling/disabling instantiated units may not work. See https://github.com/coreos/ignition/issues/586 for more information.", systemdVersion)
+		s.Logger.Warning("The version of systemd (%q) is less than 240. Enabling/disabling instantiated units may not work. See https://github.com/flatcar-linux/ignition/issues/586 for more information.", systemdVersion)
 	}
 	return nil
 }

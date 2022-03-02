@@ -48,7 +48,7 @@ jobs:
       uses: actions/checkout@v2
     - name: Build ignition-validate
       shell: bash
-      run: go build -o ignition-validate github.com/coreos/ignition/v2/validate
+      run: go build -o ignition-validate github.com/flatcar-linux/ignition/v2/validate
     - name: Test ignition-validate
       shell: bash
       run: |

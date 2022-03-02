@@ -18,15 +18,15 @@
 package vmware
 
 import (
-	"github.com/coreos/ignition/v2/config/v3_4_experimental/types"
-	"github.com/coreos/ignition/v2/internal/providers"
-	"github.com/coreos/ignition/v2/internal/providers/util"
-	"github.com/coreos/ignition/v2/internal/resource"
+	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar-linux/ignition/v2/internal/providers"
+	"github.com/flatcar-linux/ignition/v2/internal/providers/util"
+	"github.com/flatcar-linux/ignition/v2/internal/resource"
 
 	"github.com/coreos/vcontext/report"
 	"github.com/vmware/vmw-guestinfo/rpcvmx"
 	"github.com/vmware/vmw-guestinfo/vmcheck"
-	"github.com/vmware/vmw-ovflib"
+	ovf "github.com/vmware/vmw-ovflib"
 )
 
 func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {

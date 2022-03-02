@@ -29,8 +29,8 @@ import (
 	"strings"
 	"testing"
 
-	ut "github.com/coreos/ignition/v2/internal/util"
-	"github.com/coreos/ignition/v2/tests/types"
+	ut "github.com/flatcar-linux/ignition/v2/internal/util"
+	"github.com/flatcar-linux/ignition/v2/tests/types"
 )
 
 func run(ctx context.Context, command string, args ...string) ([]byte, error) {

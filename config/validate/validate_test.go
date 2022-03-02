@@ -20,7 +20,7 @@ import (
 	"reflect"
 	"testing"
 
-	ignerrors "github.com/coreos/ignition/v2/config/shared/errors"
+	ignerrors "github.com/flatcar-linux/ignition/v2/config/shared/errors"
 
 	"github.com/coreos/vcontext/path"
 	"github.com/coreos/vcontext/report"

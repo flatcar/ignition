@@ -23,11 +23,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/coreos/ignition/v2/config/v3_4_experimental/types"
-	execUtil "github.com/coreos/ignition/v2/internal/exec/util"
-	"github.com/coreos/ignition/v2/internal/log"
-	"github.com/coreos/ignition/v2/internal/providers/util"
-	"github.com/coreos/ignition/v2/internal/resource"
+	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	execUtil "github.com/flatcar-linux/ignition/v2/internal/exec/util"
+	"github.com/flatcar-linux/ignition/v2/internal/log"
+	"github.com/flatcar-linux/ignition/v2/internal/providers/util"
+	"github.com/flatcar-linux/ignition/v2/internal/resource"
 
 	"github.com/coreos/vcontext/report"
 	"golang.org/x/sys/unix"

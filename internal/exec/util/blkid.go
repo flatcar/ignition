@@ -33,7 +33,7 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/coreos/ignition/v2/config/util"
+	"github.com/flatcar-linux/ignition/v2/config/util"
 )
 
 const (

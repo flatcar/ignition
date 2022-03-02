@@ -20,15 +20,15 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/coreos/ignition/v2/config"
-	"github.com/coreos/ignition/v2/config/shared/errors"
-	"github.com/coreos/ignition/v2/internal/log"
-	"github.com/coreos/ignition/v2/internal/resource"
-	"github.com/coreos/ignition/v2/internal/state"
-	"github.com/coreos/ignition/v2/internal/util"
+	"github.com/flatcar-linux/ignition/v2/config"
+	"github.com/flatcar-linux/ignition/v2/config/shared/errors"
+	"github.com/flatcar-linux/ignition/v2/internal/log"
+	"github.com/flatcar-linux/ignition/v2/internal/resource"
+	"github.com/flatcar-linux/ignition/v2/internal/state"
+	"github.com/flatcar-linux/ignition/v2/internal/util"
 
-	latest "github.com/coreos/ignition/v2/config/v3_4_experimental"
-	"github.com/coreos/ignition/v2/config/v3_4_experimental/types"
+	latest "github.com/flatcar-linux/ignition/v2/config/v3_4_experimental"
+	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
 )
 
 type ConfigFetcher struct {

@@ -26,10 +26,10 @@ import (
 	"strconv"
 	"strings"
 
-	cutil "github.com/coreos/ignition/v2/config/util"
-	"github.com/coreos/ignition/v2/config/v3_4_experimental/types"
-	"github.com/coreos/ignition/v2/internal/exec/util"
-	"github.com/coreos/ignition/v2/internal/sgdisk"
+	cutil "github.com/flatcar-linux/ignition/v2/config/util"
+	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar-linux/ignition/v2/internal/exec/util"
+	"github.com/flatcar-linux/ignition/v2/internal/sgdisk"
 )
 
 var (

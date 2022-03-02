@@ -21,7 +21,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/coreos/ignition/v2/internal/distro"
+	"github.com/flatcar-linux/ignition/v2/internal/distro"
 )
 
 const (

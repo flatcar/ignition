@@ -19,7 +19,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/coreos/ignition/v2/config/util"
+	"github.com/flatcar-linux/ignition/v2/config/util"
 
 	"github.com/coreos/vcontext/path"
 )
@@ -236,7 +236,7 @@ func mergeStruct(parent reflect.Value, parentPath path.ContextPath, child reflec
 		case kind == reflect.Ptr && !parentField.IsNil() && !childField.IsNil() && parentField.Elem().Kind() == reflect.Struct:
 			// we're not supposed to have struct pointers, but some
 			// ended up in the Clevis and Luks structs in spec 3.2.0
-			// https://github.com/coreos/ignition/issues/1132
+			// https://github.com/flatcar-linux/ignition/issues/1132
 			resultField.Set(mergeStruct(parentField.Elem(), parentFieldPath, childField.Elem(), childFieldPath, resultFieldPath, transcript).Addr())
 			transcribeOne(parentFieldPath, resultFieldPath, transcript)
 			transcribeOne(childFieldPath, resultFieldPath, transcript)
@@ -378,7 +378,7 @@ func transcribe(fromPath path.ContextPath, toPath path.ContextPath, value reflec
 		if value.Elem().Kind() == reflect.Struct {
 			// we're not supposed to have struct pointers, but some
 			// ended up in the Clevis and Luks structs in spec 3.2.0
-			// https://github.com/coreos/ignition/issues/1132
+			// https://github.com/flatcar-linux/ignition/issues/1132
 			return transcribe(fromPath, toPath, value.Elem(), fieldMeta, transcript)
 		}
 		transcribeOne(fromPath, toPath, transcript)
