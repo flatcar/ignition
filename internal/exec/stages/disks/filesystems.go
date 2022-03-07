@@ -126,7 +126,7 @@ func (s stage) createFilesystem(fs types.Filesystem) error {
 		}
 		// If the filesystem isn't forcefully being created, then we need
 		// to check if it is of the correct type or that no filesystem exists.
-		if info.Type == fileSystemFormat &&
+		if (info.Type == fileSystemFormat || info.Label == "OEM") &&
 			(fs.Label == nil || info.Label == *fs.Label) &&
 			(fs.UUID == nil || canonicalizeFilesystemUUID(info.Type, info.UUID) == canonicalizeFilesystemUUID(fileSystemFormat, *fs.UUID)) {
 			s.Logger.Info("filesystem at %q is already correctly formatted. Skipping mkfs...", fs.Device)
@@ -208,6 +208,29 @@ func (s stage) createFilesystem(fs types.Filesystem) error {
 		*fs.Format, devAlias,
 	); err != nil {
 		return fmt.Errorf("mkfs failed: %v", err)
+	}
+
+	// udevd registers an IN_CLOSE_WRITE inotify watch on block device
+	// nodes, and synthesizes udev "change" events when the watch fires.
+	// mkfs.btrfs triggers multiple such events, the first of which
+	// occurs while there is no recognizable filesystem on the
+	// partition. Thus, if an existing partition is reformatted as
+	// btrfs while keeping the same filesystem label, there will be a
+	// synthesized uevent that deletes the /dev/disk/by-label symlink
+	// and a second one that restores it. If we didn't account for this,
+	// a systemd unit that depended on the by-label symlink (e.g.
+	// systemd-fsck-root.service) could have the symlink deleted out
+	// from under it.
+	// Trigger a tagged uevent and wait for it because a bare "udevadm
+	// settle" does not guarantee that all changes were processed
+	// because it's conceivable that only the deleting uevent has
+	// already been processed (or none!) while the restoring uevent
+	// is still sitting in the inotify queue. By triggering our own
+	// event and waiting for it we know that udev will have processed
+	// the device changes.
+	// Test case: boot failure in coreos.ignition.*.btrfsroot kola test.
+	if err := s.waitForUdev(devAlias, "createFilesystems"); err != nil {
+		return err
 	}
 
 	return nil
