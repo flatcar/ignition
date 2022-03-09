@@ -16,6 +16,7 @@ Ignition is currently only supported for the following platforms:
 * [DigitalOcean] (`digitalocean`) - Ignition will read its configuration from the droplet userdata. Cloud SSH keys and network configuration are handled separately.
 * [Exoscale] (`exoscale`) - Ignition will read its configuration from the instance userdata. Cloud SSH keys are handled separately.
 * [Google Cloud] (`gcp`) - Ignition will read its configuration from the instance metadata entry named "user-data". Cloud SSH keys are handled separately.
+* [Google Cloud] (`gce`) - It's an alias to `gcp` OEM
 * [IBM Cloud] (`ibmcloud`) - Ignition will read its configuration from the instance userdata. Cloud SSH keys are handled separately.
 * Bare Metal (`metal`) - Use the `ignition.config.url` kernel parameter to provide a URL to the configuration. The URL can use the `http://`, `https://`, `tftp://`, `s3://`, or `gs://` schemes to specify a remote config.
 * [Nutanix] (`nutanix`) - Ignition will read its configuration from the instance userdata via config drive. Cloud SSH keys are handled separately.

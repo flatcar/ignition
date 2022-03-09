@@ -134,6 +134,10 @@ func init() {
 		fetch: file.FetchConfig,
 	})
 	configs.Register(Config{
+		name:  "gce",
+		fetch: gcp.FetchConfig,
+	})
+	configs.Register(Config{
 		name:  "gcp",
 		fetch: gcp.FetchConfig,
 	})
