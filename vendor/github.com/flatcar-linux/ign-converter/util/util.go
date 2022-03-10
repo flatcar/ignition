@@ -78,7 +78,11 @@ func (e DuplicateDropinError) Error() string {
 
 func CheckPathUsesLink(links []string, path string) string {
 	for _, l := range links {
-		if strings.HasPrefix(path, l) && path != l {
+		linkdir := l
+		if !strings.HasSuffix(l, "/") {
+			linkdir += "/"
+		}
+		if strings.HasPrefix(path, linkdir) && path != l {
 			return l
 		}
 	}
