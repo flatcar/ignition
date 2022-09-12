@@ -18,7 +18,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/flatcar-linux/ignition/config/shared/errors"
+	"github.com/flatcar/ignition/config/shared/errors"
 )
 
 func equal(a, b []string) bool {

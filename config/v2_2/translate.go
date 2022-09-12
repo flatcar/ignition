@@ -15,9 +15,9 @@
 package v2_2
 
 import (
-	"github.com/flatcar-linux/ignition/config/util"
-	v2_1 "github.com/flatcar-linux/ignition/config/v2_1/types"
-	"github.com/flatcar-linux/ignition/config/v2_2/types"
+	"github.com/flatcar/ignition/config/util"
+	v2_1 "github.com/flatcar/ignition/config/v2_1/types"
+	"github.com/flatcar/ignition/config/v2_2/types"
 )
 
 // golang--

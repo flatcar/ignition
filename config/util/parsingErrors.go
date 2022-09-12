@@ -18,9 +18,9 @@ import (
 	"bytes"
 	"errors"
 
-	configErrors "github.com/flatcar-linux/ignition/config/shared/errors"
-	"github.com/flatcar-linux/ignition/config/v2_4/types"
-	"github.com/flatcar-linux/ignition/config/validate/report"
+	configErrors "github.com/flatcar/ignition/config/shared/errors"
+	"github.com/flatcar/ignition/config/v2_4/types"
+	"github.com/flatcar/ignition/config/validate/report"
 
 	json "github.com/ajeddeloh/go-json"
 	"go4.org/errorutil"

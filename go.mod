@@ -1,4 +1,4 @@
-module github.com/flatcar-linux/ignition
+module github.com/flatcar/ignition
 
 go 1.16
 

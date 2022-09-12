@@ -31,11 +31,11 @@ import (
 	"strings"
 	"syscall"
 
-	configErrors "github.com/flatcar-linux/ignition/config/shared/errors"
-	"github.com/flatcar-linux/ignition/internal/distro"
-	"github.com/flatcar-linux/ignition/internal/log"
-	"github.com/flatcar-linux/ignition/internal/systemd"
-	"github.com/flatcar-linux/ignition/internal/util"
+	configErrors "github.com/flatcar/ignition/config/shared/errors"
+	"github.com/flatcar/ignition/internal/distro"
+	"github.com/flatcar/ignition/internal/log"
+	"github.com/flatcar/ignition/internal/systemd"
+	"github.com/flatcar/ignition/internal/util"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"

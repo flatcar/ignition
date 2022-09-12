@@ -18,8 +18,8 @@ package validations
 
 import (
 	"github.com/coreos/go-systemd/unit"
-	"github.com/flatcar-linux/ignition/config/shared/errors"
-	"github.com/flatcar-linux/ignition/config/validate/report"
+	"github.com/flatcar/ignition/config/shared/errors"
+	"github.com/flatcar/ignition/config/validate/report"
 )
 
 // ValidateInstallSection is a helper to validate a given unit

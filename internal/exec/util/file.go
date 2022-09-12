@@ -27,10 +27,10 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/flatcar-linux/ignition/internal/config/types"
-	"github.com/flatcar-linux/ignition/internal/log"
-	"github.com/flatcar-linux/ignition/internal/resource"
-	"github.com/flatcar-linux/ignition/internal/util"
+	"github.com/flatcar/ignition/internal/config/types"
+	"github.com/flatcar/ignition/internal/log"
+	"github.com/flatcar/ignition/internal/resource"
+	"github.com/flatcar/ignition/internal/util"
 )
 
 const (

@@ -23,13 +23,13 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/flatcar-linux/ignition/internal/config/types"
-	"github.com/flatcar-linux/ignition/internal/distro"
-	"github.com/flatcar-linux/ignition/internal/exec/stages"
-	"github.com/flatcar-linux/ignition/internal/exec/util"
-	"github.com/flatcar-linux/ignition/internal/log"
-	"github.com/flatcar-linux/ignition/internal/resource"
-	"github.com/flatcar-linux/ignition/internal/systemd"
+	"github.com/flatcar/ignition/internal/config/types"
+	"github.com/flatcar/ignition/internal/distro"
+	"github.com/flatcar/ignition/internal/exec/stages"
+	"github.com/flatcar/ignition/internal/exec/util"
+	"github.com/flatcar/ignition/internal/log"
+	"github.com/flatcar/ignition/internal/resource"
+	"github.com/flatcar/ignition/internal/systemd"
 )
 
 const (

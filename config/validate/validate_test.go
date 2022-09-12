@@ -24,13 +24,13 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	json "github.com/ajeddeloh/go-json"
-	"github.com/flatcar-linux/ignition/config/shared/errors"
-	"github.com/flatcar-linux/ignition/config/util"
-	"github.com/flatcar-linux/ignition/config/validate/astjson"
-	"github.com/flatcar-linux/ignition/config/validate/report"
+	"github.com/flatcar/ignition/config/shared/errors"
+	"github.com/flatcar/ignition/config/util"
+	"github.com/flatcar/ignition/config/validate/astjson"
+	"github.com/flatcar/ignition/config/validate/report"
 
 	// Import into the same namespace to keep config definitions clean
-	. "github.com/flatcar-linux/ignition/config/v2_4/types"
+	. "github.com/flatcar/ignition/config/v2_4/types"
 )
 
 func TestValidate(t *testing.T) {

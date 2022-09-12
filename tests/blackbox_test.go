@@ -27,12 +27,12 @@ import (
 	"testing"
 	"time"
 
-	config "github.com/flatcar-linux/ignition/config/v2_4"
-	"github.com/flatcar-linux/ignition/tests/register"
-	"github.com/flatcar-linux/ignition/tests/types"
+	config "github.com/flatcar/ignition/config/v2_4"
+	"github.com/flatcar/ignition/tests/register"
+	"github.com/flatcar/ignition/tests/types"
 
 	// Register the tests
-	_ "github.com/flatcar-linux/ignition/tests/registry"
+	_ "github.com/flatcar/ignition/tests/registry"
 
 	// UUID generation tool
 	"github.com/pborman/uuid"

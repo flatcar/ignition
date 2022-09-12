@@ -17,9 +17,9 @@ package files
 import (
 	"path/filepath"
 
-	"github.com/flatcar-linux/ignition/internal/config/types"
-	"github.com/flatcar-linux/ignition/internal/distro"
-	"github.com/flatcar-linux/ignition/internal/exec/util"
+	"github.com/flatcar/ignition/internal/config/types"
+	"github.com/flatcar/ignition/internal/distro"
+	"github.com/flatcar/ignition/internal/exec/util"
 )
 
 // createUnits creates the units listed under systemd.units and networkd.units.

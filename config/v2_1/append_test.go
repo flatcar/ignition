@@ -20,7 +20,7 @@ import (
 
 	"github.com/coreos/go-semver/semver"
 
-	"github.com/flatcar-linux/ignition/config/v2_1/types"
+	"github.com/flatcar/ignition/config/v2_1/types"
 )
 
 func TestAppend(t *testing.T) {

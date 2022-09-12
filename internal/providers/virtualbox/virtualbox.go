@@ -23,12 +23,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/flatcar-linux/ignition/config/shared/errors"
-	"github.com/flatcar-linux/ignition/config/validate/report"
-	"github.com/flatcar-linux/ignition/internal/config/types"
-	"github.com/flatcar-linux/ignition/internal/distro"
-	"github.com/flatcar-linux/ignition/internal/providers/util"
-	"github.com/flatcar-linux/ignition/internal/resource"
+	"github.com/flatcar/ignition/config/shared/errors"
+	"github.com/flatcar/ignition/config/validate/report"
+	"github.com/flatcar/ignition/internal/config/types"
+	"github.com/flatcar/ignition/internal/distro"
+	"github.com/flatcar/ignition/internal/providers/util"
+	"github.com/flatcar/ignition/internal/resource"
 )
 
 const (
