@@ -22,9 +22,9 @@ import (
 	"strings"
 
 	json "github.com/ajeddeloh/go-json"
-	"github.com/flatcar-linux/ignition/config/validate/astjson"
-	"github.com/flatcar-linux/ignition/config/validate/astnode"
-	"github.com/flatcar-linux/ignition/config/validate/report"
+	"github.com/flatcar/ignition/config/validate/astjson"
+	"github.com/flatcar/ignition/config/validate/astnode"
+	"github.com/flatcar/ignition/config/validate/report"
 )
 
 type validator interface {

@@ -15,9 +15,9 @@
 package v2_3
 
 import (
-	"github.com/flatcar-linux/ignition/config/util"
-	v2_2 "github.com/flatcar-linux/ignition/config/v2_2/types"
-	"github.com/flatcar-linux/ignition/config/v2_3/types"
+	"github.com/flatcar/ignition/config/util"
+	v2_2 "github.com/flatcar/ignition/config/v2_2/types"
+	"github.com/flatcar/ignition/config/v2_3/types"
 )
 
 func Translate(old v2_2.Config) types.Config {

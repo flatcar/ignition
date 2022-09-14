@@ -20,8 +20,8 @@ import (
 	"net/http/httptest"
 	"time"
 
-	"github.com/flatcar-linux/ignition/tests/register"
-	"github.com/flatcar-linux/ignition/tests/types"
+	"github.com/flatcar/ignition/tests/register"
+	"github.com/flatcar/ignition/tests/types"
 )
 
 func init() {

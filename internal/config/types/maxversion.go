@@ -15,7 +15,7 @@
 package types
 
 import (
-	currentExperimental "github.com/flatcar-linux/ignition/config/v2_4/types"
+	currentExperimental "github.com/flatcar/ignition/config/v2_4/types"
 )
 
 var (

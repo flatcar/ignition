@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/flatcar-linux/ignition/internal/log"
+	"github.com/flatcar/ignition/internal/log"
 )
 
 // tempBase() slaps together a minimal /etc/{passwd,group} for the lookup test.

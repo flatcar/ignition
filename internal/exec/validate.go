@@ -18,8 +18,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/flatcar-linux/ignition/config/validate/report"
-	"github.com/flatcar-linux/ignition/internal/config"
+	"github.com/flatcar/ignition/config/validate/report"
+	"github.com/flatcar/ignition/internal/config"
 )
 
 func Validate(filename string) (report.Report, error) {

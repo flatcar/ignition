@@ -27,8 +27,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/flatcar-linux/ignition/internal/distro"
-	"github.com/flatcar-linux/ignition/tests/types"
+	"github.com/flatcar/ignition/internal/distro"
+	"github.com/flatcar/ignition/tests/types"
 )
 
 func run(ctx context.Context, command string, args ...string) ([]byte, error) {

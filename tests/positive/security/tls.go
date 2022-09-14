@@ -20,8 +20,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/flatcar-linux/ignition/tests/register"
-	"github.com/flatcar-linux/ignition/tests/types"
+	"github.com/flatcar/ignition/tests/register"
+	"github.com/flatcar/ignition/tests/types"
 
 	"github.com/vincent-petithory/dataurl"
 )

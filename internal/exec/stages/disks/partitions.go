@@ -26,9 +26,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/flatcar-linux/ignition/internal/config/types"
-	"github.com/flatcar-linux/ignition/internal/exec/util"
-	"github.com/flatcar-linux/ignition/internal/sgdisk"
+	"github.com/flatcar/ignition/internal/config/types"
+	"github.com/flatcar/ignition/internal/exec/util"
+	"github.com/flatcar/ignition/internal/sgdisk"
 )
 
 var (

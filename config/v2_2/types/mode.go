@@ -15,7 +15,7 @@
 package types
 
 import (
-	"github.com/flatcar-linux/ignition/config/shared/errors"
+	"github.com/flatcar/ignition/config/shared/errors"
 )
 
 func validateMode(m *int) error {

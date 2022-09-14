@@ -17,7 +17,7 @@ package config
 import (
 	"reflect"
 
-	"github.com/flatcar-linux/ignition/internal/config/types"
+	"github.com/flatcar/ignition/internal/config/types"
 )
 
 // Append appends newConfig to oldConfig and returns the result. Appending one

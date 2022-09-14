@@ -22,7 +22,7 @@ import (
 	"hash"
 	"strings"
 
-	"github.com/flatcar-linux/ignition/internal/config/types"
+	"github.com/flatcar/ignition/internal/config/types"
 )
 
 var (

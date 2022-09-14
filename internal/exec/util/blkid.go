@@ -31,8 +31,8 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/flatcar-linux/ignition/config/util"
-	"github.com/flatcar-linux/ignition/internal/config/types"
+	"github.com/flatcar/ignition/config/util"
+	"github.com/flatcar/ignition/internal/config/types"
 )
 
 const (

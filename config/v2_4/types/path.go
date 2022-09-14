@@ -17,7 +17,7 @@ package types
 import (
 	"path"
 
-	"github.com/flatcar-linux/ignition/config/shared/errors"
+	"github.com/flatcar/ignition/config/shared/errors"
 )
 
 func validatePath(p string) error {

@@ -17,8 +17,8 @@ package types
 import (
 	"fmt"
 
-	"github.com/flatcar-linux/ignition/config/shared/errors"
-	"github.com/flatcar-linux/ignition/config/validate/report"
+	"github.com/flatcar/ignition/config/shared/errors"
+	"github.com/flatcar/ignition/config/validate/report"
 )
 
 func (f Filesystem) Validate() report.Report {

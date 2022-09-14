@@ -15,11 +15,11 @@
 package v2_4
 
 import (
-	"github.com/flatcar-linux/ignition/config/shared/errors"
-	"github.com/flatcar-linux/ignition/config/v2_3"
-	"github.com/flatcar-linux/ignition/config/v2_4/types"
-	"github.com/flatcar-linux/ignition/config/validate"
-	"github.com/flatcar-linux/ignition/config/validate/report"
+	"github.com/flatcar/ignition/config/shared/errors"
+	"github.com/flatcar/ignition/config/v2_3"
+	"github.com/flatcar/ignition/config/v2_4/types"
+	"github.com/flatcar/ignition/config/validate"
+	"github.com/flatcar/ignition/config/validate/report"
 
 	json "github.com/ajeddeloh/go-json"
 	"github.com/coreos/go-semver/semver"
