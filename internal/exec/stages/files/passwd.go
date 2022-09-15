@@ -18,8 +18,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/flatcar-linux/ignition/v2/config/util"
-	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar/ignition/v2/config/util"
+	"github.com/flatcar/ignition/v2/config/v3_4_experimental/types"
 )
 
 func (s *stage) expandGlobList(globs ...string) ([]string, error) {

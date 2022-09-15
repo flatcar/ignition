@@ -19,7 +19,7 @@ import (
 
 	"github.com/coreos/vcontext/path"
 	"github.com/coreos/vcontext/report"
-	"github.com/flatcar-linux/ignition/v2/config/shared/errors"
+	"github.com/flatcar/ignition/v2/config/shared/errors"
 )
 
 // Parse generates standard net/http headers from the data in HTTPHeaders

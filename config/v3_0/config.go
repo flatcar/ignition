@@ -15,11 +15,11 @@
 package v3_0
 
 import (
-	"github.com/flatcar-linux/ignition/v2/config/merge"
-	"github.com/flatcar-linux/ignition/v2/config/shared/errors"
-	"github.com/flatcar-linux/ignition/v2/config/util"
-	"github.com/flatcar-linux/ignition/v2/config/v3_0/types"
-	"github.com/flatcar-linux/ignition/v2/config/validate"
+	"github.com/flatcar/ignition/v2/config/merge"
+	"github.com/flatcar/ignition/v2/config/shared/errors"
+	"github.com/flatcar/ignition/v2/config/util"
+	"github.com/flatcar/ignition/v2/config/v3_0/types"
+	"github.com/flatcar/ignition/v2/config/validate"
 
 	"github.com/coreos/go-semver/semver"
 	"github.com/coreos/vcontext/report"

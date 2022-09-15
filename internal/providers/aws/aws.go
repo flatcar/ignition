@@ -22,10 +22,10 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
-	"github.com/flatcar-linux/ignition/v2/internal/log"
-	"github.com/flatcar-linux/ignition/v2/internal/providers/util"
-	"github.com/flatcar-linux/ignition/v2/internal/resource"
+	"github.com/flatcar/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar/ignition/v2/internal/log"
+	"github.com/flatcar/ignition/v2/internal/providers/util"
+	"github.com/flatcar/ignition/v2/internal/resource"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
@@ -88,7 +88,7 @@ func Init(f *resource.Fetcher) error {
 	// every stage) but that would risk premature timeouts if the
 	// network takes a while to come up.
 	//
-	// https://github.com/flatcar-linux/ignition/issues/1158
+	// https://github.com/flatcar/ignition/issues/1158
 	//
 	// TODO: investigate alternative solutions (adding a Retryer to the
 	// aws.Config, fetching the region from an HTTP URL, handle the

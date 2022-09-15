@@ -28,12 +28,12 @@ import (
 	"strings"
 	"time"
 
-	ignerrors "github.com/flatcar-linux/ignition/v2/config/shared/errors"
-	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
-	"github.com/flatcar-linux/ignition/v2/internal/earlyrand"
-	"github.com/flatcar-linux/ignition/v2/internal/log"
-	"github.com/flatcar-linux/ignition/v2/internal/util"
-	"github.com/flatcar-linux/ignition/v2/internal/version"
+	ignerrors "github.com/flatcar/ignition/v2/config/shared/errors"
+	"github.com/flatcar/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar/ignition/v2/internal/earlyrand"
+	"github.com/flatcar/ignition/v2/internal/log"
+	"github.com/flatcar/ignition/v2/internal/util"
+	"github.com/flatcar/ignition/v2/internal/version"
 
 	"github.com/vincent-petithory/dataurl"
 

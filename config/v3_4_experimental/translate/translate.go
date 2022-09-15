@@ -15,9 +15,9 @@
 package translate
 
 import (
-	"github.com/flatcar-linux/ignition/v2/config/translate"
-	old_types "github.com/flatcar-linux/ignition/v2/config/v3_3/types"
-	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar/ignition/v2/config/translate"
+	old_types "github.com/flatcar/ignition/v2/config/v3_3/types"
+	"github.com/flatcar/ignition/v2/config/v3_4_experimental/types"
 )
 
 func translateIgnition(old old_types.Ignition) (ret types.Ignition) {

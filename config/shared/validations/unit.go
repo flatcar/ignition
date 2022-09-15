@@ -17,7 +17,7 @@
 package validations
 
 import (
-	"github.com/flatcar-linux/ignition/v2/config/shared/errors"
+	"github.com/flatcar/ignition/v2/config/shared/errors"
 
 	"github.com/coreos/go-systemd/v22/unit"
 )

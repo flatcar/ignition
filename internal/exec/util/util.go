@@ -18,9 +18,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/flatcar-linux/ignition/v2/internal/log"
-	"github.com/flatcar-linux/ignition/v2/internal/resource"
-	"github.com/flatcar-linux/ignition/v2/internal/state"
+	"github.com/flatcar/ignition/v2/internal/log"
+	"github.com/flatcar/ignition/v2/internal/resource"
+	"github.com/flatcar/ignition/v2/internal/state"
 )
 
 // Util encapsulates logging and destdir indirection for the util methods.

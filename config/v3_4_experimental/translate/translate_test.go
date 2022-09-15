@@ -18,8 +18,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/flatcar-linux/ignition/v2/config/util"
-	old "github.com/flatcar-linux/ignition/v2/config/v3_3/types"
+	"github.com/flatcar/ignition/v2/config/util"
+	old "github.com/flatcar/ignition/v2/config/v3_3/types"
 )
 
 // Check that we have valid translators for the complete config struct

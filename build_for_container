@@ -3,7 +3,7 @@
 set -eu
 
 NAME="ignition"
-ORG_PATH="github.com/flatcar-linux"
+ORG_PATH="github.com/flatcar"
 REPO_PATH="${ORG_PATH}/${NAME}/v2"
 GLDFLAGS=${GLDFLAGS:-}
 
@@ -12,7 +12,7 @@ if [ -z ${VERSION+a} ]; then
 	VERSION=$(git describe --dirty --always)
 fi
 
-GLDFLAGS+="-X github.com/flatcar-linux/ignition/v2/internal/version.Raw=${VERSION}"
+GLDFLAGS+="-X github.com/flatcar/ignition/v2/internal/version.Raw=${VERSION}"
 
 if [[ -n "$(git status -s)" ]]; then
     echo "git repo not clean"

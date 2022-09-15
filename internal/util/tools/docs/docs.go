@@ -25,7 +25,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/flatcar-linux/ignition/v2/config"
+	"github.com/flatcar/ignition/v2/config"
 )
 
 // Specific section marker used in the docs to indicate that the Markdown code

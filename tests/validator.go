@@ -26,8 +26,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/flatcar-linux/ignition/v2/internal/exec/util"
-	"github.com/flatcar-linux/ignition/v2/tests/types"
+	"github.com/flatcar/ignition/v2/internal/exec/util"
+	"github.com/flatcar/ignition/v2/tests/types"
 
 	"golang.org/x/sys/unix"
 )

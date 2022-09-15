@@ -15,9 +15,9 @@
 package filesystems
 
 import (
-	"github.com/flatcar-linux/ignition/v2/tests/fixtures"
-	"github.com/flatcar-linux/ignition/v2/tests/register"
-	"github.com/flatcar-linux/ignition/v2/tests/types"
+	"github.com/flatcar/ignition/v2/tests/fixtures"
+	"github.com/flatcar/ignition/v2/tests/register"
+	"github.com/flatcar/ignition/v2/tests/types"
 )
 
 func init() {

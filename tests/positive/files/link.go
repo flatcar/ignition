@@ -15,8 +15,8 @@
 package files
 
 import (
-	"github.com/flatcar-linux/ignition/v2/tests/register"
-	"github.com/flatcar-linux/ignition/v2/tests/types"
+	"github.com/flatcar/ignition/v2/tests/register"
+	"github.com/flatcar/ignition/v2/tests/types"
 )
 
 func init() {
@@ -364,7 +364,7 @@ func ForceHardLinkCreation() types.Test {
 
 // CreateDeepHardLinkToFile checks if Ignition can create a hard
 // link to a file that's deeper than the hard link. For more
-// information: https://github.com/flatcar-linux/ignition/issues/800
+// information: https://github.com/flatcar/ignition/issues/800
 func CreateDeepHardLinkToFile() types.Test {
 	name := "links.hard.deep.create.file"
 	in := types.GetBaseDisk()

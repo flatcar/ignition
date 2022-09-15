@@ -19,9 +19,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/flatcar-linux/ignition/v2/config/shared/errors"
-	"github.com/flatcar-linux/ignition/v2/config/shared/validations"
-	"github.com/flatcar-linux/ignition/v2/config/util"
+	"github.com/flatcar/ignition/v2/config/shared/errors"
+	"github.com/flatcar/ignition/v2/config/shared/validations"
+	"github.com/flatcar/ignition/v2/config/util"
 
 	"github.com/coreos/go-systemd/v22/unit"
 	cpath "github.com/coreos/vcontext/path"

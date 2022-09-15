@@ -15,10 +15,10 @@
 package translate
 
 import (
-	"github.com/flatcar-linux/ignition/v2/config/translate"
-	"github.com/flatcar-linux/ignition/v2/config/util"
-	old_types "github.com/flatcar-linux/ignition/v2/config/v3_0/types"
-	"github.com/flatcar-linux/ignition/v2/config/v3_1/types"
+	"github.com/flatcar/ignition/v2/config/translate"
+	"github.com/flatcar/ignition/v2/config/util"
+	old_types "github.com/flatcar/ignition/v2/config/v3_0/types"
+	"github.com/flatcar/ignition/v2/config/v3_1/types"
 )
 
 func translateFilesystem(old old_types.Filesystem) (ret types.Filesystem) {

@@ -18,8 +18,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/flatcar-linux/ignition/v2/config/shared/errors"
-	"github.com/flatcar-linux/ignition/v2/config/util"
+	"github.com/flatcar/ignition/v2/config/shared/errors"
+	"github.com/flatcar/ignition/v2/config/util"
 
 	vpath "github.com/coreos/vcontext/path"
 	"github.com/coreos/vcontext/report"

@@ -6,11 +6,11 @@ set -eu
 # tests will be run and where the stubs will be located, rely on the bb test caller setting up
 # their PATH to include them. We don't need to include `id` because it gets copied into the
 # system
-GLDFLAGS="-X github.com/flatcar-linux/ignition/v2/internal/distro.useraddCmd=useradd-stub "
-GLDFLAGS+="-X github.com/flatcar-linux/ignition/v2/internal/distro.usermodCmd=usermod-stub "
-GLDFLAGS+="-X github.com/flatcar-linux/ignition/v2/internal/distro.userdelCmd=userdel-stub "
-GLDFLAGS+="-X github.com/flatcar-linux/ignition/v2/internal/distro.groupdelCmd=groupdel-stub "
-GLDFLAGS+="-X github.com/flatcar-linux/ignition/v2/internal/distro.blackboxTesting=true "
+GLDFLAGS="-X github.com/flatcar/ignition/v2/internal/distro.useraddCmd=useradd-stub "
+GLDFLAGS+="-X github.com/flatcar/ignition/v2/internal/distro.usermodCmd=usermod-stub "
+GLDFLAGS+="-X github.com/flatcar/ignition/v2/internal/distro.userdelCmd=userdel-stub "
+GLDFLAGS+="-X github.com/flatcar/ignition/v2/internal/distro.groupdelCmd=groupdel-stub "
+GLDFLAGS+="-X github.com/flatcar/ignition/v2/internal/distro.blackboxTesting=true "
 
 . ./build
 

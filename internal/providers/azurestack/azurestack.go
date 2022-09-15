@@ -19,9 +19,9 @@ package azurestack
 
 import (
 	"github.com/coreos/vcontext/report"
-	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
-	"github.com/flatcar-linux/ignition/v2/internal/providers/azure"
-	"github.com/flatcar-linux/ignition/v2/internal/resource"
+	"github.com/flatcar/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar/ignition/v2/internal/providers/azure"
+	"github.com/flatcar/ignition/v2/internal/resource"
 )
 
 // These constants are the types of CDROM filesystems that might

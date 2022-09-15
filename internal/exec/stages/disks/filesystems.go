@@ -25,10 +25,10 @@ import (
 	"runtime"
 	"strings"
 
-	cutil "github.com/flatcar-linux/ignition/v2/config/util"
-	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
-	"github.com/flatcar-linux/ignition/v2/internal/distro"
-	"github.com/flatcar-linux/ignition/v2/internal/exec/util"
+	cutil "github.com/flatcar/ignition/v2/config/util"
+	"github.com/flatcar/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar/ignition/v2/internal/distro"
+	"github.com/flatcar/ignition/v2/internal/exec/util"
 )
 
 var (

@@ -35,11 +35,11 @@ import (
 	"cloud.google.com/go/compute/metadata"
 	"cloud.google.com/go/storage"
 
-	configErrors "github.com/flatcar-linux/ignition/v2/config/shared/errors"
-	"github.com/flatcar-linux/ignition/v2/internal/distro"
-	"github.com/flatcar-linux/ignition/v2/internal/log"
-	"github.com/flatcar-linux/ignition/v2/internal/systemd"
-	"github.com/flatcar-linux/ignition/v2/internal/util"
+	configErrors "github.com/flatcar/ignition/v2/config/shared/errors"
+	"github.com/flatcar/ignition/v2/internal/distro"
+	"github.com/flatcar/ignition/v2/internal/log"
+	"github.com/flatcar/ignition/v2/internal/systemd"
+	"github.com/flatcar/ignition/v2/internal/util"
 
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"

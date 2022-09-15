@@ -19,12 +19,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/flatcar-linux/ignition/v2/config/util"
-	v3_0 "github.com/flatcar-linux/ignition/v2/config/v3_0/types"
-	v3_1 "github.com/flatcar-linux/ignition/v2/config/v3_1/types"
-	v3_2 "github.com/flatcar-linux/ignition/v2/config/v3_2/types"
-	v3_3 "github.com/flatcar-linux/ignition/v2/config/v3_3/types"
-	v3_4 "github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar/ignition/v2/config/util"
+	v3_0 "github.com/flatcar/ignition/v2/config/v3_0/types"
+	v3_1 "github.com/flatcar/ignition/v2/config/v3_1/types"
+	v3_2 "github.com/flatcar/ignition/v2/config/v3_2/types"
+	v3_3 "github.com/flatcar/ignition/v2/config/v3_3/types"
+	v3_4 "github.com/flatcar/ignition/v2/config/v3_4_experimental/types"
 )
 
 type typeSet map[reflect.Type]struct{}
