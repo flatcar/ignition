@@ -1,4 +1,4 @@
-module github.com/flatcar-linux/ignition/v2
+module github.com/flatcar/ignition/v2
 
 go 1.15
 
@@ -9,8 +9,7 @@ require (
 	github.com/coreos/go-semver v0.3.0
 	github.com/coreos/go-systemd/v22 v22.0.0
 	github.com/coreos/vcontext v0.0.0-20211021162308-f1dbbca7bef4
-	github.com/flatcar-linux/ign-converter v0.1.1-0.20220311112608-f121a881f370
-	github.com/flatcar-linux/ignition v0.36.2-0.20220221101037-de4e6cc9bbba
+	github.com/flatcar/ignition v0.36.2
 	github.com/google/renameio v0.1.0
 	github.com/google/uuid v1.1.1
 	github.com/pin/tftp v2.1.0+incompatible
