@@ -18,19 +18,18 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/flatcar-linux/ignition/config/v2_4"
-	"github.com/flatcar-linux/ignition/v2/config/merge"
-	"github.com/flatcar-linux/ignition/v2/config/shared/errors"
-	"github.com/flatcar-linux/ignition/v2/config/util"
-	prev "github.com/flatcar-linux/ignition/v2/config/v3_3"
-	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/translate"
-	"github.com/flatcar-linux/ignition/v2/config/v3_4_experimental/types"
-	"github.com/flatcar-linux/ignition/v2/config/validate"
+	"github.com/flatcar/ignition/config/v2_4"
+	"github.com/flatcar/ignition/v2/config/ign-converter/translate/v24tov31"
+	"github.com/flatcar/ignition/v2/config/merge"
+	"github.com/flatcar/ignition/v2/config/shared/errors"
+	"github.com/flatcar/ignition/v2/config/util"
+	prev "github.com/flatcar/ignition/v2/config/v3_3"
+	"github.com/flatcar/ignition/v2/config/v3_4_experimental/translate"
+	"github.com/flatcar/ignition/v2/config/v3_4_experimental/types"
+	"github.com/flatcar/ignition/v2/config/validate"
 
 	"github.com/coreos/go-semver/semver"
 	"github.com/coreos/vcontext/report"
-
-	"github.com/flatcar-linux/ign-converter/translate/v24tov31"
 )
 
 func Merge(parent, child types.Config) types.Config {
