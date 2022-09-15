@@ -206,10 +206,6 @@ func startSpanInternal(name string, hasParent bool, parent SpanContext, remotePa
 	span.spanContext = parent
 
 	cfg := config.Load().(*Config)
-	if gen, ok := cfg.IDGenerator.(*defaultIDGenerator); ok {
-		// lazy initialization
-		gen.init()
-	}
 
 	if !hasParent {
 		span.spanContext.TraceID = cfg.IDGenerator.NewTraceID()
@@ -349,7 +345,7 @@ func (s *Span) SetStatus(status Status) {
 }
 
 func (s *Span) interfaceArrayToLinksArray() []Link {
-	linksArr := make([]Link, 0, len(s.links.queue))
+	linksArr := make([]Link, 0)
 	for _, value := range s.links.queue {
 		linksArr = append(linksArr, value.(Link))
 	}
@@ -357,7 +353,7 @@ func (s *Span) interfaceArrayToLinksArray() []Link {
 }
 
 func (s *Span) interfaceArrayToMessageEventArray() []MessageEvent {
-	messageEventArr := make([]MessageEvent, 0, len(s.messageEvents.queue))
+	messageEventArr := make([]MessageEvent, 0)
 	for _, value := range s.messageEvents.queue {
 		messageEventArr = append(messageEventArr, value.(MessageEvent))
 	}
@@ -365,7 +361,7 @@ func (s *Span) interfaceArrayToMessageEventArray() []MessageEvent {
 }
 
 func (s *Span) interfaceArrayToAnnotationArray() []Annotation {
-	annotationArr := make([]Annotation, 0, len(s.annotations.queue))
+	annotationArr := make([]Annotation, 0)
 	for _, value := range s.annotations.queue {
 		annotationArr = append(annotationArr, value.(Annotation))
 	}
@@ -373,7 +369,7 @@ func (s *Span) interfaceArrayToAnnotationArray() []Annotation {
 }
 
 func (s *Span) lruAttributesToAttributeMap() map[string]interface{} {
-	attributes := make(map[string]interface{}, s.lruAttributes.len())
+	attributes := make(map[string]interface{})
 	for _, key := range s.lruAttributes.keys() {
 		value, ok := s.lruAttributes.get(key)
 		if ok {
@@ -424,7 +420,7 @@ func (s *Span) lazyPrintfInternal(attributes []Attribute, format string, a ...in
 	var m map[string]interface{}
 	s.mu.Lock()
 	if len(attributes) != 0 {
-		m = make(map[string]interface{}, len(attributes))
+		m = make(map[string]interface{})
 		copyAttributes(m, attributes)
 	}
 	s.annotations.add(Annotation{
@@ -440,7 +436,7 @@ func (s *Span) printStringInternal(attributes []Attribute, str string) {
 	var a map[string]interface{}
 	s.mu.Lock()
 	if len(attributes) != 0 {
-		a = make(map[string]interface{}, len(attributes))
+		a = make(map[string]interface{})
 		copyAttributes(a, attributes)
 	}
 	s.annotations.add(Annotation{
@@ -538,9 +534,20 @@ func (s *Span) String() string {
 var config atomic.Value // access atomically
 
 func init() {
+	gen := &defaultIDGenerator{}
+	// initialize traceID and spanID generators.
+	var rngSeed int64
+	for _, p := range []interface{}{
+		&rngSeed, &gen.traceIDAdd, &gen.nextSpanID, &gen.spanIDInc,
+	} {
+		binary.Read(crand.Reader, binary.LittleEndian, p)
+	}
+	gen.traceIDRand = rand.New(rand.NewSource(rngSeed))
+	gen.spanIDInc |= 1
+
 	config.Store(&Config{
 		DefaultSampler:             ProbabilitySampler(defaultSamplingProbability),
-		IDGenerator:                &defaultIDGenerator{},
+		IDGenerator:                gen,
 		MaxAttributesPerSpan:       DefaultMaxAttributesPerSpan,
 		MaxAnnotationEventsPerSpan: DefaultMaxAnnotationEventsPerSpan,
 		MaxMessageEventsPerSpan:    DefaultMaxMessageEventsPerSpan,
@@ -564,24 +571,6 @@ type defaultIDGenerator struct {
 
 	traceIDAdd  [2]uint64
 	traceIDRand *rand.Rand
-
-	initOnce sync.Once
-}
-
-// init initializes the generator on the first call to avoid consuming entropy
-// unnecessarily.
-func (gen *defaultIDGenerator) init() {
-	gen.initOnce.Do(func() {
-		// initialize traceID and spanID generators.
-		var rngSeed int64
-		for _, p := range []interface{}{
-			&rngSeed, &gen.traceIDAdd, &gen.nextSpanID, &gen.spanIDInc,
-		} {
-			binary.Read(crand.Reader, binary.LittleEndian, p)
-		}
-		gen.traceIDRand = rand.New(rand.NewSource(rngSeed))
-		gen.spanIDInc |= 1
-	})
 }
 
 // NewSpanID returns a non-zero span ID from a randomly-chosen sequence.

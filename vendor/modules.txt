@@ -12,7 +12,7 @@ cloud.google.com/go/internal/version
 cloud.google.com/go/storage
 # github.com/BurntSushi/toml v0.3.1
 github.com/BurntSushi/toml
-# github.com/ajeddeloh/go-json v0.0.0-20200220154158-5ae607161559
+# github.com/ajeddeloh/go-json v0.0.0-20160803184958-73d058cf8437
 github.com/ajeddeloh/go-json
 # github.com/aws/aws-sdk-go v1.30.28
 ## explicit
@@ -81,31 +81,27 @@ github.com/coreos/vcontext/tree
 github.com/coreos/vcontext/validate
 # github.com/davecgh/go-spew v1.1.0
 github.com/davecgh/go-spew/spew
-# github.com/flatcar-linux/ign-converter v0.1.1-0.20220311112608-f121a881f370
+# github.com/flatcar/ignition v0.36.2
 ## explicit
-github.com/flatcar-linux/ign-converter/translate/v24tov31
-github.com/flatcar-linux/ign-converter/util
-# github.com/flatcar-linux/ignition v0.36.2-0.20220221101037-de4e6cc9bbba
-## explicit
-github.com/flatcar-linux/ignition/config/shared/errors
-github.com/flatcar-linux/ignition/config/shared/validations
-github.com/flatcar-linux/ignition/config/util
-github.com/flatcar-linux/ignition/config/v1
-github.com/flatcar-linux/ignition/config/v1/types
-github.com/flatcar-linux/ignition/config/v2_0
-github.com/flatcar-linux/ignition/config/v2_0/types
-github.com/flatcar-linux/ignition/config/v2_1
-github.com/flatcar-linux/ignition/config/v2_1/types
-github.com/flatcar-linux/ignition/config/v2_2
-github.com/flatcar-linux/ignition/config/v2_2/types
-github.com/flatcar-linux/ignition/config/v2_3
-github.com/flatcar-linux/ignition/config/v2_3/types
-github.com/flatcar-linux/ignition/config/v2_4
-github.com/flatcar-linux/ignition/config/v2_4/types
-github.com/flatcar-linux/ignition/config/validate
-github.com/flatcar-linux/ignition/config/validate/astjson
-github.com/flatcar-linux/ignition/config/validate/astnode
-github.com/flatcar-linux/ignition/config/validate/report
+github.com/flatcar/ignition/config/shared/errors
+github.com/flatcar/ignition/config/shared/validations
+github.com/flatcar/ignition/config/util
+github.com/flatcar/ignition/config/v1
+github.com/flatcar/ignition/config/v1/types
+github.com/flatcar/ignition/config/v2_0
+github.com/flatcar/ignition/config/v2_0/types
+github.com/flatcar/ignition/config/v2_1
+github.com/flatcar/ignition/config/v2_1/types
+github.com/flatcar/ignition/config/v2_2
+github.com/flatcar/ignition/config/v2_2/types
+github.com/flatcar/ignition/config/v2_3
+github.com/flatcar/ignition/config/v2_3/types
+github.com/flatcar/ignition/config/v2_4
+github.com/flatcar/ignition/config/v2_4/types
+github.com/flatcar/ignition/config/validate
+github.com/flatcar/ignition/config/validate/astjson
+github.com/flatcar/ignition/config/validate/astnode
+github.com/flatcar/ignition/config/validate/report
 # github.com/godbus/dbus/v5 v5.0.3
 github.com/godbus/dbus/v5
 # github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e
@@ -158,7 +154,7 @@ github.com/vmware/vmw-guestinfo/vmcheck
 # github.com/vmware/vmw-ovflib v0.0.0-20170608004843-1f217b9dc714
 ## explicit
 github.com/vmware/vmw-ovflib
-# go.opencensus.io v0.22.5
+# go.opencensus.io v0.22.3
 go.opencensus.io
 go.opencensus.io/internal
 go.opencensus.io/internal/tagencoding
@@ -175,7 +171,7 @@ go.opencensus.io/trace
 go.opencensus.io/trace/internal
 go.opencensus.io/trace/propagation
 go.opencensus.io/trace/tracestate
-# go4.org v0.0.0-20200104003542-c7e774b10ea0
+# go4.org v0.0.0-20160314031811-03efcb870d84
 go4.org/errorutil
 # golang.org/x/lint v0.0.0-20200302205851-738671d3881b
 golang.org/x/lint
@@ -210,7 +206,7 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.0.0-20200610160956-3e83d1e96d0e
+# golang.org/x/tools v0.0.0-20200606014950-c42cb6316fb6
 golang.org/x/tools/cmd/goimports
 golang.org/x/tools/go/analysis
 golang.org/x/tools/go/analysis/passes/inspect
@@ -263,7 +259,7 @@ google.golang.org/appengine/internal/modules
 google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
-# google.golang.org/genproto v0.0.0-20200610104632-a5b850bcf112
+# google.golang.org/genproto v0.0.0-20200608115520-7c474a2e3482
 google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/iam/v1
 google.golang.org/genproto/googleapis/rpc/code

@@ -937,7 +937,7 @@ func (d *decodeState) arrayNode() Node {
 		}
 	}
 	node.Value = v
-	node.End = d.off - 1
+	node.End = d.off
 	return node
 }
 
@@ -1038,7 +1038,7 @@ func (d *decodeState) objectNode() Node {
 		}
 	}
 	node.Value = m
-	node.End = d.off - 1
+	node.End = d.off
 	return node
 }
 
@@ -1086,7 +1086,7 @@ func (d *decodeState) literalNode() Node {
 		Start: start,
 		Value: d.literalInterface(),
 	}
-	node.End = d.off - 1
+	node.End = d.off
 	return node
 }
 
