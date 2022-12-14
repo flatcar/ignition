@@ -83,11 +83,11 @@ github.com/vmware/vmw-ovflib
 # go4.org v0.0.0-20160314031811-03efcb870d84
 ## explicit
 go4.org/errorutil
-# golang.org/x/net v0.0.0-20190320064053-1272bf9dcd53
+# golang.org/x/net v0.0.0-20220722155237-a158d28d115b
 ## explicit
 golang.org/x/net/http/httpproxy
 golang.org/x/net/idna
-# golang.org/x/text v0.3.7
+# golang.org/x/text v0.3.8
 ## explicit
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
