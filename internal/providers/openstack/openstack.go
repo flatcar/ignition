@@ -73,11 +73,11 @@ func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 	}
 
 	go dispatch("config drive (config-2)", func() ([]byte, error) {
-		return fetchConfigFromDevice(f.Logger, ctx, filepath.Join(distro.DiskByLabelDir(), "config-2"))
+		return FetchConfigFromDevice(f.Logger, ctx, filepath.Join(distro.DiskByLabelDir(), "config-2"))
 	})
 
 	go dispatch("config drive (CONFIG-2)", func() ([]byte, error) {
-		return fetchConfigFromDevice(f.Logger, ctx, filepath.Join(distro.DiskByLabelDir(), "CONFIG-2"))
+		return FetchConfigFromDevice(f.Logger, ctx, filepath.Join(distro.DiskByLabelDir(), "CONFIG-2"))
 	})
 
 	go dispatch("metadata service", func() ([]byte, error) {
@@ -97,7 +97,7 @@ func fileExists(path string) bool {
 	return (err == nil)
 }
 
-func fetchConfigFromDevice(logger *log.Logger, ctx context.Context, path string) ([]byte, error) {
+func FetchConfigFromDevice(logger *log.Logger, ctx context.Context, path string) ([]byte, error) {
 	for !fileExists(path) {
 		logger.Debug("config drive (%q) not found. Waiting...", path)
 		select {
