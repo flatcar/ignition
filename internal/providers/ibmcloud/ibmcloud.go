@@ -12,26 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// The OpenStack provider fetches configurations from the userdata available in
-// both the config-drive as well as the network metadata service. Whichever
-// responds first is the config that is used.
+// The IBM cloud provider fetches configurations from the userdata available in
+// the config-drive.
 // NOTE: This provider is still EXPERIMENTAL.
 
 package ibmcloud
 
 import (
 	"context"
-	"fmt"
-	"io/ioutil"
-	"os"
-	"os/exec"
 	"path/filepath"
-	"syscall"
 	"time"
 
 	"github.com/coreos/ignition/v2/config/v3_1_experimental/types"
 	"github.com/coreos/ignition/v2/internal/distro"
-	"github.com/coreos/ignition/v2/internal/log"
+	"github.com/coreos/ignition/v2/internal/providers/openstack"
 	"github.com/coreos/ignition/v2/internal/providers/util"
 	"github.com/coreos/ignition/v2/internal/resource"
 
@@ -65,7 +59,7 @@ func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 	}
 
 	go dispatch("config drive (cidata)", func() ([]byte, error) {
-		return fetchConfigFromDevice(f.Logger, ctx, filepath.Join(distro.DiskByLabelDir(), deviceLabel))
+		return openstack.FetchConfigFromDevice(f.Logger, ctx, filepath.Join(distro.DiskByLabelDir(), deviceLabel))
 	})
 
 	<-ctx.Done()
@@ -74,42 +68,4 @@ func FetchConfig(f *resource.Fetcher) (types.Config, report.Report, error) {
 	}
 
 	return util.ParseConfig(f.Logger, data)
-}
-
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return (err == nil)
-}
-
-func fetchConfigFromDevice(logger *log.Logger, ctx context.Context, path string) ([]byte, error) {
-	for !fileExists(path) {
-		logger.Debug("config drive (%q) not found. Waiting...", path)
-		select {
-		case <-time.After(time.Second):
-		case <-ctx.Done():
-			return nil, ctx.Err()
-		}
-	}
-
-	logger.Debug("creating temporary mount point")
-	mnt, err := ioutil.TempDir("", "ignition-configdrive")
-	if err != nil {
-		return nil, fmt.Errorf("failed to create temp directory: %v", err)
-	}
-	defer os.Remove(mnt)
-
-	cmd := exec.Command(distro.MountCmd(), "-o", "ro", "-t", "auto", path, mnt)
-	if _, err := logger.LogCmd(cmd, "mounting config drive"); err != nil {
-		return nil, err
-	}
-	defer logger.LogOp(
-		func() error { return syscall.Unmount(mnt, 0) },
-		"unmounting %q at %q", path, mnt,
-	)
-
-	if !fileExists(filepath.Join(mnt, cidataPath)) {
-		return nil, nil
-	}
-
-	return ioutil.ReadFile(filepath.Join(mnt, cidataPath))
 }
