@@ -152,6 +152,10 @@ func init() {
 		name:  "zvm",
 		fetch: zvm.FetchConfig,
 	})
+	configs.Register(Config{
+		name:  "ovh-baremetal",
+		fetch: openstack.FetchConfig,
+	})
 }
 
 func Get(name string) (config Config, ok bool) {
