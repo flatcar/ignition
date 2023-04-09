@@ -270,7 +270,7 @@ Users can be added to an OS with the `passwd.users` key which takes a list of ob
   "passwd": {
     "users": [
       {
-        "name": "systemUser",
+        "name": "example-user",
         "passwordHash": "$superSecretPasswordHash.",
         "sshAuthorizedKeys": [
           "ssh-rsa veryLongRSAPublicKey"
