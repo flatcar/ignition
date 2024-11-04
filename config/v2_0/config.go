@@ -16,12 +16,12 @@ package v2_0
 
 import (
 	"github.com/flatcar/ignition/config/shared/errors"
-	"github.com/flatcar/ignition/config/v1"
+	v1 "github.com/flatcar/ignition/config/v1"
 	"github.com/flatcar/ignition/config/v2_0/types"
 	"github.com/flatcar/ignition/config/validate"
 	"github.com/flatcar/ignition/config/validate/report"
 
-	json "github.com/ajeddeloh/go-json"
+	json "github.com/coreos/go-json"
 	"github.com/coreos/go-semver/semver"
 )
 

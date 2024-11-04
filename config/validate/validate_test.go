@@ -23,7 +23,7 @@ import (
 	"github.com/coreos/go-semver/semver"
 	"github.com/stretchr/testify/assert"
 
-	json "github.com/ajeddeloh/go-json"
+	json "github.com/coreos/go-json"
 	"github.com/flatcar/ignition/config/shared/errors"
 	"github.com/flatcar/ignition/config/util"
 	"github.com/flatcar/ignition/config/validate/astjson"

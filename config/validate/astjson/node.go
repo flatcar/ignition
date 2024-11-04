@@ -17,7 +17,7 @@ package astjson
 import (
 	"io"
 
-	json "github.com/ajeddeloh/go-json"
+	json "github.com/coreos/go-json"
 	"github.com/flatcar/ignition/config/validate/astnode"
 	"go4.org/errorutil"
 )
