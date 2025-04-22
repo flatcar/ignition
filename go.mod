@@ -3,8 +3,8 @@ module github.com/flatcar/ignition
 go 1.16
 
 require (
-	github.com/ajeddeloh/go-json v0.0.0-20160803184958-73d058cf8437
 	github.com/aws/aws-sdk-go v1.8.39
+	github.com/coreos/go-json v0.0.0-20231102161613-e49c8866685a
 	github.com/coreos/go-semver v0.1.0
 	github.com/coreos/go-systemd v0.0.0-20181031085051-9002847aa142
 	github.com/go-ini/ini v1.25.4 // indirect
