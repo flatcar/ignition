@@ -26,6 +26,7 @@ var (
 	diskByLabelDir    = "/dev/disk/by-label"
 	diskByPartUUIDDir = "/dev/disk/by-partuuid"
 	oemDevicePath     = "/dev/disk/by-label/OEM"
+	efiDevicePath     = "/dev/disk/by-partlabel/EFI-SYSTEM"
 
 	// File paths
 	kernelCmdlinePath = "/proc/cmdline"
@@ -61,6 +62,7 @@ var (
 func DiskByLabelDir() string    { return diskByLabelDir }
 func DiskByPartUUIDDir() string { return diskByPartUUIDDir }
 func OEMDevicePath() string     { return fromEnv("OEM_DEVICE", oemDevicePath) }
+func EFIDevicePath() string     { return fromEnv("EFI_DEVICE", efiDevicePath) }
 
 func KernelCmdlinePath() string { return kernelCmdlinePath }
 func SystemConfigDir() string   { return fromEnv("SYSTEM_CONFIG_DIR", systemConfigDir) }

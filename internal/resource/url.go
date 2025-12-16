@@ -151,6 +151,8 @@ func (f *Fetcher) Fetch(u url.URL, dest *os.File, opts FetchOptions) error {
 		return f.FetchFromDataURL(u, dest, opts)
 	case "oem":
 		return f.FetchFromOEM(u, dest, opts)
+	case "efi":
+		return f.FetchFromEFI(u, dest, opts)
 	case "s3":
 		return f.FetchFromS3(u, dest, opts)
 	case "":
@@ -323,6 +325,74 @@ func (f *Fetcher) FetchFromOEM(u url.URL, dest *os.File, opts FetchOptions) erro
 	defer fi.Close()
 
 	return f.decompressCopyHashAndVerify(dest, fi, opts)
+}
+
+// FetchFromEFI gets data from the EFI System Partition as described by u and
+// writes it into dest, returning an error if one is encountered.
+func (f *Fetcher) FetchFromEFI(u url.URL, dest *os.File, opts FetchOptions) error {
+	path := filepath.Clean(u.Path)
+	if !filepath.IsAbs(path) {
+		f.Logger.Err("efi path is not absolute: %q", u.Path)
+		return ErrPathNotAbsolute
+	}
+
+	efiMountPath, err := ioutil.TempDir("/mnt", "efi")
+	if err != nil {
+		f.Logger.Err("failed to create mount path for efi partition: %v", err)
+		return ErrFailed
+	}
+	defer os.Remove(efiMountPath)
+
+	if err := f.mountEFI(efiMountPath); err != nil {
+		f.Logger.Err("failed to mount efi partition: %v", err)
+		return ErrFailed
+	}
+	defer f.umountEFI(efiMountPath)
+
+	absPath := filepath.Join(efiMountPath, path)
+	fi, err := os.Open(absPath)
+	if err != nil {
+		f.Logger.Err("failed to read efi config: %v", err)
+		return ErrFailed
+	}
+	defer fi.Close()
+
+	return f.decompressCopyHashAndVerify(dest, fi, opts)
+}
+
+// mountEFI waits for the presence of and mounts the EFI partition at
+// efiMountPath. efiMountPath will be created if it does not exist.
+func (f *Fetcher) mountEFI(efiMountPath string) error {
+	dev := []string{distro.EFIDevicePath()}
+	if err := systemd.WaitOnDevices(dev, "efi-cmdline"); err != nil {
+		f.Logger.Err("failed to wait for efi device: %v", err)
+		return err
+	}
+
+	if err := os.MkdirAll(efiMountPath, 0700); err != nil {
+		f.Logger.Err("failed to create efi mount point: %v", err)
+		return err
+	}
+
+	if err := f.Logger.LogOp(
+		func() error {
+			return syscall.Mount(dev[0], efiMountPath, "vfat", syscall.MS_RDONLY, "")
+		},
+		"mounting %q at %q", distro.EFIDevicePath(), efiMountPath,
+	); err != nil {
+		return fmt.Errorf("failed to mount vfat device %q at %q: %v",
+			distro.EFIDevicePath(), efiMountPath, err)
+	}
+
+	return nil
+}
+
+// umountEFI unmounts the EFI partition at efiMountPath.
+func (f *Fetcher) umountEFI(efiMountPath string) {
+	f.Logger.LogOp(
+		func() error { return syscall.Unmount(efiMountPath, 0) },
+		"unmounting %q", efiMountPath,
+	)
 }
 
 // FetchFromS3 gets data from an S3 bucket as described by u and writes it into
