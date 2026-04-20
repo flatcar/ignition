@@ -22,7 +22,7 @@ import (
 	"github.com/flatcar/ignition/config/v2_4/types"
 	"github.com/flatcar/ignition/config/validate/report"
 
-	json "github.com/ajeddeloh/go-json"
+	json "github.com/coreos/go-json"
 	"go4.org/errorutil"
 )
 

@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"strings"
 
-	json "github.com/ajeddeloh/go-json"
+	json "github.com/coreos/go-json"
 	"github.com/flatcar/ignition/config/validate/astjson"
 	"github.com/flatcar/ignition/config/validate/astnode"
 	"github.com/flatcar/ignition/config/validate/report"

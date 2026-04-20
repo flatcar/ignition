@@ -21,7 +21,7 @@ import (
 	"github.com/flatcar/ignition/config/validate"
 	"github.com/flatcar/ignition/config/validate/report"
 
-	json "github.com/ajeddeloh/go-json"
+	json "github.com/coreos/go-json"
 	"github.com/coreos/go-semver/semver"
 )
 
